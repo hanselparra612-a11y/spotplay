@@ -17,8 +17,6 @@ output/
 .streamlit/
 iniciar_estudio.bat
 *.exe
-public/uploads/videos/*
-!public/uploads/videos/.gitkeep
 
 # Editor directories and files
 .vscode/*

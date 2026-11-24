@@ -62,6 +62,12 @@ function VideoCard({
   const [isCinemaMode, setIsCinemaMode] = useState(false);
 
   // 🚀 Estados para Aceleración y Scrubbing de Video en la Barra Horizontal
+  const [videoSrc, setVideoSrc] = useState(video.videoUrl);
+
+  useEffect(() => {
+    setVideoSrc(video.videoUrl);
+  }, [video.videoUrl]);
+
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubTime, setScrubTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
@@ -324,7 +330,7 @@ function VideoCard({
       {/* Video Element con loop nativo en GPU y Preload Inteligente */}
       <video
         ref={videoRef}
-        src={shouldMountMedia ? video.videoUrl : undefined}
+        src={shouldMountMedia ? videoSrc : undefined}
         poster={video.cover || video.thumbnail || undefined}
         className="w-full h-full object-cover cursor-pointer"
         autoPlay
@@ -347,6 +353,10 @@ function VideoCard({
         onError={(err) => {
           setIsBuffering(false);
           console.warn('Playback error or skip on video:', video.id, err);
+          if (videoSrc && !videoSrc.includes('sample1.mp4') && !videoSrc.startsWith('data:')) {
+            console.log('🔄 Autorecuperación: cargando video fallback para', video.id);
+            setVideoSrc('/videos/sample1.mp4');
+          }
         }}
         onEnded={() => {
           const vid = videoRef.current;
