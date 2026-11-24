@@ -1,6 +1,21 @@
 // Capa de persistencia en LocalStorage para guardar cambios offline y mantener datos
 import { INITIAL_VIDEOS, CURRENT_USER, SEED_CREATORS_MAP } from '../data/mockVideos.js';
 
+// Purga forzada de caché para eliminar perfiles y videos de prueba antiguos en el navegador del usuario
+const PURGE_KEY = 'spotplay_purge_v6_clean_owner_only';
+if (typeof window !== 'undefined' && localStorage.getItem(PURGE_KEY) !== 'done') {
+  try {
+    localStorage.removeItem('spotplay_videos_v1');
+    localStorage.removeItem('spotplay_videos_v2');
+    localStorage.removeItem('spotplay_videos_offline_v2');
+    localStorage.removeItem('spotplay_followed_creator_ids_v1');
+    localStorage.removeItem('toktik_videos_1986_v2');
+    localStorage.removeItem('spotplay_bookmarks_v2');
+    localStorage.removeItem('spotplay_likes_v2');
+    localStorage.setItem(PURGE_KEY, 'done');
+  } catch (e) {}
+}
+
 const VIDEOS_STORAGE_KEY = 'spotplay_videos_v2';
 const USER_STORAGE_KEY = 'spotplay_user_v2';
 const ORDERS_STORAGE_KEY = 'spotplay_orders_v2';
@@ -112,32 +127,24 @@ export function loadPersistedVideos() {
     let list = INITIAL_VIDEOS;
     if (raw) {
       const parsed = JSON.parse(raw);
+      const mockAuthors = [
+        'sofia_creative', 'valeria_fit', 'elparce_humor', 'burgermaster_oficial',
+        'camila_nails', 'chef_mateo', 'daniel_beats', 'andres_tech',
+        'lucia_travels', 'santiago_fitness', 'elena_pastry', 'felipe_art',
+        'mariana_dance', 'alejo_skate', 'isa_makeup', 'david_gamestudio',
+        'cata_yoga', 'juanma_tatuajes'
+      ];
       const cleaned = Array.isArray(parsed)
         ? parsed.filter((v) => {
             if (!v.videoUrl || v.videoUrl.startsWith('blob:')) return false;
-            // 🚀 Filtrar cualquier video de prueba o agregado previamente al perfil de Leonardo
-            if (v.id === 'uploaded-1795419156551') return false;
-            if (v.author?.id === 'me' || v.author?.username === 'Leonardo' || v.author?.username === 'nuevo_creador' || v.author?.id === 'user-1794726360816') {
-              return false;
-            }
+            // Descartar videos mock de prueba antiguos
+            if (v.id && (v.id.startsWith('vid-') || v.id.startsWith('demo-'))) return false;
+            if (v.author && mockAuthors.includes(v.author.username)) return false;
             return true;
           })
         : [];
       if (cleaned.length > 0) {
-        // 🚀 Asegurar que todos los videos semilla de INITIAL_VIDEOS estén presentes en el feed
-        const existingIds = new Set(cleaned.map((v) => v.id));
-        const missingSeeds = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id));
-        const combined = [...cleaned, ...missingSeeds];
-
-        list = combined.map((v) => {
-          if (SEED_CREATORS_MAP && SEED_CREATORS_MAP[v.id]) {
-            return {
-              ...v,
-              author: SEED_CREATORS_MAP[v.id],
-            };
-          }
-          return v;
-        });
+        list = cleaned;
       }
     }
     return list.map((v) => {

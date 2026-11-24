@@ -261,30 +261,46 @@ export default function App() {
   // Unique creators for live stories bar (unificado limpiamente para Leonardo y extensible a nuevos creadores)
   const uniqueCreators = Array.from(
     new Map(
-      videos.map((v) => {
-        const isLeonardo =
-          !v.author ||
-          v.author.id === 'me' ||
-          v.author.id === 'user-1794726360816' ||
-          v.author.username?.toLowerCase() === 'leonardo' ||
-          v.author.username === 'nuevo_creador' ||
-          v.author.name === 'Mi Perfil Creador' ||
-          v.author.name === 'Leonardo parra';
+      videos
+        .filter((v) => {
+          if (!v.author) return false;
+          if (v.id && (v.id.startsWith('vid-') || v.id.startsWith('demo-'))) return false;
+          const mockHandles = [
+            'sofia_creative', 'valeria_fit', 'elparce_humor', 'burgermaster_oficial',
+            'camila_nails', 'chef_mateo', 'daniel_beats', 'andres_tech',
+            'lucia_travels', 'santiago_fitness', 'elena_pastry', 'felipe_art',
+            'mariana_dance', 'alejo_skate', 'isa_makeup', 'david_gamestudio',
+            'cata_yoga', 'juanma_tatuajes'
+          ];
+          if (mockHandles.includes(v.author?.username)) return false;
+          return true;
+        })
+        .map((v) => {
+          const isLeonardo =
+            !v.author ||
+            v.author.id === 'me' ||
+            v.author.id === 'user-1794726360816' ||
+            v.author.username?.toLowerCase() === 'leonardo' ||
+            v.author.username === 'nuevo_creador' ||
+            v.author.name === 'Mi Perfil Creador' ||
+            v.author.name === 'Leonardo parra';
 
-        if (isLeonardo) {
-          const authorLeo = (currentUser?.id === 'user-1794726360816' || currentUser?.email === 'leonardoescarlata6@gmail.com')
-            ? currentUser
-            : {
-                id: 'user-1794726360816',
-                name: 'Leonardo',
-                username: 'Leonardo',
-                avatar: v.author?.avatar?.startsWith('data:image') ? v.author.avatar : (v.author?.avatar || '/default-avatar.png'),
-                isVerified: true,
-              };
-          return ['user-1794726360816', authorLeo];
-        }
-        return [v.author?.id || v.author?.username, v.author];
-      })
+          if (isLeonardo) {
+            const authorLeo = {
+              id: 'user-1794726360816',
+              name: 'Leonardo',
+              username: 'Leonardo',
+              avatar: (currentUser?.avatar?.startsWith('data:image') ? currentUser.avatar : v.author?.avatar) || '/default-avatar.png',
+              bio: currentUser?.bio || 'Creador oficial en Spot Play ✨🎥',
+              isVerified: true,
+              followersCount: 0,
+              followingCount: 0,
+              likesCount: 0,
+            };
+            return ['user-1794726360816', authorLeo];
+          }
+          return [v.author?.id || v.author?.username, v.author];
+        })
     ).values()
   ).filter(Boolean);
 
@@ -303,17 +319,41 @@ export default function App() {
         if (res.ok) {
           const rawServerVideos = await res.json();
           if (Array.isArray(rawServerVideos) && rawServerVideos.length > 0) {
+            const mockHandles = [
+              'sofia_creative', 'valeria_fit', 'elparce_humor', 'burgermaster_oficial',
+              'camila_nails', 'chef_mateo', 'daniel_beats', 'andres_tech',
+              'lucia_travels', 'santiago_fitness', 'elena_pastry', 'felipe_art',
+              'mariana_dance', 'alejo_skate', 'isa_makeup', 'david_gamestudio',
+              'cata_yoga', 'juanma_tatuajes'
+            ];
             const serverVideos = rawServerVideos
               .filter((v) => {
-                if (v.id === 'uploaded-1795419156551') return false;
-                if (v.author?.id === 'me' || v.author?.id === 'user-1794726360816' || v.author?.username?.toLowerCase() === 'leonardo' || v.author?.name?.toLowerCase() === 'leonardo') return false;
+                if (v.id && (v.id.startsWith('vid-') || v.id.startsWith('demo-'))) return false;
+                if (v.author && mockHandles.includes(v.author.username)) return false;
                 return true;
               })
               .map((v) => {
-                if (SEED_CREATORS_MAP && SEED_CREATORS_MAP[v.id]) {
+                const isLeonardo =
+                  !v.author ||
+                  v.author.id === 'me' ||
+                  v.author.id === 'user-1794726360816' ||
+                  v.author.username?.toLowerCase() === 'leonardo' ||
+                  v.author.username === 'nuevo_creador' ||
+                  v.author.name === 'Mi Perfil Creador' ||
+                  v.author.name === 'Leonardo parra';
+                if (isLeonardo) {
                   return {
                     ...v,
-                    author: SEED_CREATORS_MAP[v.id],
+                    author: {
+                      id: 'user-1794726360816',
+                      name: 'Leonardo',
+                      username: 'Leonardo',
+                      avatar: (currentUser?.avatar && currentUser.avatar.startsWith('data:image')) ? currentUser.avatar : (v.author?.avatar || '/default-avatar.png'),
+                      isVerified: true,
+                      followersCount: 0,
+                      followingCount: 0,
+                      likesCount: 0,
+                    },
                   };
                 }
                 return v;
