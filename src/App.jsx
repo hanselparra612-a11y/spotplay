@@ -258,7 +258,7 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Unique creators for live stories bar (unificado al 100% en un único perfil para Leonardo)
+  // Unique creators for live stories bar (unificado limpiamente para Leonardo y extensible a nuevos creadores)
   const uniqueCreators = Array.from(
     new Map(
       videos.map((v) => {
@@ -266,12 +266,24 @@ export default function App() {
           !v.author ||
           v.author.id === 'me' ||
           v.author.id === 'user-1794726360816' ||
-          v.author.id === currentUser?.id ||
           v.author.username?.toLowerCase() === 'leonardo' ||
           v.author.username === 'nuevo_creador' ||
-          v.author.name?.toLowerCase().includes('leonardo');
-        const unifiedAuthor = isLeonardo ? currentUser : v.author;
-        return [unifiedAuthor?.id || 'user-1794726360816', unifiedAuthor];
+          v.author.name === 'Mi Perfil Creador' ||
+          v.author.name === 'Leonardo parra';
+
+        if (isLeonardo) {
+          const authorLeo = (currentUser?.id === 'user-1794726360816' || currentUser?.email === 'leonardoescarlata6@gmail.com')
+            ? currentUser
+            : {
+                id: 'user-1794726360816',
+                name: 'Leonardo',
+                username: 'Leonardo',
+                avatar: v.author?.avatar?.startsWith('data:image') ? v.author.avatar : (v.author?.avatar || '/default-avatar.png'),
+                isVerified: true,
+              };
+          return ['user-1794726360816', authorLeo];
+        }
+        return [v.author?.id || v.author?.username, v.author];
       })
     ).values()
   ).filter(Boolean);
@@ -291,32 +303,21 @@ export default function App() {
         if (res.ok) {
           const rawServerVideos = await res.json();
           if (Array.isArray(rawServerVideos) && rawServerVideos.length > 0) {
-            const serverVideos = rawServerVideos.map((v) => {
-              if (
-                !v.author ||
-                v.author?.id === 'me' ||
-                v.author?.username === 'nuevo_creador' ||
-                v.author?.name === 'Mi Perfil Creador' ||
-                (v.author?.id && (v.author.id.startsWith('creator-') || v.author.id.startsWith('google-'))) ||
-                v.author?.name !== 'Leonardo'
-              ) {
-                return {
-                  ...v,
-                  author: {
-                    id: 'user-1794726360816',
-                    name: 'Leonardo',
-                    username: 'Leonardo',
-                    avatar: v.author?.avatar?.startsWith('data:image') ? v.author.avatar : (v.author?.avatar || '/default-avatar.png'),
-                    isVerified: true,
-                    isFollowing: false,
-                    followersCount: 0,
-                    followingCount: 0,
-                    likesCount: 0,
-                  },
-                };
-              }
-              return v;
-            });
+            const serverVideos = rawServerVideos
+              .filter((v) => {
+                if (v.id === 'uploaded-1795419156551') return false;
+                if (v.author?.id === 'me' || v.author?.id === 'user-1794726360816' || v.author?.username?.toLowerCase() === 'leonardo' || v.author?.name?.toLowerCase() === 'leonardo') return false;
+                return true;
+              })
+              .map((v) => {
+                if (SEED_CREATORS_MAP && SEED_CREATORS_MAP[v.id]) {
+                  return {
+                    ...v,
+                    author: SEED_CREATORS_MAP[v.id],
+                  };
+                }
+                return v;
+              });
             setVideos((prev) => {
               const serverIds = new Set(serverVideos.map((v) => v.id));
               const prevFiltered = prev.filter((v) => !serverIds.has(v.id));
@@ -336,26 +337,30 @@ export default function App() {
         if (userRes.ok) {
           const serverUsers = await userRes.json();
           if (Array.isArray(serverUsers) && serverUsers.length > 0) {
-            // Fijar de forma prioritaria el perfil oficial de Leonardo (Dueño)
-            const ownerUser = serverUsers.find(
-              (u) => u.email === 'leonardoescarlata6@gmail.com' || u.id === 'user-1794726360816' || u.username === 'leonardo'
-            );
-            const activeUser = ownerUser || serverUsers[0];
-            if (activeUser && activeUser.id) {
-              setCurrentUser((prev) => {
-                const cleanActive = {
-                  ...activeUser,
-                  id: 'user-1794726360816',
-                  name: 'Leonardo',
-                  username: 'Leonardo',
-                };
-                return {
-                  ...prev,
-                  ...cleanActive,
-                  avatar: (cleanActive.avatar && cleanActive.avatar.startsWith('data:image')) ? cleanActive.avatar : (prev?.avatar || cleanActive.avatar),
-                };
-              });
-            }
+            // Sincronizar el perfil del usuario actual según su sesión
+            setCurrentUser((prev) => {
+              const isOwner = !prev || prev.id === 'guest' || prev.id === 'me' || prev.id === 'user-1794726360816' || prev.email === 'leonardoescarlata6@gmail.com' || prev.username === 'Leonardo';
+              if (isOwner) {
+                const ownerUser = serverUsers.find(
+                  (u) => u.email === 'leonardoescarlata6@gmail.com' || u.id === 'user-1794726360816' || u.username === 'Leonardo'
+                ) || serverUsers[0];
+                if (ownerUser) {
+                  return {
+                    ...prev,
+                    ...ownerUser,
+                    id: 'user-1794726360816',
+                    name: 'Leonardo',
+                    username: 'Leonardo',
+                    avatar: (ownerUser.avatar && ownerUser.avatar.startsWith('data:image')) ? ownerUser.avatar : (prev?.avatar || ownerUser.avatar),
+                  };
+                }
+                return prev;
+              } else {
+                // Si es otro usuario registrado independiente (con su propia cuenta de Firebase)
+                const myServerUser = serverUsers.find((u) => u.id === prev.id || u.email === prev.email || u.username === prev.username);
+                return myServerUser ? { ...prev, ...myServerUser } : prev;
+              }
+            });
           }
         }
 
@@ -794,15 +799,19 @@ export default function App() {
   // 👥 Detección Inteligente: Redirigir a tu propio perfil o al de otro creador
   const handleOpenCreatorOrMyProfile = (author) => {
     if (!author) return;
+    const isCurrentUserLeonardo = currentUser?.id === 'user-1794726360816' || currentUser?.email === 'leonardoescarlata6@gmail.com' || currentUser?.username?.toLowerCase() === 'leonardo';
+
     const isOwn = Boolean(
-      author.id === 'me' ||
-      author.id === 'user-1794726360816' ||
       author.id === currentUser.id ||
-      author.username?.toLowerCase() === 'leonardo' ||
-      author.username === 'nuevo_creador' ||
-      author.name?.toLowerCase().includes('leonardo') ||
       (currentUser.username && author.username?.toLowerCase() === currentUser.username?.toLowerCase()) ||
-      (currentUser.name && author.name?.toLowerCase() === currentUser.name?.toLowerCase())
+      (currentUser.name && author.name?.toLowerCase() === currentUser.name?.toLowerCase()) ||
+      (isCurrentUserLeonardo && (
+        author.id === 'me' ||
+        author.id === 'user-1794726360816' ||
+        author.username?.toLowerCase() === 'leonardo' ||
+        author.username === 'nuevo_creador' ||
+        author.name?.toLowerCase().includes('leonardo')
+      ))
     );
     if (isOwn) {
       setActiveCreatorProfile(null);

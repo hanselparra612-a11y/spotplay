@@ -113,7 +113,15 @@ export function loadPersistedVideos() {
     if (raw) {
       const parsed = JSON.parse(raw);
       const cleaned = Array.isArray(parsed)
-        ? parsed.filter((v) => !v.videoUrl || !v.videoUrl.startsWith('blob:'))
+        ? parsed.filter((v) => {
+            if (!v.videoUrl || v.videoUrl.startsWith('blob:')) return false;
+            // 🚀 Filtrar cualquier video de prueba o agregado previamente al perfil de Leonardo
+            if (v.id === 'uploaded-1795419156551') return false;
+            if (v.author?.id === 'me' || v.author?.username === 'Leonardo' || v.author?.username === 'nuevo_creador' || v.author?.id === 'user-1794726360816') {
+              return false;
+            }
+            return true;
+          })
         : [];
       if (cleaned.length > 0) {
         // 🚀 Asegurar que todos los videos semilla de INITIAL_VIDEOS estén presentes en el feed
@@ -121,19 +129,11 @@ export function loadPersistedVideos() {
         const missingSeeds = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id));
         const combined = [...cleaned, ...missingSeeds];
 
-        // 🚀 Migración: Todos los perfiles de prueba quedan eliminados, dejando exclusivamente el perfil oficial de Leonardo
         list = combined.map((v) => {
-          if (
-            !v.author ||
-            v.author?.id === 'me' ||
-            v.author?.username === 'nuevo_creador' ||
-            v.author?.name === 'Mi Perfil Creador' ||
-            (v.author?.id && (v.author.id.startsWith('creator-') || v.author.id.startsWith('google-'))) ||
-            v.author?.name !== 'Leonardo'
-          ) {
+          if (SEED_CREATORS_MAP && SEED_CREATORS_MAP[v.id]) {
             return {
               ...v,
-              author: CURRENT_AUTHOR,
+              author: SEED_CREATORS_MAP[v.id],
             };
           }
           return v;

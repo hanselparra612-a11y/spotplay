@@ -1,4 +1,956 @@
-// Perfil oficial y único creador en Spot Play (Leonardo)
+// Catálogo oficial de creadores de Spot Play
+
+export const CREATOR_SOFIA = {
+  id: 'creator-sofia',
+  name: 'Sofia Martinez',
+  username: 'sofia_creative',
+  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80',
+  bio: 'Moda, outfits streetwear & estilo de vida ✨ Creadora oficial Spot Play Colombia',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+  whatsapp: '573105558899',
+};
+
+export const CREATOR_VALERIA = {
+  id: 'creator-valeria',
+  name: 'Valeria Gómez',
+  username: 'valeria_fit',
+  avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80',
+  bio: 'Entrenadora & Nutrición deportiva limpia 💪 Medellín 🇨🇴 Rutinas y tips diarios.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_CARLOS = {
+  id: 'creator-carlos',
+  name: 'Carlos Restrepo',
+  username: 'elparce_humor',
+  avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=200&auto=format&fit=crop&q=80',
+  bio: 'Humor paisa, comedia y risas diarias 😂🍻 ¡Sígueme para no perderte ningún video!',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_BURGER = {
+  id: 'creator-burger',
+  name: 'Burger Master Artesanal',
+  username: 'burgermaster_oficial',
+  avatar: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80',
+  bio: 'Las mejores hamburguesas artesanales al carbón 🍔 Domicilios en Medellín por WhatsApp.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+  whatsapp: '573147772211',
+};
+
+export const CREATOR_CAMILA = {
+  id: 'creator-camila',
+  name: 'Camila Studio Nail Art',
+  username: 'camila_nails',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
+  bio: 'Belleza & Estética profesional ✨💅 Envíos de kits semipermanentes a toda Colombia.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_MATEO = {
+  id: 'creator-mateo',
+  name: 'Chef Mateo Delicias',
+  username: 'chef_mateo',
+  avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+  bio: 'Maestro parrillero y recetas criollas 🥩🔥 Sabor 100% colombiano.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_DANIEL = {
+  id: 'creator-daniel',
+  name: 'Daniel Beats',
+  username: 'daniel_beats',
+  avatar: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=200&auto=format&fit=crop&q=80',
+  bio: 'Productor musical urbano 🎹🎧 Beats de reggaetón y trap desde Medellín.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_ANDRES = {
+  id: 'creator-andres',
+  name: 'Andrés Tech & Gaming',
+  username: 'andres_tech',
+  avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80',
+  bio: 'Unboxing, gadgets y reviews gamer 🎮🎧 Tecnología sin rodeos.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+
+export const CREATOR_LUCIA = {
+  id: 'creator-lucia',
+  name: 'Lucia Ramirez',
+  username: 'lucia_viajes',
+  avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80',
+  bio: 'Viajera empedernida recorriendo los pueblos mágicos de Colombia 🇨🇴✈️ Eje Cafetero, Guatapé y más.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_SANTIAGO = {
+  id: 'creator-santiago',
+  name: 'Santiago Morales',
+  username: 'santi_skate',
+  avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+  bio: 'Skater profesional & cultura urbana Medellín 🛹🔥 Trucos, spots callejeros y estilo libre.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_ELENA = {
+  id: 'creator-elena',
+  name: 'Elena Restrepo',
+  username: 'elena_art',
+  avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200&auto=format&fit=crop&q=80',
+  bio: 'Pintura al óleo y arte conceptual digital 🎨✨ Taller de arte en vivo desde Bogotá.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_FELIPE = {
+  id: 'creator-felipe',
+  name: 'Felipe Cadavid',
+  username: 'felipe_barista',
+  avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80',
+  bio: 'Café de especialidad de origen colombiano ☕🌿 Métodos filtrados, barismo y catas.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+  whatsapp: '573158883344',
+};
+
+export const CREATOR_MARIANA = {
+  id: 'creator-mariana',
+  name: 'Mariana Salazar',
+  username: 'mariana_dance',
+  avatar: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=200&auto=format&fit=crop&q=80',
+  bio: 'Coreógrafa & bailarina urbana 💃🔥 Salsa choke, reggaetón y ritmos latinos desde Cali.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_ALEJO = {
+  id: 'creator-alejo',
+  name: 'Alejandro Torres',
+  username: 'alejo_biker',
+  avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=200&auto=format&fit=crop&q=80',
+  bio: 'Rutas en moto por los Andes y cordilleras colombianas 🏍️💨 Aventura en dos ruedas.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_ISABELLA = {
+  id: 'creator-isabella',
+  name: 'Isabella Mendoza',
+  username: 'isa_makeup',
+  avatar: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&auto=format&fit=crop&q=80',
+  bio: 'Maquillaje editorial y skincare natural 💄🌸 Tips para lucir radiante todos los días.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_DAVID = {
+  id: 'creator-david',
+  name: 'David Ospina',
+  username: 'david_gamestudio',
+  avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&auto=format&fit=crop&q=80',
+  bio: 'Desarrollador indie de videojuegos & pixel art 🎮👾 Creando mundos virtuales en Colombia.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_CATALINA = {
+  id: 'creator-catalina',
+  name: 'Catalina Vega',
+  username: 'cata_yoga',
+  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+  bio: 'Instructora de yoga & meditación consciente 🧘‍♀️🌿 Respira, conecta y vive el presente.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const CREATOR_JUANMA = {
+  id: 'creator-juanma',
+  name: 'Juan Manuel Ríos',
+  username: 'juanma_tatuajes',
+  avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80',
+  bio: 'Artista del tatuaje realista & blackwork 🖤💉 Estudio privado en El Poblado, Medellín.',
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+};
+
+export const SEED_CREATORS_MAP = {
+  'vid-1': CREATOR_SOFIA,
+  'vid-4': CREATOR_VALERIA,
+  'vid-5': CREATOR_CARLOS,
+  'vid-2': CREATOR_BURGER,
+  'vid-6': CREATOR_CAMILA,
+  'vid-7': CREATOR_MATEO,
+  'vid-8': CREATOR_DANIEL,
+  'vid-3': CREATOR_ANDRES,
+  'vid-9': CREATOR_LUCIA,
+  'vid-10': CREATOR_SANTIAGO,
+  'vid-11': CREATOR_ELENA,
+  'vid-12': CREATOR_FELIPE,
+  'vid-13': CREATOR_MARIANA,
+  'vid-14': CREATOR_ALEJO,
+  'vid-15': CREATOR_ISABELLA,
+  'vid-16': CREATOR_DAVID,
+  'vid-17': CREATOR_CATALINA,
+  'vid-18': CREATOR_JUANMA,
+};
+
+export const CURRENT_AUTHOR = {
+  id: 'me',
+  name: CURRENT_USER.name,
+  username: CURRENT_USER.username,
+  avatar: CURRENT_USER.avatar,
+  bio: CURRENT_USER.bio,
+  isFollowing: false,
+  isVerified: true,
+  followersCount: 0,
+  followingCount: 0,
+  likesCount: 0,
+  whatsapp: '573105558899',
+};
+
+
+export const INITIAL_VIDEOS = [
+  // 1. Sofia Martinez (@sofia_creative) - Moda & Estilo de vida
+  {
+    id: 'vid-1',
+    videoUrl: '/videos/sample1.mp4',
+    author: CREATOR_SOFIA,
+    description: 'Probando el outfit completo de hoy con zapatillas streetwear 100% colombianas ✨👟 ¿Qué opinan de esta combinación?',
+    tags: ['moda', 'outfit', 'estilo', 'spotplay', 'viral'],
+    product: {
+      id: 'prod-sofia-1',
+      name: 'Sneakers Streetwear HD',
+      price: 189000,
+      whatsapp: '573105558899',
+    },
+    music: {
+      title: 'Sofia Martinez - Chill Waves (Original Sound)',
+      author: 'sofia_creative',
+      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 124800,
+      comments: 1840,
+      bookmarks: 23100,
+      shares: 9400,
+      giftsCount: 342,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-pin-1',
+        username: 'sofia_creative',
+        avatar: CREATOR_SOFIA.avatar,
+        text: '¡Hola a todos! Gracias por todo el apoyo a la nueva colección de outfits ✨👟',
+        timestamp: 'Hace 3h',
+        likes: 1250,
+        isLiked: true,
+        isPinned: true,
+        isAuthor: true,
+        likedByAuthor: true,
+        replies: [
+          {
+            id: 'r-1',
+            username: 'valentina_m',
+            avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
+            text: '@sofia_creative ¿Vienen en talla 37 o vienen ajustadas? Gracias!',
+            timestamp: 'Hace 2h',
+            likes: 18,
+            isLiked: false,
+          },
+          {
+            id: 'r-2',
+            username: 'sofia_creative',
+            avatar: CREATOR_SOFIA.avatar,
+            text: '@valentina_m Vienen en horma exacta colombiana! Te recomiendo pedir tu número habitual 👟💖',
+            timestamp: 'Hace 1h',
+            likes: 54,
+            isLiked: true,
+            isAuthor: true,
+            likedByAuthor: true,
+          },
+        ],
+      },
+      {
+        id: 'c-1',
+        username: 'carlos_g',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
+        text: '¡Se ven brutales esas zapatillas! Me encanta el estilo streetwear 😍',
+        timestamp: 'Hace 2h',
+        likes: 342,
+        isLiked: false,
+        isVerifiedBuyer: true,
+        likedByAuthor: true,
+        replies: [],
+      },
+    ],
+  },
+
+  // 2. Valeria Gómez (@valeria_fit) - Fitness & Suplementos
+  {
+    id: 'vid-4',
+    videoUrl: '/videos/sample4.mp4',
+    author: CREATOR_VALERIA,
+    description: 'Mi batido secreto post-entreno con 27g de proteína limpia. Si entrenas duro en el gym tienes que probarla 💪🔥 Comenta tus metas de este mes!',
+    tags: ['fitness', 'gym', 'nutricion', 'salud', 'medellin'],
+    music: {
+      title: 'Cyber Beats - Workout High Energy',
+      author: 'Cyber Beats',
+      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 98400,
+      comments: 1120,
+      bookmarks: 31200,
+      shares: 6300,
+      giftsCount: 520,
+    },
+    isLiked: true,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-val-pin',
+        username: 'valeria_fit',
+        avatar: CREATOR_VALERIA.avatar,
+        text: 'Chicos recuerden tomarla dentro de los primeros 45 minutos después del entreno para máxima absorción muscular 💪🥤',
+        timestamp: 'Hace 4h',
+        likes: 980,
+        isLiked: true,
+        isPinned: true,
+        isAuthor: true,
+        likedByAuthor: true,
+        replies: [],
+      },
+      {
+        id: 'c-val-1',
+        username: 'lucas_gym',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
+        text: 'La de sabor a vainilla es deliciosa, recomendada 100% 🏋️‍♂️',
+        timestamp: 'Hace 1h',
+        likes: 154,
+        isLiked: true,
+        isVerifiedBuyer: true,
+        likedByAuthor: true,
+      },
+    ],
+  },
+
+  // 3. Carlos Restrepo (@elparce_humor) - Comedia & Humor Viral
+  {
+    id: 'vid-5',
+    videoUrl: '/videos/sample5.mp4',
+    author: CREATOR_CARLOS,
+    description: 'Cuando dices que vas a ahorrar para comprar casa pero tus amigos te dicen "vamos por unas cervezas solo un ratico" 😂🍻 Etiqueta a tu amigo!',
+    tags: ['humor', 'comedia', 'colombia', 'parce', 'risas'],
+    music: {
+      title: 'El Parce - Sonido Original Risas',
+      author: 'elparce_humor',
+      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 412500,
+      comments: 7890,
+      bookmarks: 54100,
+      shares: 38200,
+      giftsCount: 1420,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-par-1',
+        username: 'juan_pablo',
+        avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80',
+        text: 'Jajajaja no me quemes de esa forma Parceee 😂🤣',
+        timestamp: 'Hace 30m',
+        likes: 890,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 4. Burger Master Artesanal (@burgermaster_oficial) - Gastronomía
+  {
+    id: 'vid-2',
+    videoUrl: '/videos/sample2.mp4',
+    author: CREATOR_BURGER,
+    description: '🔥 Preparando una Burger Doble artesanal al carbón con queso cheddar fundido y tocineta crujiente 🍔 ¿Quién se apunta?',
+    tags: ['comida', 'burger', 'recetas', 'sabor', 'gastronomia'],
+    product: {
+      id: 'prod-burger-1',
+      name: 'Burger Doble al Carbón',
+      price: 34900,
+      whatsapp: '573147772211',
+    },
+    music: {
+      title: 'Cyber Beats - Electric Pulse (Trending)',
+      author: 'Cyber Beats',
+      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 89300,
+      comments: 924,
+      bookmarks: 14500,
+      shares: 4200,
+      giftsCount: 180,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-4',
+        username: 'mariana_code',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+        text: 'La mejor hamburguesa de Laureles sin duda 🙌',
+        timestamp: 'Hace 1h',
+        likes: 89,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 5. Camila Studio Nail Art (@camila_nails) - Belleza & Estética
+  {
+    id: 'vid-6',
+    videoUrl: '/videos/sample6.mp4',
+    author: CREATOR_CAMILA,
+    description: 'Transformación de uñas nail art en 3 pasos con acabado profesional ✨💅 ¿Te gusta este diseño en tonos pastel?',
+    tags: ['belleza', 'nails', 'manicure', 'uñas', 'tutorial'],
+    music: {
+      title: 'Acoustic Vibes - Morning Glow',
+      author: 'Acoustic Vibes',
+      cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 167300,
+      comments: 2410,
+      bookmarks: 38900,
+      shares: 11200,
+      giftsCount: 410,
+    },
+    isLiked: false,
+    isBookmarked: true,
+    comments: [
+      {
+        id: 'c-cam-1',
+        username: 'andrea_s',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
+        text: '¡Quedaron espectaculares esas uñas! Me encanta el brillo 😍',
+        timestamp: 'Hace 4h',
+        likes: 210,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 6. Chef Mateo Delicias (@chef_mateo) - Gastronomía & Asados
+  {
+    id: 'vid-7',
+    videoUrl: '/videos/sample7.mp4',
+    author: CREATOR_MATEO,
+    description: 'Técnica infalible para un asado perfecto conservando todos sus jugos 🥩🔥 Cuéntame en comentarios tu término favorito!',
+    tags: ['recetas', 'asados', 'cocina', 'bbq', 'colombia'],
+    music: {
+      title: 'Chef Mateo - Sabor Criollo Asados',
+      author: 'chef_mateo',
+      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 215400,
+      comments: 3180,
+      bookmarks: 49200,
+      shares: 15400,
+      giftsCount: 890,
+    },
+    isLiked: true,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-mat-1',
+        username: 'diego_asador',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+        text: 'Esa técnica está monumental chef! Buen provecho 🔥',
+        timestamp: 'Hace 2h',
+        likes: 310,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 7. Daniel Beats (@daniel_beats) - Música Urbana & Producción
+  {
+    id: 'vid-8',
+    videoUrl: '/videos/sample8.mp4',
+    author: CREATOR_DANIEL,
+    description: 'Creando un beat de reggaetón romántico en solo 3 minutos 🎹🎧 ¿A qué cantante colombiano le montarías la voz a esta pista? Deja tu opinión en comentarios!',
+    tags: ['musica', 'reggaeton', 'beatmaker', 'producer', 'medellin'],
+    music: {
+      title: 'Daniel Beats - Medellín Summer Nights 2026',
+      author: 'daniel_beats',
+      cover: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 341800,
+      comments: 5420,
+      bookmarks: 62800,
+      shares: 24900,
+      giftsCount: 1105,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-dan-1',
+        username: 'flow_urbano',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
+        text: 'Ese bajo pegó durísimo hermano! Tienes que soltarlo en Spotify 🔥',
+        timestamp: 'Hace 1h',
+        likes: 420,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 8. Andrés Tech & Gaming (@andres_tech) - Gaming & Gadgets
+  {
+    id: 'vid-3',
+    videoUrl: '/videos/sample3.mp4',
+    author: CREATOR_ANDRES,
+    description: 'Animación clásica pero con audio 8D. Si usas estos auriculares vas a escuchar cada detalle como si estuvieras en el cine 🎧🔊',
+    tags: ['tech', 'gaming', 'auriculares', 'gadgets', 'unboxing'],
+    music: {
+      title: 'Orchestral Theme - Peach Open Movie Project',
+      author: 'Blender Foundation',
+      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 245100,
+      comments: 4120,
+      bookmarks: 48900,
+      shares: 18300,
+      giftsCount: 654,
+    },
+    isLiked: true,
+    isBookmarked: true,
+    comments: [
+      {
+        id: 'c-6',
+        username: 'pixel_art',
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
+        text: 'Justo los auriculares que estaba buscando para jugar ❤️',
+        timestamp: 'Hace 5h',
+        likes: 620,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 9. Lucia Ramirez (@lucia_viajes)
+  {
+    id: 'vid-9',
+    videoUrl: '/videos/sample9.mp4',
+    author: CREATOR_LUCIA,
+    description: 'Atardecer mágico en los cafetales colombianos 🇨🇴🌄 ¿Quién más ama perderse en las montañas cafeteras?',
+    tags: ['viajes', 'colombia', 'turismo', 'aventura', 'spotplay'],
+    music: {
+      title: 'Lucia Ramirez - Andes Sunset Chill',
+      author: 'lucia_viajes',
+      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 67200,
+      comments: 840,
+      bookmarks: 14200,
+      shares: 5100,
+      giftsCount: 210,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-luc-1',
+        username: 'juan_viajero',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+        text: '¡Colombia es el país más hermoso del mundo! Qué paisajes ❤️',
+        timestamp: 'Hace 2h',
+        likes: 120,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 10. Santiago Morales (@santi_skate)
+  {
+    id: 'vid-10',
+    videoUrl: '/videos/sample10.mp4',
+    author: CREATOR_SANTIAGO,
+    description: 'Sesión de street skate en Medellín después de la lluvia 🛹🌧️ Practicando el kickflip perfecto en las calles.',
+    tags: ['skate', 'urbano', 'medellin', 'deportes', 'viral'],
+    music: {
+      title: 'Santi Skate - Hip Hop Medellín Beats',
+      author: 'santi_skate',
+      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 91400,
+      comments: 1350,
+      bookmarks: 22100,
+      shares: 8400,
+      giftsCount: 380,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-san-1',
+        username: 'esteban_sk8',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
+        text: 'Ese truco te salió limpiecito bro 🔥💪',
+        timestamp: 'Hace 3h',
+        likes: 215,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 11. Elena Restrepo (@elena_art)
+  {
+    id: 'vid-11',
+    videoUrl: '/videos/sample11.mp4',
+    author: CREATOR_ELENA,
+    description: 'Pintando un lienzo al óleo inspirado en el realismo mágico 🎨✨ 4 horas de trabajo resumidas en este clip.',
+    tags: ['arte', 'pintura', 'creatividad', 'cultura', 'spotplay'],
+    music: {
+      title: 'Elena Art - Lo-Fi Paint Chill',
+      author: 'elena_art',
+      cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 54100,
+      comments: 730,
+      bookmarks: 18900,
+      shares: 4300,
+      giftsCount: 195,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-ele-1',
+        username: 'clara_diseno',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
+        text: 'Qué talento tan increíble tienes para los colores pastel 😍',
+        timestamp: 'Hace 1h',
+        likes: 85,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 12. Felipe Cadavid (@felipe_barista)
+  {
+    id: 'vid-12',
+    videoUrl: '/videos/sample12.mp4',
+    author: CREATOR_FELIPE,
+    description: 'Extracción en V60 con café Geisha de Nariño ☕🌿 Notas a jazmín y frutas cítricas. El verdadero café colombiano.',
+    tags: ['cafe', 'barista', 'colombia', 'coffee', 'aroma'],
+    music: {
+      title: 'Felipe Cadavid - Morning Roast Acoustic',
+      author: 'felipe_barista',
+      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 114500,
+      comments: 1890,
+      bookmarks: 36700,
+      shares: 12400,
+      giftsCount: 460,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-fel-1',
+        username: 'diego_cafe',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
+        text: '¡El Geisha de Nariño es insuperable! Gran método de filtrado ☕👌',
+        timestamp: 'Hace 4h',
+        likes: 310,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 13. Mariana Salazar (@mariana_dance)
+  {
+    id: 'vid-13',
+    videoUrl: '/videos/sample13.mp4',
+    author: CREATOR_MARIANA,
+    description: 'Coreografía enérgica con el sabor de Cali 💃🔥 ¿Quién se anima a hacer este trend de baile conmigo?',
+    tags: ['baile', 'dance', 'cali', 'salsa', 'ritmo'],
+    music: {
+      title: 'Cali Dance Studio - Ritmo Latino Flow',
+      author: 'mariana_dance',
+      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 189200,
+      comments: 3120,
+      bookmarks: 45600,
+      shares: 21300,
+      giftsCount: 890,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-mar-1',
+        username: 'valen_salsa',
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
+        text: '¡Esa energía caleña no se compara con nada! Demasiado ritmo 💥💃',
+        timestamp: 'Hace 5h',
+        likes: 420,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 14. Alejandro Torres (@alejo_biker)
+  {
+    id: 'vid-14',
+    videoUrl: '/videos/sample14.mp4',
+    author: CREATOR_ALEJO,
+    description: 'Rodada mañanera por el Alto de Las Palmas en Antioquia 🏍️💨 Curvas perfectas y clima fresco. La libertad sobre dos ruedas.',
+    tags: ['motos', 'biker', 'aventura', 'rutas', 'colombia'],
+    music: {
+      title: 'Alejo Biker - High Altitude Engine',
+      author: 'alejo_biker',
+      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 82300,
+      comments: 1140,
+      bookmarks: 19800,
+      shares: 7200,
+      giftsCount: 310,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-ale-1',
+        username: 'carlos_motor',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+        text: 'Buena ruta parce, Las Palmas siempre tiene la mejor vista ✌️🏍️',
+        timestamp: 'Hace 2h',
+        likes: 180,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 15. Isabella Mendoza (@isa_makeup)
+  {
+    id: 'vid-15',
+    videoUrl: '/videos/sample15.mp4',
+    author: CREATOR_ISABELLA,
+    description: 'Rutina de makeup "clean look" para días calurosos 💄🌸 Acabado natural y luminoso que dura 12 horas.',
+    tags: ['makeup', 'belleza', 'skincare', 'glam', 'spotplay'],
+    music: {
+      title: 'Isa Glow - Soft Pop Dreams',
+      author: 'isa_makeup',
+      cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 156400,
+      comments: 2640,
+      bookmarks: 48200,
+      shares: 16700,
+      giftsCount: 620,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-isa-1',
+        username: 'naty_beauty',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+        text: 'Esa piel quedó radiante Isa, gracias por el tip del primer ✨❤️',
+        timestamp: 'Hace 3h',
+        likes: 350,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 16. David Ospina (@david_gamestudio)
+  {
+    id: 'vid-16',
+    videoUrl: '/videos/sample16.mp4',
+    author: CREATOR_DAVID,
+    description: 'Animando al jefe final de mi videojuego indie en pixel art 🎮👾 ¿Qué ataque especial le agregarían a este personaje?',
+    tags: ['gamedev', 'gaming', 'indie', 'pixelart', 'tech'],
+    music: {
+      title: 'Retro Synth - 8Bit Quest',
+      author: 'david_gamestudio',
+      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 73600,
+      comments: 1420,
+      bookmarks: 25100,
+      shares: 8900,
+      giftsCount: 290,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-dav-1',
+        username: 'juan_gamer',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
+        text: '¡Agrégale un rayo láser giratorio! Apoyando el desarrollo nacional 🎮🇨🇴',
+        timestamp: 'Hace 1h',
+        likes: 195,
+        isLiked: false,
+      },
+    ],
+  },
+
+  // 17. Catalina Vega (@cata_yoga)
+  {
+    id: 'vid-17',
+    videoUrl: '/videos/sample17.mp4',
+    author: CREATOR_CATALINA,
+    description: '5 minutos de respiración y estiramiento para soltar la tensión del cuello y espalda 🧘‍♀️🌿 Dedícate este momento hoy.',
+    tags: ['yoga', 'bienestar', 'paz', 'meditacion', 'salud'],
+    music: {
+      title: 'Catalina Yoga - Tibetan Singing Bowls Calm',
+      author: 'cata_yoga',
+      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 122800,
+      comments: 1670,
+      bookmarks: 41300,
+      shares: 14500,
+      giftsCount: 510,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-cat-1',
+        username: 'laura_mind',
+        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
+        text: 'Justo lo que necesitaba después de tantas horas frente al computador 🙏✨',
+        timestamp: 'Hace 4h',
+        likes: 280,
+        isLiked: true,
+      },
+    ],
+  },
+
+  // 18. Juan Manuel Ríos (@juanma_tatuajes)
+  {
+    id: 'vid-18',
+    videoUrl: '/videos/sample18.mp4',
+    author: CREATOR_JUANMA,
+    description: 'Pieza de realismo en sombras terminada en 8 horas 🖤💉 Microdetalle de jaguar sobre piel. ¿Te atreverías a tatuarte una manga completa?',
+    tags: ['tattoo', 'arte', 'ink', 'medellin', 'estilo'],
+    music: {
+      title: 'Dark Ink Studio - Midnight Electric Guitar',
+      author: 'juanma_tatuajes',
+      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
+    },
+    stats: {
+      likes: 145900,
+      comments: 2180,
+      bookmarks: 39400,
+      shares: 17800,
+      giftsCount: 720,
+    },
+    isLiked: false,
+    isBookmarked: false,
+    comments: [
+      {
+        id: 'c-jua-1',
+        username: 'felipe_ink',
+        avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80',
+        text: 'Nivel legendario ese sombreado maestro, un saludo desde Bogotá 🖤👏',
+        timestamp: 'Hace 2h',
+        likes: 310,
+        isLiked: true,
+      },
+    ],
+  },
+];
 
 export const CURRENT_USER = {
   id: 'user-1794726360816',
@@ -148,733 +1100,3 @@ export const CURRENT_USER = {
     },
   ],
 };
-
-export const CURRENT_AUTHOR = {
-  id: CURRENT_USER.id,
-  name: CURRENT_USER.name,
-  username: CURRENT_USER.username,
-  avatar: CURRENT_USER.avatar,
-  bio: CURRENT_USER.bio,
-  isFollowing: false,
-  isVerified: true,
-  whatsapp: '573105558899',
-};
-
-// Aliases para compatibilidad: todos apuntan únicamente al perfil de Leonardo
-export const CREATOR_SOFIA = CURRENT_AUTHOR;
-export const CREATOR_VALERIA = CURRENT_AUTHOR;
-export const CREATOR_CARLOS = CURRENT_AUTHOR;
-export const CREATOR_BURGER = CURRENT_AUTHOR;
-export const CREATOR_CAMILA = CURRENT_AUTHOR;
-export const CREATOR_MATEO = CURRENT_AUTHOR;
-export const CREATOR_DANIEL = CURRENT_AUTHOR;
-export const CREATOR_ANDRES = CURRENT_AUTHOR;
-export const CREATOR_LUCIA = CURRENT_AUTHOR;
-export const CREATOR_SANTIAGO = CURRENT_AUTHOR;
-export const CREATOR_ELENA = CURRENT_AUTHOR;
-export const CREATOR_FELIPE = CURRENT_AUTHOR;
-export const CREATOR_MARIANA = CURRENT_AUTHOR;
-export const CREATOR_ALEJO = CURRENT_AUTHOR;
-export const CREATOR_ISABELLA = CURRENT_AUTHOR;
-export const CREATOR_DAVID = CURRENT_AUTHOR;
-export const CREATOR_CATALINA = CURRENT_AUTHOR;
-export const CREATOR_JUANMA = CURRENT_AUTHOR;
-
-export const SEED_CREATORS_MAP = {
-  'vid-1': CURRENT_AUTHOR,
-  'vid-4': CURRENT_AUTHOR,
-  'vid-5': CURRENT_AUTHOR,
-  'vid-2': CURRENT_AUTHOR,
-  'vid-6': CURRENT_AUTHOR,
-  'vid-7': CURRENT_AUTHOR,
-  'vid-8': CURRENT_AUTHOR,
-  'vid-3': CURRENT_AUTHOR,
-  'vid-9': CURRENT_AUTHOR,
-  'vid-10': CURRENT_AUTHOR,
-  'vid-11': CURRENT_AUTHOR,
-  'vid-12': CURRENT_AUTHOR,
-  'vid-13': CURRENT_AUTHOR,
-  'vid-14': CURRENT_AUTHOR,
-  'vid-15': CURRENT_AUTHOR,
-  'vid-16': CURRENT_AUTHOR,
-  'vid-17': CURRENT_AUTHOR,
-  'vid-18': CURRENT_AUTHOR,
-};
-
-export const INITIAL_VIDEOS = [
-  // 1. Sofia Martinez (@sofia_creative) - Moda & Estilo de vida
-  {
-    id: 'vid-1',
-    videoUrl: '/videos/sample1.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Probando el outfit completo de hoy con zapatillas streetwear 100% colombianas ✨👟 ¿Qué opinan de esta combinación?',
-    tags: ['moda', 'outfit', 'estilo', 'spotplay', 'viral'],
-    product: {
-      id: 'prod-sofia-1',
-      name: 'Sneakers Streetwear HD',
-      price: 189000,
-      whatsapp: '573105558899',
-    },
-    music: {
-      title: 'Sofia Martinez - Chill Waves (Original Sound)',
-      author: 'sofia_creative',
-      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-pin-1',
-        username: 'sofia_creative',
-        avatar: CREATOR_SOFIA.avatar,
-        text: '¡Hola a todos! Gracias por todo el apoyo a la nueva colección de outfits ✨👟',
-        timestamp: 'Hace 3h',
-        likes: 1250,
-        isLiked: true,
-        isPinned: true,
-        isAuthor: true,
-        likedByAuthor: true,
-        replies: [
-          {
-            id: 'r-1',
-            username: 'valentina_m',
-            avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
-            text: '@sofia_creative ¿Vienen en talla 37 o vienen ajustadas? Gracias!',
-            timestamp: 'Hace 2h',
-            likes: 18,
-            isLiked: false,
-          },
-          {
-            id: 'r-2',
-            username: 'sofia_creative',
-            avatar: CREATOR_SOFIA.avatar,
-            text: '@valentina_m Vienen en horma exacta colombiana! Te recomiendo pedir tu número habitual 👟💖',
-            timestamp: 'Hace 1h',
-            likes: 54,
-            isLiked: true,
-            isAuthor: true,
-            likedByAuthor: true,
-          },
-        ],
-      },
-      {
-        id: 'c-1',
-        username: 'carlos_g',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
-        text: '¡Se ven brutales esas zapatillas! Me encanta el estilo streetwear 😍',
-        timestamp: 'Hace 2h',
-        likes: 342,
-        isLiked: false,
-        isVerifiedBuyer: true,
-        likedByAuthor: true,
-        replies: [],
-      },
-    ],
-  },
-
-  // 2. Valeria Gómez (@valeria_fit) - Fitness & Suplementos
-  {
-    id: 'vid-4',
-    videoUrl: '/videos/sample4.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Mi batido secreto post-entreno con 27g de proteína limpia. Si entrenas duro en el gym tienes que probarla 💪🔥 Comenta tus metas de este mes!',
-    tags: ['fitness', 'gym', 'nutricion', 'salud', 'medellin'],
-    music: {
-      title: 'Cyber Beats - Workout High Energy',
-      author: 'Cyber Beats',
-      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: true,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-val-pin',
-        username: 'valeria_fit',
-        avatar: CREATOR_VALERIA.avatar,
-        text: 'Chicos recuerden tomarla dentro de los primeros 45 minutos después del entreno para máxima absorción muscular 💪🥤',
-        timestamp: 'Hace 4h',
-        likes: 980,
-        isLiked: true,
-        isPinned: true,
-        isAuthor: true,
-        likedByAuthor: true,
-        replies: [],
-      },
-      {
-        id: 'c-val-1',
-        username: 'lucas_gym',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
-        text: 'La de sabor a vainilla es deliciosa, recomendada 100% 🏋️‍♂️',
-        timestamp: 'Hace 1h',
-        likes: 154,
-        isLiked: true,
-        isVerifiedBuyer: true,
-        likedByAuthor: true,
-      },
-    ],
-  },
-
-  // 3. Carlos Restrepo (@elparce_humor) - Comedia & Humor Viral
-  {
-    id: 'vid-5',
-    videoUrl: '/videos/sample5.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Cuando dices que vas a ahorrar para comprar casa pero tus amigos te dicen "vamos por unas cervezas solo un ratico" 😂🍻 Etiqueta a tu amigo!',
-    tags: ['humor', 'comedia', 'colombia', 'parce', 'risas'],
-    music: {
-      title: 'El Parce - Sonido Original Risas',
-      author: 'elparce_humor',
-      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-par-1',
-        username: 'juan_pablo',
-        avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80',
-        text: 'Jajajaja no me quemes de esa forma Parceee 😂🤣',
-        timestamp: 'Hace 30m',
-        likes: 890,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 4. Burger Master Artesanal (@burgermaster_oficial) - Gastronomía
-  {
-    id: 'vid-2',
-    videoUrl: '/videos/sample2.mp4',
-    author: CURRENT_AUTHOR,
-    description: '🔥 Preparando una Burger Doble artesanal al carbón con queso cheddar fundido y tocineta crujiente 🍔 ¿Quién se apunta?',
-    tags: ['comida', 'burger', 'recetas', 'sabor', 'gastronomia'],
-    product: {
-      id: 'prod-burger-1',
-      name: 'Burger Doble al Carbón',
-      price: 34900,
-      whatsapp: '573147772211',
-    },
-    music: {
-      title: 'Cyber Beats - Electric Pulse (Trending)',
-      author: 'Cyber Beats',
-      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-4',
-        username: 'mariana_code',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-        text: 'La mejor hamburguesa de Laureles sin duda 🙌',
-        timestamp: 'Hace 1h',
-        likes: 89,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 5. Camila Studio Nail Art (@camila_nails) - Belleza & Estética
-  {
-    id: 'vid-6',
-    videoUrl: '/videos/sample6.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Transformación de uñas nail art en 3 pasos con acabado profesional ✨💅 ¿Te gusta este diseño en tonos pastel?',
-    tags: ['belleza', 'nails', 'manicure', 'uñas', 'tutorial'],
-    music: {
-      title: 'Acoustic Vibes - Morning Glow',
-      author: 'Acoustic Vibes',
-      cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: true,
-    comments: [
-      {
-        id: 'c-cam-1',
-        username: 'andrea_s',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-        text: '¡Quedaron espectaculares esas uñas! Me encanta el brillo 😍',
-        timestamp: 'Hace 4h',
-        likes: 210,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 6. Chef Mateo Delicias (@chef_mateo) - Gastronomía & Asados
-  {
-    id: 'vid-7',
-    videoUrl: '/videos/sample7.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Técnica infalible para un asado perfecto conservando todos sus jugos 🥩🔥 Cuéntame en comentarios tu término favorito!',
-    tags: ['recetas', 'asados', 'cocina', 'bbq', 'colombia'],
-    music: {
-      title: 'Chef Mateo - Sabor Criollo Asados',
-      author: 'chef_mateo',
-      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: true,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-mat-1',
-        username: 'diego_asador',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-        text: 'Esa técnica está monumental chef! Buen provecho 🔥',
-        timestamp: 'Hace 2h',
-        likes: 310,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 7. Daniel Beats (@daniel_beats) - Música Urbana & Producción
-  {
-    id: 'vid-8',
-    videoUrl: '/videos/sample8.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Creando un beat de reggaetón romántico en solo 3 minutos 🎹🎧 ¿A qué cantante colombiano le montarías la voz a esta pista? Deja tu opinión en comentarios!',
-    tags: ['musica', 'reggaeton', 'beatmaker', 'producer', 'medellin'],
-    music: {
-      title: 'Daniel Beats - Medellín Summer Nights 2026',
-      author: 'daniel_beats',
-      cover: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-dan-1',
-        username: 'flow_urbano',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
-        text: 'Ese bajo pegó durísimo hermano! Tienes que soltarlo en Spotify 🔥',
-        timestamp: 'Hace 1h',
-        likes: 420,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 8. Andrés Tech & Gaming (@andres_tech) - Gaming & Gadgets
-  {
-    id: 'vid-3',
-    videoUrl: '/videos/sample3.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Animación clásica pero con audio 8D. Si usas estos auriculares vas a escuchar cada detalle como si estuvieras en el cine 🎧🔊',
-    tags: ['tech', 'gaming', 'auriculares', 'gadgets', 'unboxing'],
-    music: {
-      title: 'Orchestral Theme - Peach Open Movie Project',
-      author: 'Blender Foundation',
-      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: true,
-    isBookmarked: true,
-    comments: [
-      {
-        id: 'c-6',
-        username: 'pixel_art',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
-        text: 'Justo los auriculares que estaba buscando para jugar ❤️',
-        timestamp: 'Hace 5h',
-        likes: 620,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 9. Lucia Ramirez (@lucia_viajes)
-  {
-    id: 'vid-9',
-    videoUrl: '/videos/sample9.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Atardecer mágico en los cafetales colombianos 🇨🇴🌄 ¿Quién más ama perderse en las montañas cafeteras?',
-    tags: ['viajes', 'colombia', 'turismo', 'aventura', 'spotplay'],
-    music: {
-      title: 'Lucia Ramirez - Andes Sunset Chill',
-      author: 'lucia_viajes',
-      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-luc-1',
-        username: 'juan_viajero',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-        text: '¡Colombia es el país más hermoso del mundo! Qué paisajes ❤️',
-        timestamp: 'Hace 2h',
-        likes: 120,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 10. Santiago Morales (@santi_skate)
-  {
-    id: 'vid-10',
-    videoUrl: '/videos/sample10.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Sesión de street skate en Medellín después de la lluvia 🛹🌧️ Practicando el kickflip perfecto en las calles.',
-    tags: ['skate', 'urbano', 'medellin', 'deportes', 'viral'],
-    music: {
-      title: 'Santi Skate - Hip Hop Medellín Beats',
-      author: 'santi_skate',
-      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-san-1',
-        username: 'esteban_sk8',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80',
-        text: 'Ese truco te salió limpiecito bro 🔥💪',
-        timestamp: 'Hace 3h',
-        likes: 215,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 11. Elena Restrepo (@elena_art)
-  {
-    id: 'vid-11',
-    videoUrl: '/videos/sample11.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Pintando un lienzo al óleo inspirado en el realismo mágico 🎨✨ 4 horas de trabajo resumidas en este clip.',
-    tags: ['arte', 'pintura', 'creatividad', 'cultura', 'spotplay'],
-    music: {
-      title: 'Elena Art - Lo-Fi Paint Chill',
-      author: 'elena_art',
-      cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-ele-1',
-        username: 'clara_diseno',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-        text: 'Qué talento tan increíble tienes para los colores pastel 😍',
-        timestamp: 'Hace 1h',
-        likes: 85,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 12. Felipe Cadavid (@felipe_barista)
-  {
-    id: 'vid-12',
-    videoUrl: '/videos/sample12.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Extracción en V60 con café Geisha de Nariño ☕🌿 Notas a jazmín y frutas cítricas. El verdadero café colombiano.',
-    tags: ['cafe', 'barista', 'colombia', 'coffee', 'aroma'],
-    music: {
-      title: 'Felipe Cadavid - Morning Roast Acoustic',
-      author: 'felipe_barista',
-      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-fel-1',
-        username: 'diego_cafe',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
-        text: '¡El Geisha de Nariño es insuperable! Gran método de filtrado ☕👌',
-        timestamp: 'Hace 4h',
-        likes: 310,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 13. Mariana Salazar (@mariana_dance)
-  {
-    id: 'vid-13',
-    videoUrl: '/videos/sample13.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Coreografía enérgica con el sabor de Cali 💃🔥 ¿Quién se anima a hacer este trend de baile conmigo?',
-    tags: ['baile', 'dance', 'cali', 'salsa', 'ritmo'],
-    music: {
-      title: 'Cali Dance Studio - Ritmo Latino Flow',
-      author: 'mariana_dance',
-      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-mar-1',
-        username: 'valen_salsa',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
-        text: '¡Esa energía caleña no se compara con nada! Demasiado ritmo 💥💃',
-        timestamp: 'Hace 5h',
-        likes: 420,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 14. Alejandro Torres (@alejo_biker)
-  {
-    id: 'vid-14',
-    videoUrl: '/videos/sample14.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Rodada mañanera por el Alto de Las Palmas en Antioquia 🏍️💨 Curvas perfectas y clima fresco. La libertad sobre dos ruedas.',
-    tags: ['motos', 'biker', 'aventura', 'rutas', 'colombia'],
-    music: {
-      title: 'Alejo Biker - High Altitude Engine',
-      author: 'alejo_biker',
-      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-ale-1',
-        username: 'carlos_motor',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-        text: 'Buena ruta parce, Las Palmas siempre tiene la mejor vista ✌️🏍️',
-        timestamp: 'Hace 2h',
-        likes: 180,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 15. Isabella Mendoza (@isa_makeup)
-  {
-    id: 'vid-15',
-    videoUrl: '/videos/sample15.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Rutina de makeup "clean look" para días calurosos 💄🌸 Acabado natural y luminoso que dura 12 horas.',
-    tags: ['makeup', 'belleza', 'skincare', 'glam', 'spotplay'],
-    music: {
-      title: 'Isa Glow - Soft Pop Dreams',
-      author: 'isa_makeup',
-      cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-isa-1',
-        username: 'naty_beauty',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-        text: 'Esa piel quedó radiante Isa, gracias por el tip del primer ✨❤️',
-        timestamp: 'Hace 3h',
-        likes: 350,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 16. David Ospina (@david_gamestudio)
-  {
-    id: 'vid-16',
-    videoUrl: '/videos/sample16.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Animando al jefe final de mi videojuego indie en pixel art 🎮👾 ¿Qué ataque especial le agregarían a este personaje?',
-    tags: ['gamedev', 'gaming', 'indie', 'pixelart', 'tech'],
-    music: {
-      title: 'Retro Synth - 8Bit Quest',
-      author: 'david_gamestudio',
-      cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-dav-1',
-        username: 'juan_gamer',
-        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
-        text: '¡Agrégale un rayo láser giratorio! Apoyando el desarrollo nacional 🎮🇨🇴',
-        timestamp: 'Hace 1h',
-        likes: 195,
-        isLiked: false,
-      },
-    ],
-  },
-
-  // 17. Catalina Vega (@cata_yoga)
-  {
-    id: 'vid-17',
-    videoUrl: '/videos/sample17.mp4',
-    author: CURRENT_AUTHOR,
-    description: '5 minutos de respiración y estiramiento para soltar la tensión del cuello y espalda 🧘‍♀️🌿 Dedícate este momento hoy.',
-    tags: ['yoga', 'bienestar', 'paz', 'meditacion', 'salud'],
-    music: {
-      title: 'Catalina Yoga - Tibetan Singing Bowls Calm',
-      author: 'cata_yoga',
-      cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-cat-1',
-        username: 'laura_mind',
-        avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80',
-        text: 'Justo lo que necesitaba después de tantas horas frente al computador 🙏✨',
-        timestamp: 'Hace 4h',
-        likes: 280,
-        isLiked: true,
-      },
-    ],
-  },
-
-  // 18. Juan Manuel Ríos (@juanma_tatuajes)
-  {
-    id: 'vid-18',
-    videoUrl: '/videos/sample18.mp4',
-    author: CURRENT_AUTHOR,
-    description: 'Pieza de realismo en sombras terminada en 8 horas 🖤💉 Microdetalle de jaguar sobre piel. ¿Te atreverías a tatuarte una manga completa?',
-    tags: ['tattoo', 'arte', 'ink', 'medellin', 'estilo'],
-    music: {
-      title: 'Dark Ink Studio - Midnight Electric Guitar',
-      author: 'juanma_tatuajes',
-      cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
-    },
-    stats: {
-      likes: 0,
-      comments: 0,
-      bookmarks: 0,
-      shares: 0,
-      giftsCount: 0,
-    },
-    isLiked: false,
-    isBookmarked: false,
-    comments: [
-      {
-        id: 'c-jua-1',
-        username: 'felipe_ink',
-        avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80',
-        text: 'Nivel legendario ese sombreado maestro, un saludo desde Bogotá 🖤👏',
-        timestamp: 'Hace 2h',
-        likes: 310,
-        isLiked: true,
-      },
-    ],
-  },
-];
