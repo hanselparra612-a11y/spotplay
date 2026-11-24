@@ -262,9 +262,16 @@ export function loadPersistedUser() {
     const cleanFollowing = typeof parsed.followingCount === 'number' ? parsed.followingCount : 0;
     const cleanLikes = typeof parsed.likesCount === 'number' ? parsed.likesCount : 0;
 
+    const cleanId = (!parsed.id || parsed.id === 'me') ? CURRENT_USER.id : parsed.id;
+    const cleanName = (!parsed.name || parsed.name === 'Mi Perfil Creador' || parsed.name === 'nuevo_creador') ? CURRENT_USER.name : parsed.name;
+    const cleanUsername = (!parsed.username || parsed.username === 'nuevo_creador' || parsed.username === 'mi_spotplay') ? CURRENT_USER.username : parsed.username;
+
     return {
       ...CURRENT_USER,
       ...parsed,
+      id: cleanId,
+      name: cleanName,
+      username: cleanUsername,
       followersCount: cleanFollowers,
       followingCount: cleanFollowing,
       baseLikesCount: 0,

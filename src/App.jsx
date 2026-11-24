@@ -258,9 +258,22 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  // Unique creators for live stories bar
+  // Unique creators for live stories bar (unificado al 100% en un único perfil para Leonardo)
   const uniqueCreators = Array.from(
-    new Map(videos.map((v) => [v.author?.id, v.author])).values()
+    new Map(
+      videos.map((v) => {
+        const isLeonardo =
+          !v.author ||
+          v.author.id === 'me' ||
+          v.author.id === 'user-1794726360816' ||
+          v.author.id === currentUser?.id ||
+          v.author.username?.toLowerCase() === 'leonardo' ||
+          v.author.username === 'nuevo_creador' ||
+          v.author.name?.toLowerCase().includes('leonardo');
+        const unifiedAuthor = isLeonardo ? currentUser : v.author;
+        return [unifiedAuthor?.id || 'user-1794726360816', unifiedAuthor];
+      })
+    ).values()
   ).filter(Boolean);
 
   // Upload modal pre-fill state
@@ -330,16 +343,17 @@ export default function App() {
             const activeUser = ownerUser || serverUsers[0];
             if (activeUser && activeUser.id) {
               setCurrentUser((prev) => {
-                const activeHasRealAvatar = activeUser.avatar && activeUser.avatar.startsWith('data:image');
-                const prevHasRealAvatar = prev?.avatar && prev.avatar.startsWith('data:image');
-                
-                if (activeHasRealAvatar && !prevHasRealAvatar) {
-                  return { ...prev, ...activeUser, avatar: activeUser.avatar };
-                }
-                if (!prev || prev.id === 'guest' || prev.id === 'me' || prev.username === 'nuevo_creador') {
-                  return activeUser;
-                }
-                return prev;
+                const cleanActive = {
+                  ...activeUser,
+                  id: 'user-1794726360816',
+                  name: 'Leonardo',
+                  username: 'Leonardo',
+                };
+                return {
+                  ...prev,
+                  ...cleanActive,
+                  avatar: (cleanActive.avatar && cleanActive.avatar.startsWith('data:image')) ? cleanActive.avatar : (prev?.avatar || cleanActive.avatar),
+                };
               });
             }
           }
@@ -782,8 +796,13 @@ export default function App() {
     if (!author) return;
     const isOwn = Boolean(
       author.id === 'me' ||
+      author.id === 'user-1794726360816' ||
       author.id === currentUser.id ||
-      (currentUser.username && author.username === currentUser.username)
+      author.username?.toLowerCase() === 'leonardo' ||
+      author.username === 'nuevo_creador' ||
+      author.name?.toLowerCase().includes('leonardo') ||
+      (currentUser.username && author.username?.toLowerCase() === currentUser.username?.toLowerCase()) ||
+      (currentUser.name && author.name?.toLowerCase() === currentUser.name?.toLowerCase())
     );
     if (isOwn) {
       setActiveCreatorProfile(null);
@@ -1697,7 +1716,7 @@ export default function App() {
                   {/* Tarjetas rápidas de creadores sugeridos */}
                   <div className="w-full max-w-xs space-y-2 mb-5">
                     {uniqueCreators
-                      .filter((c) => c.id !== 'me' && c.id !== currentUser.id)
+                      .filter((c) => c.id !== 'me' && c.id !== currentUser.id && c.id !== 'user-1794726360816' && !c.name?.toLowerCase().includes('leonardo'))
                       .slice(0, 3)
                       .map((creator) => (
                         <div
@@ -1759,7 +1778,7 @@ export default function App() {
         {currentTab === 'profile' && (
           <ProfileView
             currentUser={currentUser}
-            userVideos={videos.filter((v) => v.author?.id === currentUser.id || v.author?.username === currentUser.username || v.author?.id === 'me')}
+            userVideos={videos.filter((v) => v.author?.id === currentUser.id || v.author?.username === currentUser.username || v.author?.id === 'me' || v.author?.id === 'user-1794726360816' || v.author?.name?.toLowerCase().includes('leonardo'))}
             bookmarkedVideos={videos.filter((v) => v.isBookmarked)}
             likedVideos={videos.filter((v) => v.isLiked)}
             onSelectVideo={handleSelectVideo}
@@ -1774,7 +1793,7 @@ export default function App() {
             initialTab={profileInitialTab}
             onExploreVideos={() => setCurrentTab('feed')}
             followedCreatorsList={uniqueCreators.filter((c) => c.isFollowing)}
-            allCreatorsList={uniqueCreators.filter((c) => c.id !== 'me' && c.id !== currentUser.id)}
+            allCreatorsList={uniqueCreators.filter((c) => c.id !== 'me' && c.id !== currentUser.id && c.id !== 'user-1794726360816' && !c.name?.toLowerCase().includes('leonardo'))}
             onToggleFollow={handleToggleFollow}
             onOpenCreatorProfile={handleOpenCreatorOrMyProfile}
             onEditVideo={handleOpenEditVideo}
