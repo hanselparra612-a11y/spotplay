@@ -1,0 +1,24 @@
+{
+  "appId": "com.spotplay.app",
+  "appName": "Spot Play",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "AdMob": {
+      "appId": "ca-app-pub-3940256099942544~3347511713"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 1800,
+      "backgroundColor": "#07080b",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#07080b"
+    }
+  }
+}

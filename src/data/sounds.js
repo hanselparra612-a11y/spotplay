@@ -1,0 +1,48 @@
+// Sonidos en tendencia para SpotPlay
+export const TRENDING_SOUNDS = [
+  {
+    id: 'snd-1',
+    title: 'Cyber Beats - Electric Pulse',
+    author: 'Cyber Beats',
+    duration: '0:30',
+    usesCount: '1.4M',
+    cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&auto=format&fit=crop&q=80',
+    category: 'Electrónica',
+  },
+  {
+    id: 'snd-2',
+    title: 'Sofia Martinez - Chill Waves (Original Sound)',
+    author: 'sofia_creative',
+    duration: '0:45',
+    usesCount: '890K',
+    cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
+    category: 'Lo-Fi',
+  },
+  {
+    id: 'snd-3',
+    title: 'Orchestral Theme - Peach Open Movie Project',
+    author: 'Blender Foundation',
+    duration: '1:00',
+    usesCount: '412K',
+    cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&auto=format&fit=crop&q=80',
+    category: 'Cine',
+  },
+  {
+    id: 'snd-4',
+    title: 'Neon Horizon - Synthwave Rush',
+    author: 'RetroWave Records',
+    duration: '0:35',
+    usesCount: '2.1M',
+    cover: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=100&auto=format&fit=crop&q=80',
+    category: 'Synthwave',
+  },
+  {
+    id: 'snd-5',
+    title: 'Aesthetic Morning - Acoustic Guitar',
+    author: 'Acoustic Vibes',
+    duration: '0:28',
+    usesCount: '650K',
+    cover: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=100&auto=format&fit=crop&q=80',
+    category: 'Acústico',
+  },
+];

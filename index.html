@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- VitrinaSpot Official Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- PWA & Pantalla Completa sin navegador con ajuste dinámico de teclado virtual -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Spot Play" />
+    <meta name="description" content="Spot Play - Videos Cortos, En Vivos & Entretenimiento" />
+    <meta name="theme-color" content="#0c0f14" />
+    
+    <title>Spot Play - Videos Cortos, En Vivos & Entretenimiento</title>
+  </head>
+  <body class="bg-[#0c0f14] select-none">
+    <script>
+      window.addEventListener('error', function(e) {
+        if (!document.getElementById('root') || !document.getElementById('root').hasChildNodes()) {
+          var b = document.getElementById('spotplay-fallback-err');
+          if (!b) {
+            b = document.createElement('div');
+            b.id = 'spotplay-fallback-err';
+            b.style.cssText = 'position:fixed;inset:0;background:#0c0f14;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:sans-serif;z-index:999999;';
+            b.innerHTML = '<div style="font-size:40px;margin-bottom:12px">✨</div><h2 style="color:#ffb800;font-size:18px;margin-bottom:8px">Spot Play</h2><p style="color:#a1a1aa;font-size:13px;max-width:300px;margin-bottom:16px">Se detectó una versión previa en memoria. Toca abajo para abrir limpio.</p><button onclick="localStorage.clear();sessionStorage.clear();location.reload();" style="background:#ffb800;color:#000;font-weight:bold;padding:12px 24px;border:none;border-radius:99px;cursor:pointer;font-size:14px">🔄 Abrir Spot Play</button>';
+            document.body.appendChild(b);
+          }
+        }
+      });
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

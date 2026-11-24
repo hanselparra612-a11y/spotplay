@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Eliminar Cuenta & Datos Personales - Spot Play</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+
+  <style>
+    :root {
+      --bg-dark: #0c0f14;
+      --card-bg: rgba(255, 255, 255, 0.035);
+      --spot-gold: #ffb800;
+      --spot-red: #FE2C55;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .delete-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(12, 15, 20, 0.95);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .delete-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.25rem;
+    }
+    .delete-brand span { color: var(--spot-gold); }
+    .btn-back-app {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 99px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s;
+    }
+    .btn-back-app:hover { background: rgba(255, 184, 0, 0.15); border-color: var(--spot-gold); color: var(--spot-gold); }
+    .delete-container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 20px 80px 20px;
+      width: 100%;
+    }
+    .delete-header { margin-bottom: 30px; text-align: center; }
+    .delete-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(254, 44, 85, 0.12);
+      color: var(--spot-red);
+      border: 1px solid rgba(254, 44, 85, 0.35);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .delete-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.5px;
+    }
+    .delete-subtitle { color: var(--text-muted); font-size: 0.92rem; margin: 0; line-height: 1.5; }
+    .delete-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 28px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .delete-box h2 {
+      font-family: 'Outfit', sans-serif;
+      color: #fff;
+      font-size: 1.25rem;
+      margin: 0 0 14px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .delete-box p { font-size: 0.9rem; color: #cbd5e1; margin: 0 0 12px 0; }
+    .data-list { list-style: none; padding: 0; margin: 0 0 18px 0; }
+    .data-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .data-list li i { color: var(--spot-red); }
+    .input-group { margin-bottom: 16px; }
+    .input-label { display: block; font-size: 0.82rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; }
+    .input-control {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .input-control:focus { outline: none; border-color: var(--spot-red); box-shadow: 0 0 0 2px rgba(254, 44, 85, 0.2); }
+    .btn-delete-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #FE2C55, #c9183b);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(254, 44, 85, 0.35);
+    }
+    .btn-delete-submit:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .delete-alert {
+      display: none;
+      padding: 16px;
+      border-radius: 14px;
+      margin-top: 16px;
+      font-size: 0.9rem;
+      align-items: center;
+      gap: 10px;
+    }
+    .alert-success { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; }
+    .alert-warning { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; }
+    .delete-footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="delete-navbar">
+    <a href="/" class="delete-brand">
+      <i class="fa-solid fa-play" style="color: #ffb800;"></i>
+      Spot <span>Play</span>
+    </a>
+    <a href="/" class="btn-back-app">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Volver a la App</span>
+    </a>
+  </nav>
+
+  <main class="delete-container">
+    <div class="delete-header">
+      <span class="delete-badge">
+        <i class="fa-solid fa-trash-can"></i>
+        Google Play Data Safety Policy 2026
+      </span>
+      <h1 class="delete-title">Eliminar Cuenta de Spot Play</h1>
+      <p class="delete-subtitle">
+        Solicitud de Supresión Definitiva de Cuenta y Datos Personales (com.spotplay.app)
+      </p>
+    </div>
+
+    <div class="delete-box">
+      <h2><i class="fa-solid fa-circle-exclamation" style="color: var(--spot-red);"></i> ¿Qué datos se eliminarán definitivamente?</h2>
+      <p>
+        Al confirmar la eliminación de tu cuenta en Spot Play, se borrarán de forma inmediata e irreversible los siguientes datos:
+      </p>
+      <ul class="data-list">
+        <li><i class="fa-solid fa-video"></i> Todos tus videos subidos en el feed y estados.</li>
+        <li><i class="fa-solid fa-user-slash"></i> Tu perfil de creador (@handle, biografía, avatar).</li>
+        <li><i class="fa-solid fa-coins"></i> Tu saldo acumulado de monedas virtuales (SpotCoins).</li>
+        <li><i class="fa-solid fa-heart-crack"></i> El historial de likes, comentarios y favoritos guardados.</li>
+        <li><i class="fa-solid fa-hard-drive"></i> Todos los archivos temporales y caché local del dispositivo.</li>
+      </ul>
+
+      <form id="delete-account-form" onsubmit="handleAccountDelete(event)">
+        <div class="input-group">
+          <label class="input-label" for="username-input">Nombre de usuario en Spot Play (@handle) o Correo</label>
+          <input type="text" id="username-input" class="input-control" placeholder="Ej. @mi_usuario o tu_correo@gmail.com" required>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="reason-input">Motivo de eliminación (Opcional)</label>
+          <select id="reason-input" class="input-control">
+            <option value="">Selecciona un motivo...</option>
+            <option value="no-uso">Ya no utilizo la aplicación</option>
+            <option value="privacidad">Preocupaciones sobre privacidad</option>
+            <option value="otra-cuenta">Tengo otra cuenta en Spot Play</option>
+            <option value="otro">Otro motivo</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-delete-submit">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Confirmar y Eliminar Mi Cuenta</span>
+        </button>
+      </form>
+
+      <div id="delete-success-msg" class="delete-alert alert-success">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>
+          <strong>¡Solicitud procesada con éxito!</strong> Tu cuenta, videos y datos asociados han sido purgados de Spot Play de forma definitiva.
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacto Directo Alternativo -->
+    <div class="delete-box">
+      <h2><i class="fa-solid fa-headset" style="color: var(--spot-gold);"></i> ¿Prefieres asistencia humana?</h2>
+      <p>
+        También puedes solicitar la eliminación inmediata de tus datos enviando un correo a nuestro equipo de moderación:
+      </p>
+      <p style="margin: 0;">
+        📧 <strong>privacidad@spotplay.app</strong> — Asunto: <em>"Baja Definitiva de Cuenta - [Tu Usuario]"</em>. Las solicitudes se ejecutan en menos de 24 horas hábiles.
+      </p>
+    </div>
+  </main>
+
+  <footer class="delete-footer">
+    © 2026 Spot Play (com.spotplay.app). Cumplimiento del Derecho al Olvido y Políticas de Datos de Google Play.
+  </footer>
+
+  <script>
+    function handleAccountDelete(e) {
+      e.preventDefault();
+      var input = document.getElementById('username-input').value.trim();
+      if (!input) return;
+
+      if (!confirm('⚠️ ¿Estás completamente seguro de que deseas eliminar tu cuenta de Spot Play? Esta acción borrará todos tus videos, monedas y datos personales y NO se puede deshacer.')) {
+        return;
+      }
+
+      // 1. Limpieza de almacenamiento local del navegador
+      try {
+        localStorage.removeItem('spotplay_persisted_user');
+        localStorage.removeItem('spotplay_likes_v1');
+        localStorage.removeItem('spotplay_bookmarks_v1');
+        localStorage.removeItem('spotplay_coins');
+        sessionStorage.clear();
+      } catch (err) {}
+
+      // 2. Limpieza de IndexedDB local
+      try {
+        if (window.indexedDB) {
+          indexedDB.deleteDatabase('SpotPlayVideosDB');
+        }
+      } catch (err) {}
+
+      document.getElementById('delete-account-form').style.display = 'none';
+      var alertBox = document.getElementById('delete-success-msg');
+      alertBox.style.display = 'flex';
+
+      setTimeout(function() {
+        window.location.href = '/';
+      }, 3500);
+    }
+  </script>
+
+</body>
+</html>

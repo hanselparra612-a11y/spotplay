@@ -1,0 +1,293 @@
+// Capa de persistencia en LocalStorage para guardar cambios offline y mantener datos
+import { INITIAL_VIDEOS, CURRENT_USER, SEED_CREATORS_MAP } from '../data/mockVideos.js';
+
+const VIDEOS_STORAGE_KEY = 'spotplay_videos_v2';
+const USER_STORAGE_KEY = 'spotplay_user_v2';
+const ORDERS_STORAGE_KEY = 'spotplay_orders_v2';
+const BOOKMARKS_STORAGE_KEY = 'spotplay_bookmarks_v2';
+const LIKES_STORAGE_KEY = 'spotplay_likes_v2';
+const REPORTS_STORAGE_KEY = 'spotplay_reports_v1';
+const BLOCKED_USERS_STORAGE_KEY = 'spotplay_blocked_users_v1';
+
+// Claves legadas para migración transparente sin pérdida de datos
+const LEGACY_VIDEOS_KEY = 'toktik_videos_1986_v2';
+const LEGACY_USER_KEY = 'toktik_user_1986_v2';
+const LEGACY_ORDERS_KEY = 'toktik_orders_1986_v1';
+
+export const INITIAL_SAMPLE_ORDERS = [
+  {
+    orderId: 'DIR-849201',
+    productName: 'Chaqueta Streetwear Rompevientos',
+    storeName: 'Urban Streetwear SAS',
+    storeCity: 'Medellín',
+    storeWhatsapp: '573105558899',
+    selectedSize: 'M',
+    selectedColor: 'Negro Puro',
+    quantity: 1,
+    status: 'WHATSAPP_CONTACTED', // Contactado por WhatsApp
+    totalPaid: 159000,
+    commissionPercent: 10,
+    commissionEarned: 15900,
+    creatorUsername: 'carolina_style',
+    date: 'Hoy',
+    type: 'DIRECT_SHOWCASE',
+  },
+  {
+    orderId: 'DIR-739102',
+    productName: 'Combo Burger Master Doble Carne + Papas',
+    storeName: 'Burger Master Artesanal',
+    storeCity: 'Medellín',
+    storeWhatsapp: '573147772211',
+    selectedSize: 'Individual',
+    selectedColor: 'Salsa Especial',
+    quantity: 2,
+    status: 'DELIVERED', // Entregado a satisfacción
+    totalPaid: 64000,
+    commissionPercent: 8,
+    commissionEarned: 5120,
+    creatorUsername: 'valeria_fit',
+    date: 'Ayer',
+    type: 'DIRECT_SHOWCASE',
+  },
+];
+
+export function loadPersistedOrders() {
+  try {
+    const raw = localStorage.getItem(ORDERS_STORAGE_KEY) || localStorage.getItem(LEGACY_ORDERS_KEY);
+    if (!raw) return INITIAL_SAMPLE_ORDERS;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_SAMPLE_ORDERS;
+  } catch (err) {
+    return INITIAL_SAMPLE_ORDERS;
+  }
+}
+
+export function savePersistedOrders(orders) {
+  try {
+    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
+  } catch (err) {
+    console.warn('Error al guardar pedidos:', err);
+  }
+}
+
+export function loadPersistedBookmarks() {
+  try {
+    const raw = localStorage.getItem(BOOKMARKS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export function savePersistedBookmarks(bookmarkIds) {
+  try {
+    localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(bookmarkIds));
+  } catch (err) {
+    console.warn('Error al guardar favoritos en localStorage:', err);
+  }
+}
+
+export function loadPersistedLikes() {
+  try {
+    const raw = localStorage.getItem(LIKES_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export function savePersistedLikes(likedIds) {
+  try {
+    localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(likedIds));
+  } catch (err) {
+    console.warn('Error al guardar likes en localStorage:', err);
+  }
+}
+
+export function loadPersistedVideos() {
+  try {
+    const raw = localStorage.getItem(VIDEOS_STORAGE_KEY);
+    const bookmarkedIds = new Set(loadPersistedBookmarks());
+    const likedIds = new Set(loadPersistedLikes());
+    let list = INITIAL_VIDEOS;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const cleaned = Array.isArray(parsed)
+        ? parsed.filter((v) => !v.videoUrl || !v.videoUrl.startsWith('blob:'))
+        : [];
+      if (cleaned.length > 0) {
+        // 🚀 Asegurar que todos los videos semilla de INITIAL_VIDEOS estén presentes en el feed
+        const existingIds = new Set(cleaned.map((v) => v.id));
+        const missingSeeds = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id));
+        const combined = [...cleaned, ...missingSeeds];
+
+        // 🚀 Migración experta: Si los videos semilla tienen autor legado 'me' o 'nuevo_creador',
+        // restaurar automáticamente su creador oficial independiente (Sofia, Valeria, Carlos, etc.)
+        list = combined.map((v) => {
+          const seedCreator = SEED_CREATORS_MAP[v.id];
+          if (
+            seedCreator &&
+            (!v.author ||
+              v.author?.id === 'me' ||
+              v.author?.username === 'nuevo_creador' ||
+              v.author?.name === 'Mi Perfil Creador')
+          ) {
+            return {
+              ...v,
+              author: seedCreator,
+            };
+          }
+          return v;
+        });
+      }
+    }
+    return list.map((v) => {
+      const { product, isPromoted, promotedCta, ...cleanVid } = v;
+      return {
+        ...cleanVid,
+        isBookmarked: bookmarkedIds.has(v.id) || Boolean(v.isBookmarked),
+        isLiked: likedIds.has(v.id) || Boolean(v.isLiked),
+        hasUserGifted: Boolean(v.hasUserGifted),
+        stats: {
+          ...v.stats,
+          likes: typeof v.stats?.likes === 'number' ? v.stats.likes : 0,
+          bookmarks: typeof v.stats?.bookmarks === 'number' ? v.stats.bookmarks : 0,
+          giftsCount: typeof v.stats?.giftsCount === 'number' ? v.stats.giftsCount : 0,
+        },
+        comments: (v.comments || []).map((c) => ({
+          ...c,
+          text: typeof c.text === 'string'
+            ? c.text.replace(/por Coordinadora/gi, 'por WhatsApp a la tienda').replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play')
+            : c.text,
+        })),
+        tags: Array.isArray(v.tags) ? v.tags.map((t) => (t === 'videospot' ? 'spotplay' : t)) : v.tags,
+      };
+    });
+  } catch (err) {
+    console.warn('Error al leer videos de localStorage:', err);
+    return INITIAL_VIDEOS;
+  }
+}
+
+export function savePersistedVideos(videos) {
+  try {
+    // No persistir URLs efímeras de blobs ni datos de productos/tiendas en localStorage
+    const serializableVideos = (videos || [])
+      .filter((v) => !v.videoUrl || !v.videoUrl.startsWith('blob:'))
+      .map(({ product, isPromoted, promotedCta, ...cleanVid }) => cleanVid);
+    localStorage.setItem(VIDEOS_STORAGE_KEY, JSON.stringify(serializableVideos));
+
+    // Sincronización transparente con el servidor central para celular y PC
+    if (serializableVideos.length > 0) {
+      serializableVideos.slice(0, 10).forEach((vid) => {
+        if (vid.isUserUploaded || vid.id.startsWith('uploaded-') || vid.author?.id === 'me') {
+          fetch('/api/videos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(vid),
+          }).catch(() => {});
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Error al guardar videos en localStorage:', err);
+  }
+}
+
+export function loadPersistedUser() {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    if (!raw) return CURRENT_USER;
+    const parsed = JSON.parse(raw);
+    const rawTransactions =
+      parsed.wallet?.transactions && parsed.wallet.transactions.length > 0
+        ? parsed.wallet.transactions
+        : CURRENT_USER.wallet.transactions;
+
+    // Limpieza estricta de campos COP obsoletos y unificación 100% en SpotCoins
+    const cleanWallet = {
+      coins: typeof parsed.wallet?.coins === 'number' ? parsed.wallet.coins : CURRENT_USER.wallet.coins,
+      totalGiftsReceivedCoins:
+        typeof parsed.wallet?.totalGiftsReceivedCoins === 'number'
+          ? parsed.wallet.totalGiftsReceivedCoins
+          : CURRENT_USER.wallet.totalGiftsReceivedCoins,
+      adMobRewardsWatched:
+        typeof parsed.wallet?.adMobRewardsWatched === 'number'
+          ? parsed.wallet.adMobRewardsWatched
+          : CURRENT_USER.wallet.adMobRewardsWatched,
+      transactions: rawTransactions.map((tx) => ({
+        ...tx,
+        coins: tx.coins || (tx.amount ? Math.round(tx.amount / 50) : 5),
+        subtitle: typeof tx.subtitle === 'string' ? tx.subtitle.replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play') : tx.subtitle,
+      })),
+    };
+
+    const isRealAvatar = parsed.avatar && typeof parsed.avatar === 'string' && parsed.avatar.startsWith('data:image');
+    return {
+      ...CURRENT_USER,
+      ...parsed,
+      avatar: isRealAvatar ? parsed.avatar : CURRENT_USER.avatar,
+      bio: typeof parsed.bio === 'string' ? parsed.bio.replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play') : CURRENT_USER.bio,
+      wallet: cleanWallet,
+      receivedGifts:
+        parsed.receivedGifts && parsed.receivedGifts.length > 0
+          ? parsed.receivedGifts
+          : CURRENT_USER.receivedGifts || [],
+    };
+  } catch (err) {
+    return CURRENT_USER;
+  }
+}
+
+export function savePersistedUser(user) {
+  try {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+
+    // Sincronizar el perfil con el servidor compartido
+    if (user && user.id && user.id !== 'guest') {
+      fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      }).catch(() => {});
+    }
+  } catch (err) {
+    console.warn('Error al guardar usuario en localStorage:', err);
+  }
+}
+
+// 🛡️ Moderación y Denuncias de la Comunidad (Obligatorio Google Play & AdMob)
+export function loadPersistedReports() {
+  try {
+    const raw = localStorage.getItem(REPORTS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export function savePersistedReports(reports) {
+  try {
+    localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
+  } catch (err) {
+    console.warn('Error al guardar denuncias en localStorage:', err);
+  }
+}
+
+export function loadPersistedBlockedUsers() {
+  try {
+    const raw = localStorage.getItem(BLOCKED_USERS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export function savePersistedBlockedUsers(blockedList) {
+  try {
+    localStorage.setItem(BLOCKED_USERS_STORAGE_KEY, JSON.stringify(blockedList));
+  } catch (err) {
+    console.warn('Error al guardar usuarios bloqueados en localStorage:', err);
+  }
+}
+

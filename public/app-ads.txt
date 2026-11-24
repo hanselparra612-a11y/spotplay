@@ -1,0 +1,5 @@
+# Google AdMob Authorized Digital Sellers (app-ads.txt)
+# Spot Play - Videos Cortos, En Vivos & Vitrina Comercial
+# Paquete Android: com.spotplay.app
+# Cuando tengas tu ID de Editor oficial en Google AdMob (pub-xxxxxxxxxxxxxxxx), reemplázalo aquí.
+google.com, pub-3940256099942544, DIRECT, f08c47fec0942fa0
