@@ -67,7 +67,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialRegis
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/10">
           <div className="flex items-center gap-2">
             <div className="w-6.5 h-5 rounded-md bg-gradient-to-tr from-[#ffb800] to-[#ffa000] flex items-center justify-center shadow-sm shrink-0">
-              <Play size={9} className="fill-black text-black ml-0.5" />
+              <Play size={9} className="fill-white text-white ml-0.5" />
             </div>
             <h2 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
               <span>Spot <span className="text-[#ffb800]">Play</span></span>
@@ -92,7 +92,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialRegis
           <div className="text-center py-2">
             <div className="flex items-center justify-center gap-2.5 mb-2">
               <div className="w-9 h-7 rounded-lg bg-gradient-to-tr from-[#ffb800] to-[#ffa000] flex items-center justify-center shadow-md shadow-[#ffb800]/20 shrink-0">
-                <Play size={12} className="fill-black text-black ml-0.5" />
+                <Play size={12} className="fill-white text-white ml-0.5" />
               </div>
               <span className="text-2xl font-black tracking-tight text-white select-none">
                 Spot <span className="text-[#ffb800]">Play</span>

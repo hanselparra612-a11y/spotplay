@@ -109,7 +109,7 @@ export default function PwaInstallBanner() {
             <div className="relative shrink-0">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#ffe28a] via-[#ffb800] to-[#ff9500] blur-sm opacity-75 animate-pulse" />
               <div className="relative w-10 h-10 rounded-[13px] bg-gradient-to-b from-[#fff5d0] via-[#ffb800] to-[#b45309] flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.85),inset_0_2px_3px_rgba(255,255,255,0.95)] border border-white/60">
-                <Play size={16} className="fill-black text-black ml-0.5 filter drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)]" />
+                <Play size={16} className="fill-white text-white ml-0.5 filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]" />
               </div>
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-[8px] font-black text-white border border-black shadow-md animate-bounce">
                 ★
