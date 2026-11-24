@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ExternalLink, RefreshCw, ShoppingBag, ShieldCheck } from 'lucide-react';
 
-export default function VitrinaView({ currentUser, onBack }) {
+export default function VitrinaView({ currentUser, onBack, openStore = false }) {
   const [isLoading, setIsLoading] = useState(true);
   const [iframeKey, setIframeKey] = useState(1);
   const iframeRef = useRef(null);
 
-  // Escuchar mensajes nativos de VitrinaSpot (ej: retorno al feed)
+  // Escuchar mensajes nativos de Vitrina (ej: retorno al feed)
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data && event.data.type === 'SPOTPLAY_NAVIGATE') {
@@ -19,31 +19,46 @@ export default function VitrinaView({ currentUser, onBack }) {
     return () => window.removeEventListener('message', handleMessage);
   }, [onBack]);
 
-  // Catálogo comercial integrado en el mismo origen (0ms latencia, sin bloqueos cross-origin)
-  const baseUrl = '/vitrinaspot/index.html';
+  // Temporizador de seguridad para ocultar spinner si la carga tarda más de 3.5 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [iframeKey]);
+
+  // Detección de entorno: Render producción vs Desarrollo local
+  const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const baseUrl = isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/';
   const externalUrl = 'https://vitrinaspot.onrender.com/';
+
   const params = new URLSearchParams();
-  params.set('v', '27.7');
+  params.set('v', '28.1');
   if (typeof window !== 'undefined') {
     params.set('spotplay_origin', window.location.origin);
   }
+
+  // Si se solicita abrir la tienda del usuario directamente (ej. desde Perfil)
+  if (openStore) {
+    params.set('open_store', '1');
+  }
+
   // SSO Automático: si el usuario está autenticado en Spot Play, lo identificamos en la Vitrina
   if (currentUser && currentUser.id && currentUser.id !== 'guest') {
     params.set('sso', '1');
     params.set('uid', currentUser.id);
     params.set('name', currentUser.name || currentUser.username || '');
-    params.set('avatar', currentUser.avatar || '');
+    // Jamás pasar base64 en la URL para evitar errores 414 de URL demasiado larga
+    if (currentUser.avatar && !currentUser.avatar.startsWith('data:') && currentUser.avatar.length < 300) {
+      params.set('avatar', currentUser.avatar);
+    }
     params.set('email', currentUser.email || '');
   }
 
   const vitrinaUrl = `${baseUrl}?${params.toString()}`;
 
   const handleOpenExternal = () => {
-    const fullParams = new URLSearchParams(params.toString());
-    if (typeof window !== 'undefined') {
-      fullParams.set('spotplay_origin', window.location.origin);
-    }
-    window.open(`${externalUrl}?${fullParams.toString()}`, '_blank');
+    window.open(`${externalUrl}?${params.toString()}`, '_blank');
   };
 
   const handleRefresh = () => {
@@ -71,7 +86,7 @@ export default function VitrinaView({ currentUser, onBack }) {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#0c0f14] z-20 pb-[72px]">
+    <div className="relative w-full h-full flex flex-col bg-[#0c0f14] z-20 pb-[64px]">
       {/* Barra Superior de Navegación del Ecosistema */}
       <header className="flex items-center justify-between px-3.5 py-2.5 bg-[#0c0f14]/95 backdrop-blur-md border-b border-white/10 shrink-0 select-none">
         <button
@@ -116,7 +131,7 @@ export default function VitrinaView({ currentUser, onBack }) {
       </header>
 
       {/* Indicador de Seguridad y Pedidos al Chat Directo */}
-      <div className="px-3 py-1 bg-emerald-950/40 border-b border-emerald-500/20 flex items-center justify-between text-[10px] text-emerald-400">
+      <div className="px-3 py-1 bg-emerald-950/40 border-b border-emerald-500/20 flex items-center justify-between text-[10px] text-emerald-400 shrink-0">
         <div className="flex items-center gap-1">
           <ShieldCheck size={12} />
           <span>Catálogo Directo • Pedidos al Chat Directo</span>
@@ -125,7 +140,7 @@ export default function VitrinaView({ currentUser, onBack }) {
       </div>
 
       {/* Contenedor del Iframe / Webview */}
-      <div className="relative flex-1 w-full h-full overflow-hidden bg-[#0c0f14]">
+      <div className="relative flex-1 w-full min-h-0 overflow-hidden bg-[#0c0f14]">
         {isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#0c0f14] z-10">
             <div className="w-10 h-10 border-3 border-[#ffb800]/20 border-t-[#ffb800] rounded-full animate-spin" />

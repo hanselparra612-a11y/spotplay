@@ -153,6 +153,7 @@ export default function App() {
   });
   const [currentUser, setCurrentUser] = useState(loadPersistedUser);
   const [currentTab, setCurrentTab] = useState('feed'); // 'feed' | 'explore' | 'inbox' | 'profile'
+  const [vitrinaOpenStore, setVitrinaOpenStore] = useState(false);
   const [feedFilter, setFeedFilter] = useState('foryou'); // 'foryou' | 'following'
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
@@ -1755,7 +1756,10 @@ export default function App() {
             onOpenCreatorProfile={handleOpenCreatorOrMyProfile}
             onEditVideo={handleOpenEditVideo}
             onOpenInbox={() => setCurrentTab('inbox')}
-            onOpenVitrina={() => setCurrentTab('vitrina')}
+            onOpenVitrina={() => {
+              setVitrinaOpenStore(true);
+              setCurrentTab('vitrina');
+            }}
           />
         )}
 
@@ -1765,6 +1769,7 @@ export default function App() {
             <VitrinaView
               currentUser={currentUser}
               onBack={() => setCurrentTab('feed')}
+              openStore={vitrinaOpenStore}
             />
           </Suspense>
         )}
@@ -1809,6 +1814,7 @@ export default function App() {
           activeTab={currentTab}
           onSelectTab={(tab) => {
             if (tab === 'profile') setProfileInitialTab('videos');
+            if (tab === 'vitrina') setVitrinaOpenStore(false);
             if (tab === 'feed' && currentTab === 'feed') {
               handleShuffleFeed();
             }
@@ -1828,6 +1834,7 @@ export default function App() {
           }}
           onSellProduct={() => {
             setIsCreateMenuOpen(false);
+            setVitrinaOpenStore(true);
             setCurrentTab('vitrina');
           }}
           onUploadVideo={() => {
