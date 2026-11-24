@@ -47,8 +47,11 @@ export default function HeaderNav({
           className="h-8 flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform focus:outline-none shrink-0"
           title="Spot Play"
         >
-          <div className="w-7.5 h-7.5 rounded-[9px] bg-gradient-to-b from-[#ffe28a] via-[#ffb800] to-[#c97500] flex items-center justify-center shadow-[0_0_12px_rgba(255,184,0,0.55)] border border-white/40 shrink-0">
-            <Play size={12} className="fill-white text-white ml-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]" />
+          <div className="relative shrink-0">
+            <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-[#ffe28a] via-[#ffb800] to-[#ff9500] blur-[4px] opacity-75 animate-pulse" />
+            <div className="relative w-7.5 h-7.5 rounded-[10px] bg-gradient-to-b from-[#fff5d0] via-[#ffb800] to-[#b45309] flex items-center justify-center shadow-[0_0_15px_rgba(255,184,0,0.85),inset_0_1.5px_2px_rgba(255,255,255,0.95)] border border-white/60 shrink-0">
+              <Play size={12} className="fill-black text-black ml-0.5 filter drop-shadow-[0_1px_1px_rgba(255,255,255,0.5)]" />
+            </div>
           </div>
           <span className="text-[15px] font-black tracking-tight leading-none text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] select-none whitespace-nowrap">
             Spot <span className="text-[#ffb800]">Play</span>

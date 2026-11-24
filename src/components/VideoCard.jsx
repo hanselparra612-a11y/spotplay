@@ -382,14 +382,23 @@ function VideoCard({
         </div>
       )}
 
-      {/* Paused Overlay Icon */}
+      {/* Paused Overlay Icon - Resplandeciente y Profesional VIP */}
       {!isPlaying && (
         <div
           onClick={handleVideoClick}
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 animate-in zoom-in-75 fade-in duration-200"
         >
-          <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center shadow-2xl">
-            <Play size={32} className="text-white ml-1 fill-white" />
+          <div className="relative flex items-center justify-center">
+            {/* Halo resplandeciente exterior pulsante */}
+            <div className="absolute w-28 h-28 rounded-full bg-gradient-to-tr from-[#ffb800]/40 via-[#ffa000]/25 to-transparent blur-2xl animate-pulse pointer-events-none" />
+
+            {/* Anillo de cristal translúcido con reflejo especular */}
+            <div className="relative w-20 h-20 rounded-full bg-black/50 backdrop-blur-2xl border border-white/35 flex items-center justify-center shadow-[0_0_35px_rgba(255,184,0,0.55),0_12px_40px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.45)] transition-all">
+              {/* Botón Central Dorado Metálico Resplandeciente */}
+              <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-[#d97706] via-[#ffb800] to-[#fff3c4] flex items-center justify-center shadow-[0_0_24px_rgba(255,184,0,0.95),inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(180,83,9,0.5)] border border-white/60">
+                <Play size={25} className="text-black fill-black ml-1 filter drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)]" />
+              </div>
+            </div>
           </div>
         </div>
       )}

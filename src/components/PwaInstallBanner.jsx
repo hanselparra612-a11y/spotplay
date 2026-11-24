@@ -107,10 +107,11 @@ export default function PwaInstallBanner() {
         <div className="fixed bottom-16 inset-x-3.5 z-40 max-w-md mx-auto bg-gradient-to-r from-zinc-900/95 via-black/95 to-zinc-900/95 backdrop-blur-xl border border-amber-400/40 rounded-2xl p-3 shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(251,191,36,0.25)] flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-300">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="relative shrink-0">
-              <div className="w-10 h-9 rounded-[11px] bg-gradient-to-b from-[#ffe28a] via-[#ffb800] to-[#c97500] flex items-center justify-center shadow-[0_0_16px_rgba(255,184,0,0.6)] border border-white/40">
-                <Play size={15} className="fill-white text-white ml-0.5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]" />
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#ffe28a] via-[#ffb800] to-[#ff9500] blur-sm opacity-75 animate-pulse" />
+              <div className="relative w-10 h-10 rounded-[13px] bg-gradient-to-b from-[#fff5d0] via-[#ffb800] to-[#b45309] flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.85),inset_0_2px_3px_rgba(255,255,255,0.95)] border border-white/60">
+                <Play size={16} className="fill-black text-black ml-0.5 filter drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)]" />
               </div>
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-[8px] font-black text-white border border-black animate-pulse">
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-600 rounded-full flex items-center justify-center text-[8px] font-black text-white border border-black shadow-md animate-bounce">
                 ★
               </span>
             </div>

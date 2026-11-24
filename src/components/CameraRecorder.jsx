@@ -705,10 +705,15 @@ export default function CameraRecorder({ isOpen, onClose, onFinishRecording }) {
             {!isPreviewPlaying && (
               <div
                 onClick={togglePreviewPlayPause}
-                className="absolute inset-0 flex items-center justify-center bg-black/25 cursor-pointer z-10"
+                className="absolute inset-0 flex items-center justify-center bg-black/25 cursor-pointer z-10 animate-in zoom-in-75 fade-in duration-150"
               >
-                <div className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-2xl animate-in zoom-in-75 duration-150">
-                  <Play size={28} className="ml-1 fill-white" />
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute w-24 h-24 rounded-full bg-gradient-to-tr from-[#ffb800]/40 via-[#ffa000]/25 to-transparent blur-xl animate-pulse pointer-events-none" />
+                  <div className="relative w-18 h-18 rounded-full bg-black/50 backdrop-blur-2xl border border-white/35 flex items-center justify-center shadow-[0_0_30px_rgba(255,184,0,0.5),0_10px_30px_rgba(0,0,0,0.85)]">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#d97706] via-[#ffb800] to-[#fff3c4] flex items-center justify-center shadow-[0_0_20px_rgba(255,184,0,0.9),inset_0_2px_4px_rgba(255,255,255,0.9)] border border-white/60">
+                      <Play size={22} className="text-black fill-black ml-1 filter drop-shadow-[0_1px_2px_rgba(255,255,255,0.6)]" />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
