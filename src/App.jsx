@@ -279,14 +279,28 @@ export default function App() {
           const rawServerVideos = await res.json();
           if (Array.isArray(rawServerVideos) && rawServerVideos.length > 0) {
             const serverVideos = rawServerVideos.map((v) => {
-              const seedCreator = SEED_CREATORS_MAP[v.id];
               if (
-                seedCreator &&
-                (v.author?.id === 'me' ||
-                  v.author?.username === 'nuevo_creador' ||
-                  v.author?.name === 'Mi Perfil Creador')
+                !v.author ||
+                v.author?.id === 'me' ||
+                v.author?.username === 'nuevo_creador' ||
+                v.author?.name === 'Mi Perfil Creador' ||
+                (v.author?.id && (v.author.id.startsWith('creator-') || v.author.id.startsWith('google-'))) ||
+                v.author?.name !== 'Leonardo'
               ) {
-                return { ...v, author: seedCreator };
+                return {
+                  ...v,
+                  author: {
+                    id: 'user-1794726360816',
+                    name: 'Leonardo',
+                    username: 'Leonardo',
+                    avatar: v.author?.avatar?.startsWith('data:image') ? v.author.avatar : (v.author?.avatar || '/default-avatar.png'),
+                    isVerified: true,
+                    isFollowing: false,
+                    followersCount: 0,
+                    followingCount: 0,
+                    likesCount: 0,
+                  },
+                };
               }
               return v;
             });
@@ -836,11 +850,14 @@ export default function App() {
     setVideos((prev) => {
       const updated = prev.map((v) => {
         if (v.author?.id === authorId || (authorUsername && v.author?.username === authorUsername)) {
+          const currentFollowers = typeof v.author?.followersCount === 'number' ? v.author.followersCount : 0;
+          const nextFollowers = nextFollowingState ? currentFollowers + 1 : Math.max(0, currentFollowers - 1);
           return {
             ...v,
             author: {
               ...v.author,
               isFollowing: nextFollowingState,
+              followersCount: nextFollowers,
             },
           };
         }
@@ -866,10 +883,15 @@ export default function App() {
 
     // 3. Actualizar perfil de creador si está abierto
     if (activeCreatorProfile && (activeCreatorProfile.id === authorId || activeCreatorProfile.username === authorUsername)) {
-      setActiveCreatorProfile((prev) => ({
-        ...prev,
-        isFollowing: nextFollowingState,
-      }));
+      setActiveCreatorProfile((prev) => {
+        const curFollowers = typeof prev.followersCount === 'number' ? prev.followersCount : 0;
+        const nextFollowers = nextFollowingState ? curFollowers + 1 : Math.max(0, curFollowers - 1);
+        return {
+          ...prev,
+          isFollowing: nextFollowingState,
+          followersCount: nextFollowers,
+        };
+      });
     }
 
     // 4. Actualizar contador del usuario autenticado
@@ -995,12 +1017,13 @@ export default function App() {
             updatedComments = [newCommentItem, ...(v.comments || [])];
           }
 
+          const realCount = updatedComments.reduce((acc, curr) => acc + 1 + (curr.replies?.length || 0), 0);
           const updatedVideo = {
             ...v,
             comments: updatedComments,
             stats: {
               ...v.stats,
-              comments: (v.stats?.comments || 0) + 1,
+              comments: realCount,
             },
           };
           if (activeCommentVideo && activeCommentVideo.id === videoId) {

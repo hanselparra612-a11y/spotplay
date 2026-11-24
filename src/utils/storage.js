@@ -121,20 +121,19 @@ export function loadPersistedVideos() {
         const missingSeeds = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id));
         const combined = [...cleaned, ...missingSeeds];
 
-        // 🚀 Migración experta: Si los videos semilla tienen autor legado 'me' o 'nuevo_creador',
-        // restaurar automáticamente su creador oficial independiente (Sofia, Valeria, Carlos, etc.)
+        // 🚀 Migración: Todos los perfiles de prueba quedan eliminados, dejando exclusivamente el perfil oficial de Leonardo
         list = combined.map((v) => {
-          const seedCreator = SEED_CREATORS_MAP[v.id];
           if (
-            seedCreator &&
-            (!v.author ||
-              v.author?.id === 'me' ||
-              v.author?.username === 'nuevo_creador' ||
-              v.author?.name === 'Mi Perfil Creador')
+            !v.author ||
+            v.author?.id === 'me' ||
+            v.author?.username === 'nuevo_creador' ||
+            v.author?.name === 'Mi Perfil Creador' ||
+            (v.author?.id && (v.author.id.startsWith('creator-') || v.author.id.startsWith('google-'))) ||
+            v.author?.name !== 'Leonardo'
           ) {
             return {
               ...v,
-              author: seedCreator,
+              author: CURRENT_AUTHOR,
             };
           }
           return v;
@@ -143,23 +142,59 @@ export function loadPersistedVideos() {
     }
     return list.map((v) => {
       const { product, isPromoted, promotedCta, ...cleanVid } = v;
+      const realCommentsList = (v.comments || []).map((c) => ({
+        ...c,
+        text: typeof c.text === 'string'
+          ? c.text.replace(/por Coordinadora/gi, 'por WhatsApp a la tienda').replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play')
+          : c.text,
+      }));
+      const realCommentsCount = realCommentsList.reduce(
+        (acc, curr) => acc + 1 + (curr.replies?.length || 0),
+        0
+      );
+
+      const isBookmarked = bookmarkedIds.has(v.id) || Boolean(v.isBookmarked);
+      const isLiked = likedIds.has(v.id) || Boolean(v.isLiked);
+      const hasUserGifted = Boolean(v.hasUserGifted);
+
+      // 🎯 MODO REAL ESTRICTO: Eliminar números simulados inflados (> 99) para todos los botones del riel
+      const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
+      const cleanLikes = rawLikes > 99 ? (isLiked ? 1 : 0) : rawLikes;
+
+      const rawBookmarks = typeof v.stats?.bookmarks === 'number' ? v.stats.bookmarks : 0;
+      const cleanBookmarks = rawBookmarks > 99 ? (isBookmarked ? 1 : 0) : rawBookmarks;
+
+      const rawShares = typeof v.stats?.shares === 'number' ? v.stats.shares : 0;
+      const cleanShares = rawShares > 99 ? 0 : rawShares;
+
+      const rawGifts = typeof v.stats?.giftsCount === 'number' ? v.stats.giftsCount : 0;
+      const cleanGifts = rawGifts > 99 ? (hasUserGifted ? 1 : 0) : rawGifts;
+
+      // Saneamiento de autor a Modo Real
+      const cleanAuthor = v.author
+        ? {
+            ...v.author,
+            followersCount: typeof v.author.followersCount === 'number' ? v.author.followersCount : 0,
+            followingCount: typeof v.author.followingCount === 'number' ? v.author.followingCount : 0,
+            likesCount: typeof v.author.likesCount === 'number' ? v.author.likesCount : 0,
+          }
+        : v.author;
+
       return {
         ...cleanVid,
-        isBookmarked: bookmarkedIds.has(v.id) || Boolean(v.isBookmarked),
-        isLiked: likedIds.has(v.id) || Boolean(v.isLiked),
-        hasUserGifted: Boolean(v.hasUserGifted),
+        author: cleanAuthor,
+        isBookmarked,
+        isLiked,
+        hasUserGifted,
         stats: {
           ...v.stats,
-          likes: typeof v.stats?.likes === 'number' ? v.stats.likes : 0,
-          bookmarks: typeof v.stats?.bookmarks === 'number' ? v.stats.bookmarks : 0,
-          giftsCount: typeof v.stats?.giftsCount === 'number' ? v.stats.giftsCount : 0,
+          likes: cleanLikes,
+          comments: realCommentsCount,
+          bookmarks: cleanBookmarks,
+          shares: cleanShares,
+          giftsCount: cleanGifts,
         },
-        comments: (v.comments || []).map((c) => ({
-          ...c,
-          text: typeof c.text === 'string'
-            ? c.text.replace(/por Coordinadora/gi, 'por WhatsApp a la tienda').replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play')
-            : c.text,
-        })),
+        comments: realCommentsList,
         tags: Array.isArray(v.tags) ? v.tags.map((t) => (t === 'videospot' ? 'spotplay' : t)) : v.tags,
       };
     });
@@ -223,9 +258,17 @@ export function loadPersistedUser() {
     };
 
     const isRealAvatar = parsed.avatar && typeof parsed.avatar === 'string' && parsed.avatar.startsWith('data:image');
+    const cleanFollowers = typeof parsed.followersCount === 'number' ? parsed.followersCount : 0;
+    const cleanFollowing = typeof parsed.followingCount === 'number' ? parsed.followingCount : 0;
+    const cleanLikes = typeof parsed.likesCount === 'number' ? parsed.likesCount : 0;
+
     return {
       ...CURRENT_USER,
       ...parsed,
+      followersCount: cleanFollowers,
+      followingCount: cleanFollowing,
+      baseLikesCount: 0,
+      likesCount: cleanLikes,
       avatar: isRealAvatar ? parsed.avatar : CURRENT_USER.avatar,
       bio: typeof parsed.bio === 'string' ? parsed.bio.replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play') : CURRENT_USER.bio,
       wallet: cleanWallet,

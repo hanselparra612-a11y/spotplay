@@ -663,7 +663,7 @@ function VideoCard({
           />
         </div>
 
-        {/* Comment Button */}
+        {/* Comment Button (Muestra la cantidad EXACTA Y REAL de comentarios y respuestas) */}
         <div className="flex flex-col items-center">
           <button
             onClick={(e) => {
@@ -671,11 +671,16 @@ function VideoCard({
               onOpenComments(video);
             }}
             className="w-8 h-8 flex items-center justify-center text-white hover:text-white/80 transition-transform active:scale-75"
+            title="Ver comentarios reales"
           >
             <MessageCircle size={23} className="drop-shadow-md" />
           </button>
           <span className="text-[10px] font-bold text-white drop-shadow">
-            {formatNumber(video.stats.comments)}
+            {formatNumber(
+              Array.isArray(video.comments)
+                ? video.comments.reduce((acc, curr) => acc + 1 + (curr.replies?.length || 0), 0)
+                : (video.stats?.comments || 0)
+            )}
           </span>
         </div>
 
@@ -698,11 +703,11 @@ function VideoCard({
             />
           </button>
           <span className={`text-[10px] font-bold drop-shadow ${video.hasUserGifted ? 'text-[#FE2C55]' : 'text-white'}`}>
-            {formatNumber(video.stats.giftsCount || 140)}
+            {formatNumber(video.stats?.giftsCount || 0)}
           </span>
         </div>
 
-        {/* Bookmark Button (Banderita / Guardar en Favoritos) */}
+        {/* Bookmark Button (Banderita / Guardar en Favoritos - Modo Real) */}
         <div className="flex flex-col items-center">
           <button
             onClick={(e) => {
@@ -710,6 +715,7 @@ function VideoCard({
               onToggleBookmark(video.id);
             }}
             className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative"
+            title="Guardar en favoritos"
           >
             <Bookmark
               size={23}
@@ -725,7 +731,7 @@ function VideoCard({
           </span>
         </div>
 
-        {/* Share Button */}
+        {/* Share Button (Compartir - Modo Real) */}
         <div className="flex flex-col items-center">
           <button
             onClick={(e) => {
@@ -733,11 +739,12 @@ function VideoCard({
               onOpenShare(video);
             }}
             className="w-8 h-8 flex items-center justify-center text-white hover:text-white/80 transition-transform active:scale-75"
+            title="Compartir"
           >
             <Share2 size={22} className="drop-shadow-md" />
           </button>
           <span className="text-[10px] font-bold text-white drop-shadow">
-            {formatNumber(video.stats.shares)}
+            {formatNumber(video.stats?.shares || 0)}
           </span>
         </div>
       </div>

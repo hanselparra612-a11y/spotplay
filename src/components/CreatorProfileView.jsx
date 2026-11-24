@@ -22,20 +22,18 @@ export default function CreatorProfileView({
     (currentUser && (creator.id === currentUser.id || creator.username === currentUser.username))
   );
 
-  // 📈 Contador General Dinámico de Likes del Creador
+  // 📈 Contador General Dinámico de Likes del Creador en Modo Real: suma exacta de likes en sus videos
   const creatorPublishedLikes = creatorVideos.reduce(
     (sum, v) => sum + (typeof v.stats?.likes === 'number' ? v.stats.likes : 0),
     0
   );
-  const totalCreatorLikes =
-    typeof creator.baseLikesCount === 'number'
-      ? creator.baseLikesCount + creatorPublishedLikes
-      : creatorPublishedLikes > 0
-      ? creatorPublishedLikes
-      : creator.likesCount || '1.8M';
+  const totalCreatorLikes = creatorPublishedLikes;
 
-  // Base de seguidores calculada en vivo
-  const followersDisplay = creator.isFollowing ? '94.3K' : '94.2K';
+  // Base de seguidores y seguidos calculada en vivo en Modo Real
+  const followersCount = typeof creator.followersCount === 'number'
+    ? creator.followersCount
+    : (creator.isFollowing ? 1 : 0);
+  const followingCount = typeof creator.followingCount === 'number' ? creator.followingCount : 0;
 
   return (
     <div className="absolute inset-0 z-40 bg-[#121316] overflow-y-auto overscroll-y-contain touch-pan-y no-scrollbar flex flex-col animate-in slide-in-from-right duration-200 text-white pb-20 select-none">
@@ -96,13 +94,13 @@ export default function CreatorProfileView({
         {/* Stats */}
         <div className="flex items-center justify-center gap-6 mb-4">
           <div>
-            <p className="text-sm font-bold text-white">{creator.followingCount ?? 214}</p>
+            <p className="text-sm font-bold text-white">{formatNumber(followingCount)}</p>
             <p className="text-[10px] text-zinc-400">Siguiendo</p>
           </div>
           <div className="w-[1px] h-5 bg-white/10" />
           <div>
             <p className="text-sm font-bold text-white">
-              {followersDisplay}
+              {formatNumber(followersCount)}
             </p>
             <p className="text-[10px] text-zinc-400">Seguidores</p>
           </div>

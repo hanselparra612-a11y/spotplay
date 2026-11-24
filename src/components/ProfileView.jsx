@@ -162,17 +162,12 @@ export default function ProfileView({
   const totalGiftsCount = receivedGifts.length;
   const totalReceivedCoins = receivedGifts.reduce((acc, g) => acc + (g.coins || 0), 0) || currentUser?.wallet?.totalGiftsReceivedCoins || 721;
 
-  // 📈 Contador General Dinámico: Suma real de todos los Me gusta recibidos en los videos publicados
+  // 📈 Contador General Dinámico en Modo Real: Suma real de todos los Me gusta recibidos en los videos publicados
   const userPublishedLikes = userVideos.reduce(
     (sum, v) => sum + (typeof v.stats?.likes === 'number' ? v.stats.likes : 0),
     0
   );
-  const totalLikesDisplay =
-    typeof currentUser.baseLikesCount === 'number'
-      ? currentUser.baseLikesCount + userPublishedLikes
-      : userPublishedLikes > 0
-      ? userPublishedLikes
-      : currentUser.likesCount || 0;
+  const totalLikesDisplay = userPublishedLikes;
 
   return (
     <div
@@ -278,7 +273,7 @@ export default function ProfileView({
           title="Ver cuentas que sigues"
         >
           <p className="text-base font-bold text-white group-hover:text-[#ffb800] transition-colors leading-tight">
-            {currentUser.followingCount ?? 142}
+            {followedCreatorsList ? followedCreatorsList.length : (typeof currentUser.followingCount === 'number' ? currentUser.followingCount : 0)}
           </p>
           <p className="text-[11px] text-zinc-400 group-hover:text-zinc-200 transition-colors flex items-center justify-center gap-0.5">
             <span>Siguiendo</span>
@@ -287,7 +282,7 @@ export default function ProfileView({
         <div className="w-[1px] h-6 bg-white/10" />
         <div>
           <p className="text-base font-bold text-white leading-tight">
-            {currentUser.followersCount || '28.4K'}
+            {typeof currentUser.followersCount === 'number' ? currentUser.followersCount : 0}
           </p>
           <p className="text-[11px] text-zinc-400">Seguidores</p>
         </div>

@@ -608,7 +608,7 @@ export default function AdminMasterDashboard({
                           </div>
                         </div>
                         <span className="text-[11px] font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
-                          {cr.followersCount || '50K'} seg. ✨
+                          {cr.followersCount || 0} seg. ✨
                         </span>
                       </div>
                     ))}
