@@ -72,14 +72,14 @@ export default function HeaderNav({
 
       {/* 2. Lado Derecho: [Crear] + [Buscador] */}
       <div className="flex items-center gap-2 pointer-events-auto z-10">
-        {/* Botón Crear (Cápsula Dorada VIP) */}
+        {/* Botón Crear (Cápsula Dorada VIP con Letras Blancas) */}
         <button
           onClick={onOpenCreateMenu}
-          className="h-7.5 px-3 rounded-full bg-gradient-to-r from-[#ffe28a] via-[#ffb800] to-[#d97706] flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,184,0,0.55)] border border-white/40 active:scale-95 hover:brightness-105 transition-all cursor-pointer shrink-0"
+          className="h-7.5 px-3 rounded-full bg-gradient-to-r from-[#b45309] via-[#d97706] to-[#92400e] flex items-center gap-1.5 shadow-[0_0_15px_rgba(255,184,0,0.5)] border border-amber-300/60 active:scale-95 hover:brightness-110 transition-all cursor-pointer shrink-0"
           title="Crear SPOT o publicar video"
         >
-          <Video size={13} strokeWidth={2.4} className="text-black" />
-          <span className="text-xs font-black tracking-wider text-black uppercase">Crear</span>
+          <Video size={13} strokeWidth={2.4} className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]" />
+          <span className="text-xs font-black tracking-wider text-white uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">Crear</span>
         </button>
 
         {/* Botón Buscador */}
