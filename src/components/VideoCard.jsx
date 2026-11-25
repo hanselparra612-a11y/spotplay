@@ -9,8 +9,7 @@ import {
   Check,
   Volume2,
   VolumeX,
-  Play,
-  Zap,
+    Zap,
   Gift,
   ArrowRight,
   Sparkles,
@@ -375,28 +374,6 @@ function VideoCard({
         <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-400 text-xs font-black animate-pulse border border-amber-400/30">
           <Zap size={14} className="fill-amber-400" />
           <span>VELOCIDAD 2X</span>
-        </div>
-      )}
-
-      {/* Paused Overlay Icon - Blanco Resplandeciente y Profesional VIP */}
-      {!isPlaying && (
-        <div
-          onClick={handleVideoClick}
-          className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 animate-in zoom-in-75 fade-in duration-200"
-        >
-          <div className="relative flex items-center justify-center">
-            {/* Halo de luz blanca resplandeciente exterior */}
-            <div className="absolute w-28 h-28 rounded-full bg-gradient-to-tr from-white/25 via-white/10 to-transparent blur-2xl animate-pulse pointer-events-none" />
-
-            {/* Anillo de cristal translúcido esmerilado */}
-            <div className="relative w-20 h-20 rounded-full bg-black/45 backdrop-blur-2xl border border-white/45 flex items-center justify-center shadow-[0_0_35px_rgba(255,255,255,0.4),0_12px_40px_rgba(0,0,0,0.85),inset_0_1.5px_3px_rgba(255,255,255,0.6)]">
-              {/* Ícono de Play Blanco Resplandeciente */}
-              <Play
-                size={36}
-                className="text-white fill-white ml-1 filter drop-shadow-[0_0_14px_rgba(255,255,255,0.95)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]"
-              />
-            </div>
-          </div>
         </div>
       )}
 
