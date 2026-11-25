@@ -27,6 +27,7 @@ import {
   ShoppingBag,
   ShieldCheck,
   Trash2,
+  Smartphone,
 } from 'lucide-react';
 import { formatNumber } from '../utils/format';
 
@@ -798,6 +799,28 @@ export default function ProfileView({
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+              </button>
+
+              {/* Botón PWA Oficial: Instalar en Celular */}
+              <button
+                onClick={() => {
+                  setIsMenuDrawerOpen(false);
+                  window.dispatchEvent(new CustomEvent('spotplay_trigger_install'));
+                }}
+                className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent hover:from-amber-500/30 border border-amber-500/40 flex items-center justify-between transition-all cursor-pointer group active:scale-98 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-[#ffb800] flex items-center justify-center border border-amber-500/30 shrink-0">
+                    <Smartphone size={18} />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs font-bold text-white block flex items-center gap-1.5">
+                      Instalar Spot Play <span className="text-[9px] bg-[#ffb800] text-black font-extrabold px-1.5 py-0.5 rounded-full uppercase">App</span>
+                    </span>
+                    <span className="text-[10px] text-zinc-300">Pantalla completa en tu celular</span>
+                  </div>
+                </div>
+                <ChevronRight size={16} className="text-[#ffb800] group-hover:translate-x-0.5 transition-all shrink-0" />
               </button>
 
               {/* 5. Política de Privacidad & AdMob */}

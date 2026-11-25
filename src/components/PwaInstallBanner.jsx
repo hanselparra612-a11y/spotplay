@@ -45,6 +45,11 @@ export default function PwaInstallBanner() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    const handleExternalTrigger = () => {
+      handleInstallClick();
+    };
+    window.addEventListener('spotplay_trigger_install', handleExternalTrigger);
+
     // Si pasaron 3 segundos en Android y no se ha mostrado aún y no se ha cerrado:
     const timer = setTimeout(() => {
       const dismissed = localStorage.getItem('spotplay_pwa_dismissed');
@@ -56,9 +61,10 @@ export default function PwaInstallBanner() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('spotplay_trigger_install', handleExternalTrigger);
       clearTimeout(timer);
     };
-  }, []);
+  }, [deferredPrompt, isIOS]);
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
