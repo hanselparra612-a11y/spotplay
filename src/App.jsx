@@ -358,12 +358,19 @@ export default function App() {
                 }
                 return v;
               });
-            setVideos((prev) => {
-              const serverIds = new Set(serverVideos.map((v) => v.id));
-              const prevFiltered = prev.filter((v) => !serverIds.has(v.id));
-              const combined = [...serverVideos, ...prevFiltered];
+            // 🎯 El servidor es la única fuente oficial de verdad:
+            // Ordenar de más reciente a más antiguo según el timestamp numérico
+            const sortedServerVideos = [...serverVideos].sort((a, b) => {
+              const numA = parseInt(a.id?.replace(/\D/g, '') || '0', 10);
+              const numB = parseInt(b.id?.replace(/\D/g, '') || '0', 10);
+              return numB - numA;
+            });
+
+            setVideos(() => {
               // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales
-              const sanitized = combined.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => v);
+              const sanitized = sortedServerVideos.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => v);
+              // Guardar lista oficial autoritativa en localStorage
+              savePersistedVideos(sanitized);
               // 🎲 Aplicar métricas de visualización intercaladas con el catálogo completo del servidor
               const freshIds = generateShuffledFeed(sanitized);
               setFeedSequence(freshIds.map((id, idx) => ({ id, instanceKey: `${id}-c0-${idx}` })));

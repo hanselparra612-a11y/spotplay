@@ -213,24 +213,17 @@ export function loadPersistedVideos() {
 
 export function savePersistedVideos(videos) {
   try {
-    // No persistir URLs efímeras de blobs ni datos de productos/tiendas en localStorage
+    // No persistir URLs efímeras de blobs ni avatares gigantes en base64 para evitar QuotaExceededError
     const serializableVideos = (videos || [])
       .filter((v) => !v.videoUrl || !v.videoUrl.startsWith('blob:'))
-      .map(({ product, isPromoted, promotedCta, ...cleanVid }) => cleanVid);
-    localStorage.setItem(VIDEOS_STORAGE_KEY, JSON.stringify(serializableVideos));
-
-    // Sincronización transparente con el servidor central para celular y PC
-    if (serializableVideos.length > 0) {
-      serializableVideos.slice(0, 10).forEach((vid) => {
-        if (vid.isUserUploaded || vid.id.startsWith('uploaded-') || vid.author?.id === 'me') {
-          fetch('/api/videos', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(vid),
-          }).catch(() => {});
+      .map(({ product, isPromoted, promotedCta, ...cleanVid }) => {
+        let cleanAuthor = cleanVid.author;
+        if (cleanAuthor && typeof cleanAuthor.avatar === 'string' && cleanAuthor.avatar.startsWith('data:image')) {
+          cleanAuthor = { ...cleanAuthor, avatar: '/default-avatar.png' };
         }
+        return { ...cleanVid, author: cleanAuthor };
       });
-    }
+    localStorage.setItem(VIDEOS_STORAGE_KEY, JSON.stringify(serializableVideos));
   } catch (err) {
     console.warn('Error al guardar videos en localStorage:', err);
   }

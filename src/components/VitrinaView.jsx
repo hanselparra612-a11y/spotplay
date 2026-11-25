@@ -65,7 +65,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   const externalUrl = isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/');
 
   const params = new URLSearchParams();
-  params.set('v', '28.2');
+  params.set('v', '28.5');
   if (typeof window !== 'undefined') {
     params.set('spotplay_origin', window.location.origin);
   }
