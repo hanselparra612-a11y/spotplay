@@ -332,7 +332,7 @@ function VideoCard({
         src={shouldMountMedia ? videoSrc : undefined}
         poster={video.cover || video.thumbnail || undefined}
         className="w-full h-full object-cover cursor-pointer"
-        autoPlay
+        autoPlay={isActive}
         playsInline
         webkit-playsinline="true"
         loop

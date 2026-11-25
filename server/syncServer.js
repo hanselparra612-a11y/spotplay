@@ -151,16 +151,22 @@ const server = http.createServer((req, res) => {
             : payload.videoBase64.replace(/^data:video\/[^;]+;base64,/, '');
           fs.writeFileSync(filePath, Buffer.from(rawBase64, 'base64'));
 
-          // Optimización instantánea con FFmpeg (+faststart) para mover metadatos moov al inicio
+          // Transcodificación y optimización web ultra-fluida con FFmpeg (+faststart)
           try {
-            const tmpPath = filePath + '.fast.mp4';
-            execSync(`ffmpeg -i "${filePath}" -c copy -movflags +faststart "${tmpPath}" -y`, { stdio: 'ignore' });
+            const tmpPath = filePath + '.opt.mp4';
+            const stat = fs.statSync(filePath);
+            // Si el video supera 8 MB, transcodificar a 720p / 2.5 Mbps H.264 para reproducción fluida sin pausas
+            const ffmpegCmd = stat.size > 8 * 1024 * 1024
+              ? `ffmpeg -i "${filePath}" -c:v libx264 -preset veryfast -crf 24 -maxrate 2800k -bufsize 5600k -pix_fmt yuv420p -vf "scale='min(720,iw)':-2" -c:a aac -b:a 128k -movflags +faststart "${tmpPath}" -y`
+              : `ffmpeg -i "${filePath}" -c copy -movflags +faststart "${tmpPath}" -y`;
+
+            execSync(ffmpegCmd, { stdio: 'ignore', timeout: 60000 });
             if (fs.existsSync(tmpPath) && fs.statSync(tmpPath).size > 0) {
               fs.unlinkSync(filePath);
               fs.renameSync(tmpPath, filePath);
             }
           } catch (e) {
-            console.warn('FFmpeg faststart warning:', e.message);
+            console.warn('FFmpeg transcoding warning (fallback activo):', e.message);
           }
 
           finalVideoUrl = `/uploads/videos/${videoFileName}`;

@@ -1737,11 +1737,11 @@ export default function App() {
                       preloadMode={
                         activeVideoIndex === index
                           ? 'auto'
-                          : Math.abs(activeVideoIndex - index) === 1
-                          ? 'metadata'
-                          : 'none'
+                          : Math.abs(activeVideoIndex - index) <= 1
+                          ? 'auto'
+                          : 'metadata'
                       }
-                      shouldMountMedia={Math.abs(activeVideoIndex - index) <= 1}
+                      shouldMountMedia={Math.abs(activeVideoIndex - index) <= 2}
                       isMuted={isMuted}
                       onToggleMute={() => setIsMuted((prev) => !prev)}
                       onToggleLike={handleToggleLike}
