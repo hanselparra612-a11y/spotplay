@@ -352,11 +352,7 @@ function VideoCard({
         onClick={handleVideoClick}
         onError={(err) => {
           setIsBuffering(false);
-          console.warn('Playback error or skip on video:', video.id, err);
-          if (videoSrc && !videoSrc.includes('sample1.mp4') && !videoSrc.startsWith('data:')) {
-            console.log('🔄 Autorecuperación: cargando video fallback para', video.id);
-            setVideoSrc('/videos/sample1.mp4');
-          }
+          console.warn('Playback error on video:', video.id, err);
         }}
         onEnded={() => {
           const vid = videoRef.current;
@@ -631,7 +627,7 @@ function VideoCard({
                 onToggleLike(video.id);
               }
             }}
-            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 text-[#ffb800] hover:text-[#ffe28a]"
+            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 text-white hover:text-white/80"
           >
             {activeReactionEmoji ? (
               <span className="text-2xl animate-bounce">{activeReactionEmoji}</span>
@@ -641,7 +637,7 @@ function VideoCard({
                 className={`transition-colors drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.2] ${
                   video.isLiked
                     ? 'fill-[#FE2C55] text-[#FE2C55] scale-110 animate-bounce drop-shadow-[0_0_12px_rgba(254,44,85,0.7)]'
-                    : 'text-[#ffb800] hover:text-[#ffe28a]'
+                    : 'text-white hover:text-white/80'
                 }`}
               />
             )}
@@ -680,7 +676,7 @@ function VideoCard({
               e.stopPropagation();
               onOpenComments(video);
             }}
-            className="w-8 h-8 flex items-center justify-center text-[#ffb800] hover:text-[#ffe28a] transition-transform active:scale-75"
+            className="w-8 h-8 flex items-center justify-center text-white hover:text-white/80 transition-transform active:scale-75"
             title="Ver comentarios reales"
           >
             <MessageCircle size={23} className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.3]" />
@@ -701,14 +697,14 @@ function VideoCard({
               e.stopPropagation();
               onOpenGifts(video.author);
             }}
-            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-[#ffb800] hover:text-[#ffe28a]"
+            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-white hover:text-white/80"
           >
             <Gift
               size={23}
               className={`drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] transition-all duration-300 stroke-[2.2] ${
                 video.hasUserGifted
                   ? 'text-[#FE2C55] fill-[#FE2C55] scale-110 drop-shadow-[0_0_12px_rgba(254,44,85,0.85)]'
-                  : 'text-[#ffb800] hover:text-[#ffe28a]'
+                  : 'text-white hover:text-white/80'
               }`}
             />
           </button>
@@ -724,7 +720,7 @@ function VideoCard({
               e.stopPropagation();
               onToggleBookmark(video.id);
             }}
-            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-[#ffb800] hover:text-[#ffe28a]"
+            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-white hover:text-white/80"
             title="Guardar en favoritos"
           >
             <Bookmark
@@ -732,7 +728,7 @@ function VideoCard({
               className={`transition-all duration-300 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.2] ${
                 video.isBookmarked
                   ? 'fill-[#ffb800] text-[#ffb800] scale-110 drop-shadow-[0_0_10px_rgba(255,184,0,0.75)]'
-                  : 'text-[#ffb800] hover:text-[#ffe28a]'
+                  : 'text-white hover:text-white/80'
               }`}
             />
           </button>
@@ -748,7 +744,7 @@ function VideoCard({
               e.stopPropagation();
               onOpenShare(video);
             }}
-            className="w-8 h-8 flex items-center justify-center text-[#ffb800] hover:text-[#ffe28a] transition-transform active:scale-75"
+            className="w-8 h-8 flex items-center justify-center text-white hover:text-white/80 transition-transform active:scale-75"
             title="Compartir"
           >
             <Share2 size={22} className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.3]" />

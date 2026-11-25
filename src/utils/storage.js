@@ -2,21 +2,20 @@
 import { INITIAL_VIDEOS, CURRENT_USER, SEED_CREATORS_MAP } from '../data/mockVideos.js';
 
 // Purga forzada de caché para eliminar perfiles y videos de prueba antiguos en el navegador del usuario
-const PURGE_KEY = 'spotplay_purge_v6_clean_owner_only';
+const PURGE_KEY = 'spotplay_purge_v7_clean_real_only';
 if (typeof window !== 'undefined' && localStorage.getItem(PURGE_KEY) !== 'done') {
   try {
     localStorage.removeItem('spotplay_videos_v1');
     localStorage.removeItem('spotplay_videos_v2');
+    localStorage.removeItem('spotplay_videos_v3');
     localStorage.removeItem('spotplay_videos_offline_v2');
     localStorage.removeItem('spotplay_followed_creator_ids_v1');
     localStorage.removeItem('toktik_videos_1986_v2');
-    localStorage.removeItem('spotplay_bookmarks_v2');
-    localStorage.removeItem('spotplay_likes_v2');
     localStorage.setItem(PURGE_KEY, 'done');
   } catch (e) {}
 }
 
-const VIDEOS_STORAGE_KEY = 'spotplay_videos_v2';
+const VIDEOS_STORAGE_KEY = 'spotplay_videos_v3';
 const USER_STORAGE_KEY = 'spotplay_user_v2';
 const ORDERS_STORAGE_KEY = 'spotplay_orders_v2';
 const BOOKMARKS_STORAGE_KEY = 'spotplay_bookmarks_v2';

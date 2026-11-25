@@ -212,7 +212,7 @@ export const INITIAL_VIDEOS = [
     },
     "isUserUploaded": true,
     "videoUrl": "/uploads/videos/video-1795566356158-f523n3.mp4",
-    "createdAt": "2026-11-25T05:06:57.458Z",
+    "createdAt": "2026-11-25T05:19:28.650Z",
     "isBookmarked": false,
     "isLiked": false,
     "hasUserGifted": false,
@@ -262,7 +262,7 @@ export const INITIAL_VIDEOS = [
     "isLiked": true,
     "isBookmarked": false,
     "comments": [],
-    "createdAt": "2026-11-25T05:06:57.780Z",
+    "createdAt": "2026-11-25T05:19:34.393Z",
     "hasUserGifted": false
   },
   {
@@ -302,7 +302,7 @@ export const INITIAL_VIDEOS = [
     "isLiked": true,
     "isBookmarked": false,
     "comments": [],
-    "createdAt": "2026-11-25T05:06:58.044Z",
+    "createdAt": "2026-11-25T05:19:30.262Z",
     "hasUserGifted": false
   },
   {
@@ -341,7 +341,7 @@ export const INITIAL_VIDEOS = [
     "isLiked": true,
     "isBookmarked": false,
     "comments": [],
-    "createdAt": "2026-11-25T05:06:56.616Z",
+    "createdAt": "2026-11-25T05:19:32.393Z",
     "hasUserGifted": false
   }
 ];

@@ -125,6 +125,21 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const payload = JSON.parse(body);
+
+        // 🚫 Bloqueo permanente de videos de prueba / anime descartados
+        const BANNED_IDS = new Set([
+          'uploaded-1795217678569',
+          'uploaded-1795070804756',
+          'uploaded-1795070474294',
+          'uploaded-1795070274259',
+          'uploaded-1795069901259'
+        ]);
+        if (BANNED_IDS.has(payload.id)) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, reason: 'Banned test video' }));
+          return;
+        }
+
         let finalVideoUrl = payload.videoUrl;
 
         // Si el video viene en base64 (grabado desde la cámara o subido desde galería)
