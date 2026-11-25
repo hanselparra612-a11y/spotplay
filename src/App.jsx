@@ -1508,31 +1508,42 @@ export default function App() {
     );
   };
 
-  // 🔴 Handle Live Stream Finished
-  const handleFinishLive = ({ earnedCOP, giftsCount }) => {
-    if (earnedCOP > 0) {
+  // 🔴 Handle Live Stream Finished (Calibrado Google AdMob & SpotCoins)
+  const handleFinishLive = ({ totalCoins = 0, giftCoins = 0, admobCoins = 0, earnedCOP = 0, giftsCount = 0, viewers = 0 }) => {
+    const coinsToAdd = totalCoins > 0 ? totalCoins : Math.round(earnedCOP / 100);
+    if (coinsToAdd > 0 || earnedCOP > 0) {
       setCurrentUser((prev) => {
-        const currentTransactions = prev.wallet?.transactions || [];
+        const prevWallet = prev?.wallet || {};
+        const prevCoins = typeof prevWallet.coins === 'number' ? prevWallet.coins : 140;
+        const prevTotalReceived = typeof prevWallet.totalGiftsReceivedCoins === 'number' ? prevWallet.totalGiftsReceivedCoins : 721;
+        const currentTransactions = prevWallet.transactions || [];
+
         const newTx = {
           id: `tx-live-${Date.now()}`,
           type: 'LIVE_GIFT',
-          title: `Ganancia en LIVE (${giftsCount || 1} regalos)`,
-          subtitle: `Monetización de transmisión en vivo`,
-          amount: earnedCOP,
+          title: `Ganancia en LIVE (+${coinsToAdd} SpotCoins)`,
+          subtitle: `${giftsCount} regalos de audiencia • Bono AdMob (${viewers} espectadores)`,
+          coins: coinsToAdd,
+          amount: earnedCOP || coinsToAdd * 100,
           status: 'COMPLETED',
-          date: 'Hoy',
+          date: 'Justo ahora',
           icon: 'gift',
         };
 
-        return {
+        const updatedUser = {
           ...prev,
           wallet: {
-            ...prev.wallet,
-            balanceCOP: (prev.wallet?.balanceCOP || 0) + earnedCOP,
-            giftEarningsCOP: (prev.wallet?.giftEarningsCOP || 0) + earnedCOP,
+            ...prevWallet,
+            coins: prevCoins + coinsToAdd,
+            totalGiftsReceivedCoins: prevTotalReceived + (giftCoins || coinsToAdd),
+            balanceCOP: (prevWallet.balanceCOP || 0) + (earnedCOP || coinsToAdd * 100),
+            giftEarningsCOP: (prevWallet.giftEarningsCOP || 0) + (earnedCOP || coinsToAdd * 100),
             transactions: [newTx, ...currentTransactions],
           },
         };
+
+        savePersistedUser(updatedUser);
+        return updatedUser;
       });
     }
   };

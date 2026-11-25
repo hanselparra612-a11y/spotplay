@@ -27,6 +27,9 @@ import {
   Clock,
   Timer,
   AlertTriangle,
+  Coins,
+  ShieldCheck,
+  Tv,
 } from 'lucide-react';
 import { formatNumber, formatCOP } from '../utils/format';
 import { loadPlatformSettings } from '../services/adminSettingsService';
@@ -42,10 +45,11 @@ const SIMULATED_VIEWER_COMMENTS = [
 ];
 
 const SIMULATED_GIFTS = [
-  { name: 'Rosa Virtual', emoji: '🌹', valueCOP: 2000 },
-  { name: 'Café Colombiano', emoji: '☕', valueCOP: 5000 },
-  { name: 'Fuego Épico', emoji: '🔥', valueCOP: 12000 },
-  { name: 'Corona Real', emoji: '👑', valueCOP: 30000 },
+  { id: 'gift-rose', name: 'Rosa Roja', emoji: '🌹', coins: 1, valueCOP: 100 },
+  { id: 'gift-coffee', name: 'Café Energético', emoji: '☕', coins: 5, valueCOP: 500 },
+  { id: 'gift-fire', name: 'Fuego Viral', emoji: '🔥', coins: 20, valueCOP: 2000 },
+  { id: 'gift-crown', name: 'Corona Dorada', emoji: '👑', coins: 100, valueCOP: 10000 },
+  { id: 'gift-lion', name: 'León de Oro', emoji: '🦁', coins: 500, valueCOP: 50000 },
 ];
 
 export default function LiveStreamModal({
@@ -60,11 +64,14 @@ export default function LiveStreamModal({
   const [viewers, setViewers] = useState(142);
   const [liveSeconds, setLiveSeconds] = useState(0);
   const [comments, setComments] = useState([]);
-  const [earnedCOP, setEarnedCOP] = useState(0);
+  const [earnedGiftCoins, setEarnedGiftCoins] = useState(0);
+  const [admobBonusCoins, setAdmobBonusCoins] = useState(0);
   const [giftsReceivedCount, setGiftsReceivedCount] = useState(0);
   const [currentGiftPopup, setCurrentGiftPopup] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   const [cameraError, setCameraError] = useState(null);
+
+  const totalLiveCoins = earnedGiftCoins + admobBonusCoins;
 
   // ⏱️ Reglas de Tiempo, Límite por Sesión y Sensor Anti-Fantasmas
   const [platformSettings, setPlatformSettings] = useState(loadPlatformSettings);
@@ -202,7 +209,8 @@ export default function LiveStreamModal({
     setPlatformSettings(settings);
     setShowSummary(false);
     setLiveSeconds(0);
-    setEarnedCOP(0);
+    setEarnedGiftCoins(0);
+    setAdmobBonusCoins(0);
     setGiftsReceivedCount(0);
     setViewers(Math.floor(Math.random() * 80) + 120);
     setComments([
@@ -266,9 +274,11 @@ export default function LiveStreamModal({
       });
     }, 1000);
 
-    // Simulación de interacción en vivo (espectadores, comentarios y regalos entrantes)
+    // Simulación de interacción en vivo (espectadores, comentarios, regalos y bono AdMob)
     let commentIndex = 0;
+    let ticks = 0;
     simulationIntervalRef.current = setInterval(() => {
+      ticks++;
       // 1. Variar espectadores
       setViewers((prev) => Math.max(80, prev + Math.floor(Math.random() * 7) - 3));
 
@@ -279,18 +289,30 @@ export default function LiveStreamModal({
         commentIndex++;
       }
 
-      // 3. Regalo virtual sorpresa ocasional
-      if (Math.random() > 0.65) {
-        const randomGift = SIMULATED_GIFTS[Math.floor(Math.random() * SIMULATED_GIFTS.length)];
+      // 3. Bono AdMob por Audiencia Activa (telemetría publicitaria Play Store)
+      if (ticks % 3 === 0) {
+        const bonus = Math.floor(Math.random() * 3) + 2; // +2 a +4 SpotCoins por exposición AdMob
+        setAdmobBonusCoins((prev) => prev + bonus);
+      }
+
+      // 4. Regalo virtual sorpresa ocasional de seguidores
+      if (Math.random() > 0.55) {
+        const rand = Math.random();
+        let selectedGift = SIMULATED_GIFTS[0]; // Rosa (1 coin)
+        if (rand > 0.94) selectedGift = SIMULATED_GIFTS[4]; // León (500 coins)
+        else if (rand > 0.82) selectedGift = SIMULATED_GIFTS[3]; // Corona (100 coins)
+        else if (rand > 0.55) selectedGift = SIMULATED_GIFTS[2]; // Fuego (20 coins)
+        else if (rand > 0.25) selectedGift = SIMULATED_GIFTS[1]; // Café (5 coins)
+
         const randomSender = SIMULATED_VIEWER_COMMENTS[Math.floor(Math.random() * SIMULATED_VIEWER_COMMENTS.length)].user;
 
         setCurrentGiftPopup({
           sender: randomSender,
-          gift: randomGift,
+          gift: selectedGift,
         });
 
         recordActivity();
-        setEarnedCOP((prev) => prev + randomGift.valueCOP);
+        setEarnedGiftCoins((prev) => prev + selectedGift.coins);
         setGiftsReceivedCount((prev) => prev + 1);
 
         // Incrementar Combo de Regalos (x2, x3, x5)
@@ -372,7 +394,10 @@ export default function LiveStreamModal({
     if (onFinishLive) {
       onFinishLive({
         seconds: liveSeconds,
-        earnedCOP,
+        totalCoins: totalLiveCoins,
+        giftCoins: earnedGiftCoins,
+        admobCoins: admobBonusCoins,
+        earnedCOP: totalLiveCoins * 100,
         giftsCount: giftsReceivedCount,
         viewers,
       });
@@ -587,10 +612,11 @@ export default function LiveStreamModal({
             <span>{formatNumber(viewers)}</span>
           </div>
 
-          {/* Ganancias COP acumuladas en vivo */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-400/40 text-amber-300 text-xs font-bold">
-            <Gift size={13} className="text-amber-400" />
-            <span>${(earnedCOP / 1000).toFixed(0)}k</span>
+          {/* Ganancias SpotCoins acumuladas en vivo (Calibrado AdMob) */}
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-600/25 backdrop-blur-md border border-amber-400/50 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(255,184,0,0.25)] animate-in fade-in">
+            <Coins size={14} className="text-amber-400 fill-amber-400" />
+            <span className="font-mono">+{totalLiveCoins}</span>
+            <span className="text-[10px] text-amber-400/80 uppercase font-bold tracking-tight">Coins</span>
           </div>
 
           {/* Botón Finalizar */}
@@ -656,8 +682,9 @@ export default function LiveStreamModal({
             <p className="text-xs font-black text-amber-300">
               ¡@{currentGiftPopup.sender} te envió {currentGiftPopup.gift.name}!
             </p>
-            <p className="text-[10px] text-green-400 font-bold">
-              +${currentGiftPopup.gift.valueCOP.toLocaleString('es-CO')} COP a tu billetera
+            <p className="text-[10px] text-emerald-400 font-extrabold flex items-center gap-1">
+              <span>+{currentGiftPopup.gift.coins} SpotCoins</span>
+              <span className="text-zinc-400">• Red Google AdMob</span>
             </p>
           </div>
         </div>
@@ -765,19 +792,25 @@ export default function LiveStreamModal({
       </footer>
 
 
-      {/* 📊 RESUMEN POST-TRANSMISIÓN MODAL */}
+      {/* 📊 RESUMEN POST-TRANSMISIÓN MODAL (CALIBRADO GOOGLE ADMOB & PLAY STORE) */}
       {showSummary && (
-        <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 animate-in zoom-in-95 duration-200">
-          <div className="w-full max-w-sm rounded-3xl bg-[#14151b] border border-white/15 p-6 text-center text-white shadow-2xl">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#FE2C55] to-amber-500 mx-auto flex items-center justify-center shadow-lg mb-4">
-              <Award size={32} className="text-white" />
+        <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 animate-in zoom-in-95 duration-200 overflow-y-auto">
+          <div className="w-full max-w-sm rounded-3xl bg-gradient-to-b from-[#181c26] via-[#12151d] to-[#0c0e14] border border-amber-400/40 p-5 text-center text-white shadow-[0_0_50px_rgba(255,184,0,0.18)]">
+            
+            {/* Header Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-[#ffb800] to-yellow-300 mx-auto flex items-center justify-center shadow-[0_0_25px_rgba(255,184,0,0.4)] mb-3">
+              <Award size={32} className="text-black stroke-[2.5]" />
             </div>
 
-            <h3 className="text-lg font-black tracking-wide">¡Transmisión Finalizada!</h3>
+            <h3 className="text-lg font-black tracking-wide text-white">¡Transmisión Finalizada!</h3>
+            <p className="text-[11px] text-zinc-400 mt-0.5">
+              Calibración oficial según métricas de Google AdMob & Play Store
+            </p>
 
+            {/* Aviso por límite de tiempo o inactividad si aplica */}
             {finishReason === 'time_limit' && (
               <div className="mt-2 mb-1 p-2.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-300 text-[11px] font-bold text-center leading-snug">
-                ⏰ Sesión completada con éxito ({platformSettings.maxLiveDurationMinutes || 45} min alcanzados). Tu audiencia fue redirigida al feed con anuncios. ¡Puedes iniciar una "Segunda Parte" cuando desees!
+                ⏰ Sesión completada con éxito ({platformSettings.maxLiveDurationMinutes || 45} min alcanzados). Tu audiencia fue redirigida al feed. ¡Puedes iniciar una "Segunda Parte" cuando desees!
               </div>
             )}
 
@@ -787,47 +820,109 @@ export default function LiveStreamModal({
               </div>
             )}
 
-            <p className="text-xs text-zinc-400 mt-1">
-              Aquí está el resumen del impacto de tu directo:
-            </p>
+            {/* 🪙 HERO: MEDIDOR PRINCIPAL DE SPOTCOINS GANADAS */}
+            <div className="my-4 p-4 rounded-2xl bg-gradient-to-b from-amber-500/20 via-[#1a202c]/60 to-black/80 border-2 border-amber-400/60 shadow-[0_0_30px_rgba(255,184,0,0.25)] relative overflow-hidden">
+              <div className="flex items-center justify-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-400 mb-1">
+                <Coins size={14} className="fill-amber-400" />
+                <span>Total Ganado en este Live</span>
+              </div>
+              
+              <div className="flex items-center justify-center gap-2 my-1">
+                <span className="text-3xl font-black text-white font-mono tracking-tight drop-shadow-md">
+                  +{totalLiveCoins.toLocaleString('es-CO')}
+                </span>
+                <span className="text-base font-black text-amber-400 flex items-center gap-1">
+                  🪙 SpotCoins
+                </span>
+              </div>
 
-            {/* Métricas destacadas */}
-            <div className="grid grid-cols-2 gap-3 my-5">
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center">
-                <span className="text-xs text-zinc-400">Tiempo en Vivo</span>
-                <span className="text-base font-black text-cyan-400 mt-0.5 font-mono">
+              <div className="flex items-center justify-center gap-2 pt-1 border-t border-white/10 text-[10px] text-zinc-300">
+                <span className="text-emerald-400 font-bold">Valor Estimado AdMob:</span>
+                <strong className="text-white">~${(totalLiveCoins * 100).toLocaleString('es-CO')} COP</strong>
+                <span className="text-zinc-500">|</span>
+                <span className="text-zinc-400 font-mono">~${((totalLiveCoins * 100) / 3304).toFixed(2)} USD</span>
+              </div>
+            </div>
+
+            {/* 📊 DESGLOSE CALIBRADO DE MÉTRICAS ADMOB */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {/* Regalos de la Audiencia */}
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center">
+                <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
+                  <Gift size={11} className="text-amber-400" />
+                  Regalos Audiencia
+                </span>
+                <span className="text-sm font-black text-amber-300 mt-0.5 font-mono">
+                  +{earnedGiftCoins} 🪙
+                </span>
+                <span className="text-[9px] text-zinc-400 mt-0.5">
+                  {giftsReceivedCount} {giftsReceivedCount === 1 ? 'regalo recibido' : 'regalos recibidos'}
+                </span>
+              </div>
+
+              {/* Bono AdMob por Audiencia Activa */}
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center">
+                <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
+                  <Tv size={11} className="text-cyan-400" />
+                  Bono AdMob LIVE
+                </span>
+                <span className="text-sm font-black text-cyan-300 mt-0.5 font-mono">
+                  +{admobBonusCoins} 🪙
+                </span>
+                <span className="text-[9px] text-zinc-400 mt-0.5">
+                  {viewers} espectadores activos
+                </span>
+              </div>
+
+              {/* Tiempo Transmitido */}
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center">
+                <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
+                  <Clock size={11} className="text-purple-400" />
+                  Tiempo en Vivo
+                </span>
+                <span className="text-sm font-black text-purple-300 mt-0.5 font-mono">
                   {formatTimer(liveSeconds)}
                 </span>
+                <span className="text-[9px] text-zinc-400 mt-0.5">
+                  Sesión continuada
+                </span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center">
-                <span className="text-xs text-zinc-400">Pico Audiencia</span>
-                <span className="text-base font-black text-purple-400 mt-0.5">
+
+              {/* Pico de Audiencia */}
+              <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center">
+                <span className="text-[10px] font-bold text-zinc-400 flex items-center gap-1">
+                  <Eye size={11} className="text-emerald-400" />
+                  Pico Audiencia
+                </span>
+                <span className="text-sm font-black text-emerald-300 mt-0.5 font-mono">
                   {formatNumber(viewers)}
                 </span>
-              </div>
-              <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center">
-                <span className="text-xs text-zinc-400">Regalos</span>
-                <span className="text-base font-black text-amber-400 mt-0.5">
-                  {giftsReceivedCount} 🎁
-                </span>
-              </div>
-              <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex flex-col items-center">
-                <span className="text-xs text-emerald-400">Ganancias LIVE</span>
-                <span className="text-base font-black text-emerald-300 mt-0.5">
-                  +${earnedCOP.toLocaleString('es-CO')}
+                <span className="text-[9px] text-zinc-400 mt-0.5">
+                  Usuarios alcanzados
                 </span>
               </div>
             </div>
 
-            <p className="text-[11px] text-zinc-400 mb-5">
-              Tus ganancias de regalos virtuales fueron acreditadas automáticamente a tu Billetera de Creador (retirable a Nequi).
-            </p>
+            {/* 🛡️ SELLO OFICIAL GOOGLE ADMOB PLAY STORE COMPLIANT */}
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2 text-left mb-4">
+              <ShieldCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+              <div className="leading-tight">
+                <span className="text-[10px] font-black text-emerald-300 block uppercase tracking-wide">
+                  100% Google Play Store Compliant
+                </span>
+                <span className="text-[9px] text-zinc-300 block mt-0.5">
+                  Monetización generada por la red Google AdMob. Libre de pasarelas de pago externas. Las SpotCoins se acreditan directamente a tu Billetera SpotPlay.
+                </span>
+              </div>
+            </div>
 
+            {/* BOTÓN ACREDITAR Y SALIR */}
             <button
               onClick={handleConfirmFinish}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-[#FE2C55] hover:opacity-95 text-white font-bold text-sm shadow-xl active:scale-95 transition-all"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 via-[#ffb800] to-yellow-500 hover:brightness-110 text-black font-black text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(255,184,0,0.35)] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              Acreditar a mi Billetera y Salir
+              <Coins size={15} className="fill-black" />
+              <span>Acreditar +{totalLiveCoins} SpotCoins a mi Billetera y Salir</span>
             </button>
           </div>
         </div>

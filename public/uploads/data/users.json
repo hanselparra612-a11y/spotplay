@@ -10,10 +10,21 @@
     "baseLikesCount": 0,
     "likesCount": 0,
     "wallet": {
-      "coins": 145,
-      "totalGiftsReceivedCoins": 721,
+      "coins": 276,
+      "totalGiftsReceivedCoins": 851,
       "adMobRewardsWatched": 28,
       "transactions": [
+        {
+          "id": "tx-live-1795606999733",
+          "type": "LIVE_GIFT",
+          "title": "Ganancia en LIVE (+136 SpotCoins)",
+          "subtitle": "4 regalos de audiencia • Bono AdMob (139 espectadores)",
+          "coins": 136,
+          "amount": 13600,
+          "status": "COMPLETED",
+          "date": "Justo ahora",
+          "icon": "gift"
+        },
         {
           "id": "tx-1",
           "type": "VIDEO_GIFT",
@@ -74,7 +85,9 @@
           "date": "Hoy",
           "icon": "admob"
         }
-      ]
+      ],
+      "balanceCOP": 13600,
+      "giftEarningsCOP": 13600
     },
     "receivedGifts": [
       {
