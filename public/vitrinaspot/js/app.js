@@ -424,37 +424,22 @@ function renderDynamicPlansUI() {
 
   if (c1) {
     c1.setAttribute('data-price', '0');
+    c1.classList.remove('plan-free-locked');
     const prEl = c1.querySelector('.plan-price');
     const bEl = c1.querySelector('.plan-badge-pill');
     const dEl = c1.querySelector('.plan-desc');
     const iconEl = c1.querySelector('.plan-icon');
 
-    if (isLocked) {
-      c1.classList.add('plan-free-locked');
-      if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-lock" style="color: #ef4444;"></i>';
-      if (prEl) prEl.innerHTML = '<span style="color:#ef4444; font-weight:800; text-decoration:line-through;">100% GRATIS</span> <small style="font-size:0.75rem; color:#ef4444; font-weight:800;">(CUPO LLENO)</small>';
-      if (bEl) {
-        bEl.className = 'plan-badge-pill plan-lock-badge-pill';
-        bEl.innerHTML = `<i class="fa-solid fa-lock"></i> LÍMITE (${storeCount}/${freeQuota})`;
-        bEl.style.background = '';
-        bEl.style.color = '';
-      }
-      if (dEl) {
-        dEl.innerHTML = `<strong style="color:#ef4444;">🔒 Límite de spots alcanzado (${storeCount}/${freeQuota}).</strong> Has completado tu cupo de spots gratuitos.`;
-      }
-    } else {
-      c1.classList.remove('plan-free-locked');
-      if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-gift text-gold"></i>';
-      if (prEl) prEl.innerHTML = '<span style="color:#00ff88; font-weight:800;">100% GRATIS</span> <small style="font-size:0.75rem; color:#00ff88;">(CARRUSEL DE FOTOS)</small>';
-      if (bEl) {
-        bEl.className = 'plan-badge-pill';
-        bEl.textContent = `${freeRem > 0 ? freeRem + ' DE ' + freeQuota + ' GRATIS' : freeQuota + ' SPOTS GRATIS'}`;
-        bEl.style.background = 'linear-gradient(135deg, var(--wa-green), #00c853)';
-        bEl.style.color = '#000';
-      }
-      if (dEl) {
-        dEl.textContent = `Tus primeros ${freeQuota} spots con carrusel de hasta 7 fotos son totalmente gratis. Disponibles: ${freeRem} spots.`;
-      }
+    if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-gift text-gold"></i>';
+    if (prEl) prEl.innerHTML = '<span style="color:#00ff88; font-weight:800;">100% GRATIS</span> <small style="font-size:0.75rem; color:#00ff88;">(HASTA 7 FOTOS)</small>';
+    if (bEl) {
+      bEl.className = 'plan-badge-pill';
+      bEl.textContent = 'PUBLICACIONES ILIMITADAS · $0 COP';
+      bEl.style.background = 'linear-gradient(135deg, var(--wa-green), #00c853)';
+      bEl.style.color = '#000';
+    }
+    if (dEl) {
+      dEl.textContent = 'Publica tus productos con hasta 7 fotos en alta definición y contacto directo a WhatsApp sin costo.';
     }
   }
 
@@ -498,37 +483,22 @@ function refreshUploadMembershipUI() {
   }
 
   if (c1) {
+    c1.classList.remove('plan-free-locked');
     const prEl = c1.querySelector('.plan-price');
     const bgPill = c1.querySelector('.plan-badge-pill');
     const dEl = c1.querySelector('.plan-desc');
     const iconEl = c1.querySelector('.plan-icon');
 
-    if (isLocked) {
-      c1.classList.add('plan-free-locked');
-      if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-lock" style="color: #ef4444;"></i>';
-      if (prEl) prEl.innerHTML = '<span style="color:#ef4444; font-weight:800; text-decoration:line-through;">$0 COP</span> <small style="font-size:0.75rem; color:#ef4444; font-weight:800;">(BLOQUEADO)</small>';
-      if (bgPill) {
-        bgPill.className = 'plan-badge-pill plan-lock-badge-pill';
-        bgPill.innerHTML = `<i class="fa-solid fa-lock"></i> BLOQUEADO (${storeCount}/${freeQuota})`;
-        bgPill.style.background = '';
-        bgPill.style.color = '';
-      }
-      if (dEl) {
-        dEl.innerHTML = `<strong style="color:#ef4444;">🔒 Límite de spots alcanzado (${storeCount}/${freeQuota}).</strong> Has completado tu cupo de publicaciones gratuitas.`;
-      }
-    } else {
-      c1.classList.remove('plan-free-locked');
-      if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-gift text-gold"></i>';
-      if (prEl) prEl.innerHTML = '<span style="color:#00ff88; font-weight:800;">100% GRATIS</span> <small style="font-size:0.75rem; color:#00ff88;">(7 FOTOS)</small>';
-      if (bgPill) {
-        bgPill.className = 'plan-badge-pill';
-        bgPill.textContent = `${freeRem > 0 ? freeRem + ' DE ' + freeQuota + ' GRATIS' : freeQuota + ' SPOTS GRATIS'}`;
-        bgPill.style.background = 'linear-gradient(135deg, var(--wa-green), #00c853)';
-        bgPill.style.color = '#000';
-      }
-      if (dEl) {
-        dEl.textContent = `Tus primeros ${freeQuota} spots con 7 fotos son totalmente gratis. Disponibles: ${freeRem} spots.`;
-      }
+    if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-gift text-gold"></i>';
+    if (prEl) prEl.innerHTML = '<span style="color:#00ff88; font-weight:800;">100% GRATIS</span> <small style="font-size:0.75rem; color:#00ff88;">(HASTA 7 FOTOS)</small>';
+    if (bgPill) {
+      bgPill.className = 'plan-badge-pill';
+      bgPill.textContent = 'PUBLICACIONES ILIMITADAS · $0 COP';
+      bgPill.style.background = 'linear-gradient(135deg, var(--wa-green), #00c853)';
+      bgPill.style.color = '#000';
+    }
+    if (dEl) {
+      dEl.textContent = 'Publica tus productos con hasta 7 fotos en alta definición y contacto directo a WhatsApp sin costo.';
     }
   }
 }
@@ -1381,10 +1351,10 @@ function renderContinuousFeed() {
     if (deskPanel && window.innerWidth > 900) deskPanel.style.display = 'flex';
   }
 
-  // 0. Publicidad de Enganche de Entrada (Reel Cero Oficial de VitrinaSpot)
+  // 0. Publicidad de Enganche de Entrada (Desactivada: entrada directa a productos reales)
   const isSearchActive = Boolean(state.searchQuery && state.searchQuery.trim() !== '');
   const hasDirectSharedProduct = Boolean(state._sharedTargetVideoId);
-  const showWelcomeHook = !isSearchActive && !hasDirectSharedProduct;
+  const showWelcomeHook = false; // Opción 1: Acceso instantáneo al primer producto sin tarjeta intermedia
   const camp = state.launchCampaign || {};
 
   const welcomeHookCardHTML = showWelcomeHook ? `
@@ -3714,14 +3684,10 @@ async function openSellerPanel() {
       welcomeStatEl.innerHTML = `<span style="color:#00ff88; font-weight:800;">${myVideos.length} / ${memLimit}</span>`;
       if (welcomeStatLabel) welcomeStatLabel.textContent = 'Cupo Membresía Pro';
       if (welcomeStatIcon) welcomeStatIcon.innerHTML = '<i class="fa-solid fa-crown text-spot"></i>';
-    } else if (isQuotaFull) {
-      welcomeStatEl.innerHTML = `<span style="color:#ef4444; font-weight:800;">${freeUsed} de ${freeQuota} (Completo)</span>`;
-      if (welcomeStatLabel) welcomeStatLabel.textContent = 'Cupo Gratuito Agotado';
-      if (welcomeStatIcon) welcomeStatIcon.innerHTML = '<i class="fa-solid fa-lock" style="color:#ef4444;"></i>';
     } else {
-      welcomeStatEl.innerHTML = `<span style="color:#00ff88; font-weight:800;">${freeUsed} de ${freeQuota} usados</span>`;
-      if (welcomeStatLabel) welcomeStatLabel.textContent = `Spots Gratuitos (${freeRem} disponibles)`;
-      if (welcomeStatIcon) welcomeStatIcon.innerHTML = '<i class="fa-solid fa-gift text-gold"></i>';
+      welcomeStatEl.innerHTML = `<span style="color:#00ff88; font-weight:800;">${myVideos.length} activos</span>`;
+      if (welcomeStatLabel) welcomeStatLabel.textContent = 'Publicaciones Ilimitadas ($0 COP)';
+      if (welcomeStatIcon) welcomeStatIcon.innerHTML = '<i class="fa-solid fa-infinity text-gold"></i>';
     }
   }
 
@@ -4094,14 +4060,13 @@ function openAdminPortal() {
 }
 
 function updateAdminQuotaHelperUI(quotaVal) {
-  const q = Number(quotaVal) || 100;
   const helperVal = document.getElementById('adm-helper-quota-val');
-  if (helperVal) helperVal.textContent = q;
+  if (helperVal) helperVal.textContent = 'Ilimitadas';
   const headerVal = document.getElementById('adm-header-quota-val');
-  if (headerVal) headerVal.textContent = `${q} SPOTS GRATIS`;
+  if (headerVal) headerVal.textContent = `PUBLICACIONES ILIMITADAS ($0 COP)`;
   const headerDesc = document.getElementById('adm-pricing-header-desc');
   if (headerDesc) {
-    headerDesc.innerHTML = `Como Administrador, calibra aquí el cupo gratuito por tienda y la frecuencia publicitaria en el feed. Cada comercio cuenta con <strong>${q} SPOTS 100% GRATIS</strong> con carrusel permanente de fotos. El feed opera en modalidad <strong>100% ORGÁNICA Y DEMOCRÁTICA</strong> financiado pasivamente con <strong>Google AdMob</strong>.`;
+    headerDesc.innerHTML = `Plataforma de catálogo con <strong>PUBLICACIONES ILIMITADAS 100% GRATIS</strong> para todos los comercios. El feed opera en modalidad <strong>100% ORGÁNICA Y DEMOCRÁTICA</strong> financiado pasivamente con <strong>Google AdMob</strong>.`;
   }
 }
 
@@ -4131,7 +4096,6 @@ async function loadAdminMetrics() {
       state.admobConfig = Object.assign(state.admobConfig || {}, admob);
 
       const freeQuotaVal = prc.free_spots_quota || 100;
-      if (document.getElementById('adm-quota-free-spots')) document.getElementById('adm-quota-free-spots').value = freeQuotaVal;
       updateAdminQuotaHelperUI(freeQuotaVal);
 
       if (document.getElementById('adm-admob-feed-freq')) {
@@ -5776,12 +5740,7 @@ function setupEventListeners() {
         state.currentStore.hasMembership &&
         (!state.currentStore.membershipExpiresAt || new Date(state.currentStore.membershipExpiresAt) > new Date())
       );
-      if (!isMemActive && storeCount >= freeQuota) {
-        updatePlanSelection('spot_permanent');
-        showToast(`🔒 Has completado tus ${freeQuota} spots gratuitos.`, 'warning');
-      } else {
-        updatePlanSelection('photos_5');
-      }
+      updatePlanSelection('photos_5');
       uploadModal.style.display = 'flex';
     });
   });
@@ -5865,16 +5824,7 @@ function setupEventListeners() {
           state.currentStore.hasMembership &&
           (!state.currentStore.membershipExpiresAt || new Date(state.currentStore.membershipExpiresAt) > new Date())
         );
-        if (!isMemActive && storeCount >= freeQuota) {
-          showToast(`🔒 Plan Gratuito Bloqueado: Ya completaste tus ${freeQuota} spots gratis. Has completado tu cupo de publicaciones para este comercio.`, 'error');
-          updatePlanSelection('spot_permanent');
-          const permCard = document.querySelector('.video-plan-card[data-plan="spot_permanent"]');
-          if (permCard) {
-            permCard.classList.add('plan-highlight-pulse');
-            setTimeout(() => permCard.classList.remove('plan-highlight-pulse'), 1600);
-          }
-          return;
-        }
+        // Publicaciones ilimitadas y gratuitas sin bloqueo de cupo
       }
       updatePlanSelection(p);
     });
