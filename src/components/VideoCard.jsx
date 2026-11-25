@@ -566,7 +566,7 @@ function VideoCard({
             src={video.author.avatar}
             alt={video.author.username}
             className={`w-10 h-10 rounded-full border-2 object-cover shadow-lg cursor-pointer hover:scale-105 transition-transform ${
-              isOwnVideo ? 'border-[#ffb800]' : 'border-white'
+              isOwnVideo ? 'border-[#ffb800]' : 'border-[#ffb800]/80 shadow-[0_0_8px_rgba(255,184,0,0.35)]'
             }`}
           />
           {!isOwnVideo && (
@@ -631,22 +631,22 @@ function VideoCard({
                 onToggleLike(video.id);
               }
             }}
-            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75"
+            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 text-[#ffb800] hover:text-[#ffe28a]"
           >
             {activeReactionEmoji ? (
               <span className="text-2xl animate-bounce">{activeReactionEmoji}</span>
             ) : (
               <Heart
                 size={24}
-                className={`transition-colors drop-shadow-md ${
+                className={`transition-colors drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.2] ${
                   video.isLiked
-                    ? 'fill-[#FE2C55] text-[#FE2C55] scale-110 animate-bounce'
-                    : 'text-white hover:text-white/80'
+                    ? 'fill-[#FE2C55] text-[#FE2C55] scale-110 animate-bounce drop-shadow-[0_0_12px_rgba(254,44,85,0.7)]'
+                    : 'text-[#ffb800] hover:text-[#ffe28a]'
                 }`}
               />
             )}
           </button>
-          <span className="text-[10px] font-bold text-white drop-shadow">
+          <span className="text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
             {formatNumber(video.stats?.likes || 0)}
           </span>
 
@@ -680,12 +680,12 @@ function VideoCard({
               e.stopPropagation();
               onOpenComments(video);
             }}
-            className="w-8 h-8 flex items-center justify-center text-white hover:text-white/80 transition-transform active:scale-75"
+            className="w-8 h-8 flex items-center justify-center text-[#ffb800] hover:text-[#ffe28a] transition-transform active:scale-75"
             title="Ver comentarios reales"
           >
-            <MessageCircle size={23} className="drop-shadow-md" />
+            <MessageCircle size={23} className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.3]" />
           </button>
-          <span className="text-[10px] font-bold text-white drop-shadow">
+          <span className="text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
             {formatNumber(
               Array.isArray(video.comments)
                 ? video.comments.reduce((acc, curr) => acc + 1 + (curr.replies?.length || 0), 0)
@@ -701,18 +701,18 @@ function VideoCard({
               e.stopPropagation();
               onOpenGifts(video.author);
             }}
-            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative"
+            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-[#ffb800] hover:text-[#ffe28a]"
           >
             <Gift
               size={23}
-              className={`drop-shadow-md transition-all duration-300 ${
+              className={`drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] transition-all duration-300 stroke-[2.2] ${
                 video.hasUserGifted
                   ? 'text-[#FE2C55] fill-[#FE2C55] scale-110 drop-shadow-[0_0_12px_rgba(254,44,85,0.85)]'
-                  : 'text-white hover:text-white/80'
+                  : 'text-[#ffb800] hover:text-[#ffe28a]'
               }`}
             />
           </button>
-          <span className={`text-[10px] font-bold drop-shadow ${video.hasUserGifted ? 'text-[#FE2C55]' : 'text-white'}`}>
+          <span className={`text-[10px] font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] ${video.hasUserGifted ? 'text-[#FE2C55]' : 'text-white'}`}>
             {formatNumber(video.stats?.giftsCount || 0)}
           </span>
         </div>
@@ -724,19 +724,19 @@ function VideoCard({
               e.stopPropagation();
               onToggleBookmark(video.id);
             }}
-            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative"
+            className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-[#ffb800] hover:text-[#ffe28a]"
             title="Guardar en favoritos"
           >
             <Bookmark
               size={23}
-              className={`transition-all duration-300 drop-shadow-md ${
+              className={`transition-all duration-300 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.2] ${
                 video.isBookmarked
-                  ? 'fill-amber-400 text-amber-400 scale-110 drop-shadow-[0_0_10px_rgba(251,191,36,0.75)]'
-                  : 'text-white hover:text-white/80'
+                  ? 'fill-[#ffb800] text-[#ffb800] scale-110 drop-shadow-[0_0_10px_rgba(255,184,0,0.75)]'
+                  : 'text-[#ffb800] hover:text-[#ffe28a]'
               }`}
             />
           </button>
-          <span className="text-[10px] font-bold text-white drop-shadow">
+          <span className="text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
             {formatNumber(video.stats?.bookmarks || 0)}
           </span>
         </div>
@@ -748,12 +748,12 @@ function VideoCard({
               e.stopPropagation();
               onOpenShare(video);
             }}
-            className="w-8 h-8 flex items-center justify-center text-white hover:text-white/80 transition-transform active:scale-75"
+            className="w-8 h-8 flex items-center justify-center text-[#ffb800] hover:text-[#ffe28a] transition-transform active:scale-75"
             title="Compartir"
           >
-            <Share2 size={22} className="drop-shadow-md" />
+            <Share2 size={22} className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] stroke-[2.3]" />
           </button>
-          <span className="text-[10px] font-bold text-white drop-shadow">
+          <span className="text-[10px] font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
             {formatNumber(video.stats?.shares || 0)}
           </span>
         </div>

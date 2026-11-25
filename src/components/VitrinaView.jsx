@@ -33,7 +33,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false }) 
   const externalUrl = 'https://vitrinaspot.onrender.com/';
 
   const params = new URLSearchParams();
-  params.set('v', '28.1');
+  params.set('v', '28.2');
   if (typeof window !== 'undefined') {
     params.set('spotplay_origin', window.location.origin);
   }
