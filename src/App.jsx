@@ -1836,7 +1836,16 @@ export default function App() {
         {currentTab === 'profile' && (
           <ProfileView
             currentUser={currentUser}
-            userVideos={videos.filter((v) => v.author?.id === currentUser.id || v.author?.username === currentUser.username || v.author?.id === 'me' || v.author?.id === 'user-1794726360816' || v.author?.name?.toLowerCase().includes('leonardo'))}
+            userVideos={videos.filter((v) => {
+              if (!currentUser || currentUser.id === 'guest') return false;
+              if (v.author?.id === currentUser.id) return true;
+              if (currentUser.username && v.author?.username?.toLowerCase() === currentUser.username.toLowerCase()) return true;
+              const isCurrentUserLeonardo = currentUser.id === 'user-1794726360816' || currentUser.email === 'leonardoescarlata6@gmail.com' || currentUser.username?.toLowerCase() === 'leonardo';
+              if (isCurrentUserLeonardo) {
+                return v.author?.id === 'me' || v.author?.id === 'user-1794726360816' || v.author?.name?.toLowerCase().includes('leonardo');
+              }
+              return false;
+            })}
             bookmarkedVideos={videos.filter((v) => v.isBookmarked)}
             likedVideos={videos.filter((v) => v.isLiked)}
             onSelectVideo={handleSelectVideo}
