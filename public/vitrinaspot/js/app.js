@@ -13,9 +13,32 @@ function triggerOpenUploadModal() {
   if (!uploadModal) return;
   const nameInput = document.getElementById('upload-store-name');
   const waInput = document.getElementById('upload-whatsapp');
+    const uploadCCode = document.getElementById('upload-country-code')?.value || '+57';
+    let combinedUploadWa = waInput ? waInput.value.trim() : '';
+    if (combinedUploadWa && !combinedUploadWa.startsWith('+')) {
+      combinedUploadWa = uploadCCode + combinedUploadWa.replace(/[^0-9]/g, '');
+    }
   if (state.currentStore) {
     if (nameInput) nameInput.value = state.currentStore.name;
-    if (waInput) waInput.value = (state.currentStore.whatsapp || '').replace('+57', '').replace(/[^0-9]/g, '');
+    if (waInput && state.currentStore.whatsapp) {
+        const swa = state.currentStore.whatsapp;
+        const upCC = document.getElementById('upload-country-code');
+        if (swa.startsWith('+1')) {
+          if (upCC) upCC.value = '+1';
+          waInput.value = swa.replace('+1', '').replace(/[^0-9]/g, '');
+        } else if (swa.startsWith('+57')) {
+          if (upCC) upCC.value = '+57';
+          waInput.value = swa.replace('+57', '').replace(/[^0-9]/g, '');
+        } else {
+          const m = swa.match(/^\+(\d{1,4})/);
+          if (m && upCC) {
+            upCC.value = '+' + m[1];
+            waInput.value = swa.replace('+' + m[1], '').replace(/[^0-9]/g, '');
+          } else {
+            waInput.value = swa.replace(/[^0-9]/g, '');
+          }
+        }
+      }
   } else {
     if (nameInput) nameInput.value = '';
     if (waInput) waInput.value = '';
@@ -38,7 +61,7 @@ const state = {
   videos: [],
   stores: [],
   currentIndex: 0,
-  currentCity: 'Toda Colombia',
+  currentCity: '🌍 Todos los Países',
   currentCategory: 'Todas',
   currentStoreFilter: null, // Filtro de tienda activa en el feed
   searchQuery: '',
@@ -809,7 +832,8 @@ async function loadVideos() {
       // Búsqueda libre global por palabra clave o producto
       params.append('q', state.searchQuery.trim());
     } else {
-      if (state.currentCity && state.currentCity !== 'Toda Colombia') {
+      const isAllCities = !state.currentCity || state.currentCity.includes('Todos los Países') || state.currentCity === 'Global' || state.currentCity === 'Todos';
+      if (!isAllCities) {
         params.append('city', state.currentCity);
       }
       if (state.currentCategory && state.currentCategory !== 'Todas' && state.currentCategory !== 'Solo Ofertas') {
@@ -4871,7 +4895,13 @@ function setupEventListeners() {
       document.querySelectorAll('.city-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
       state.currentCity = item.getAttribute('data-city');
-      document.getElementById('current-city-label').textContent = state.currentCity;
+      let lbl = state.currentCity;
+      if (lbl.includes('Todos los Países')) lbl = '🌍 Global';
+      else if (lbl === 'Todo Estados Unidos') lbl = '🇺🇸 EE.UU.';
+      else if (lbl === 'Toda Colombia') lbl = '🇨🇴 Colombia';
+      else if (lbl === 'Internacional') lbl = '🌐 Global';
+      else if (lbl === 'California') lbl = '🎬 Los Ángeles';
+      document.getElementById('current-city-label').textContent = lbl;
       cityMenu.classList.remove('show');
       showView('feed-view');
       loadVideos();
@@ -5724,7 +5754,27 @@ function setupEventListeners() {
       const waInput = document.getElementById('upload-whatsapp');
       if (state.currentStore) {
         if (nameInput) nameInput.value = state.currentStore.name;
-        if (waInput) waInput.value = (state.currentStore.whatsapp || '').replace('+57', '').replace(/[^0-9]/g, '');
+        const profileFullWa = state.currentStore.whatsapp || '';
+    const profileCCSelect = document.getElementById('edit-store-country-code');
+    if (profileCCSelect) {
+      if (profileFullWa.startsWith('+1')) {
+        profileCCSelect.value = '+1';
+        if (waInput) waInput.value = profileFullWa.replace('+1', '').replace(/[^0-9]/g, '');
+      } else if (profileFullWa.startsWith('+57')) {
+        profileCCSelect.value = '+57';
+        if (waInput) waInput.value = profileFullWa.replace('+57', '').replace(/[^0-9]/g, '');
+      } else {
+        const m = profileFullWa.match(/^\+(\d{1,4})/);
+        if (m) {
+          profileCCSelect.value = '+' + m[1];
+          if (waInput) waInput.value = profileFullWa.replace('+' + m[1], '').replace(/[^0-9]/g, '');
+        } else {
+          if (waInput) waInput.value = profileFullWa.replace(/[^0-9]/g, '');
+        }
+      }
+    } else if (waInput) {
+      waInput.value = profileFullWa.replace(/[^0-9]/g, '');
+    }
       } else {
         if (nameInput) nameInput.value = '';
         if (waInput) waInput.value = '';
@@ -6053,7 +6103,7 @@ function setupEventListeners() {
     const storeAvatar = state.currentStore?.avatar || 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=100&auto=format&fit=crop&q=80';
     const titleVal = document.getElementById('upload-title')?.value.trim() || 'Título de tu producto o servicio';
     const priceNum = Number(document.getElementById('upload-price')?.value || 0);
-    const priceText = priceNum > 0 ? `$${priceNum.toLocaleString('es-CO')} COP` : 'Precio a Convenir';
+    const priceText = priceNum > 0 ? (prodCurrency === 'USD' ? `${priceNum.toLocaleString('en-US')} USD` : `${priceNum.toLocaleString('es-CO')} COP`) : 'Precio a Convenir';
 
     // Domicilio
     let delivText = '🛵 Domicilio Gratis';
@@ -6253,6 +6303,10 @@ function setupEventListeners() {
       } else {
         formattedDelivery = 'Domicilio con costo según destino';
       }
+    } else if (dType === 'global') {
+      formattedDelivery = '🌍 Envíos a Todo el Mundo (Global)';
+    } else if (dType === 'digital') {
+      formattedDelivery = '⚡ Entrega Digital Inmediata';
     } else if (dType === 'local') {
       formattedDelivery = 'Recogida en Local Físico';
     } else if (dType === 'nacional') {
@@ -6269,6 +6323,13 @@ function setupEventListeners() {
     const sendData = await prepareCompressedFormData(uploadForm);
     if (state.currentStore) sendData.append('storeId', state.currentStore.id);
     sendData.set('delivery', formattedDelivery);
+    const upCountryCode = document.getElementById('upload-country-code')?.value || '+57';
+    let currentUploadWa = sendData.get('whatsapp') ? sendData.get('whatsapp').trim() : '';
+    if (currentUploadWa && !currentUploadWa.startsWith('+')) {
+      sendData.set('whatsapp', upCountryCode + currentUploadWa.replace(/[^0-9]/g, ''));
+    }
+    const upCurrency = document.getElementById('upload-currency')?.value || (/miami|florida|york|california|texas|houston|orlando|angeles|usa|estados unidos/i.test(sendData.get('city') || '') ? 'USD' : 'COP');
+    sendData.set('currency', upCurrency);
     sendData.append('paidPlan', selectedPlan || 'photos_7');
     const isBoostPlan = selectedPlan && (selectedPlan.includes('boost') || selectedPlan.includes('diamante') || selectedPlan.includes('platino'));
     sendData.append('hasSpot', isBoostPlan ? 'true' : 'false');
@@ -6716,7 +6777,9 @@ function setupEventListeners() {
     e.preventDefault();
     clearRegNameError();
     const name = document.getElementById('reg-store-name').value.trim();
-    const whatsapp = document.getElementById('reg-store-whatsapp').value.trim();
+    const cCode = document.getElementById('reg-store-country-code')?.value || '+57';
+    let rawRegWa = document.getElementById('reg-store-whatsapp').value.trim();
+    const whatsapp = rawRegWa.startsWith('+') ? rawRegWa : (cCode + rawRegWa.replace(/[^0-9]/g, ''));
     const email = document.getElementById('reg-store-email')?.value.trim().toLowerCase() || '';
     const city = document.getElementById('reg-store-city').value;
     const password = document.getElementById('reg-store-pass').value;
@@ -7165,13 +7228,9 @@ function setupEventListeners() {
 
     try {
       const formData = new FormData(editProfileForm);
-      const rawWa = document.getElementById('edit-store-whatsapp')?.value.trim();
-      let cleanWa = rawWa.replace(/[^0-9]/g, '');
-      if (cleanWa.length === 10 && !cleanWa.startsWith('57')) {
-        cleanWa = `+57${cleanWa}`;
-      } else if (!cleanWa.startsWith('+')) {
-        cleanWa = `+${cleanWa}`;
-      }
+      const rawWa = document.getElementById('edit-store-whatsapp')?.value.trim() || '';
+      const cCode = document.getElementById('edit-store-country-code')?.value || '+57';
+      const cleanWa = rawWa.startsWith('+') ? rawWa : (cCode + rawWa.replace(/[^0-9]/g, ''));
       formData.set('whatsapp', cleanWa);
 
       // Si se optimizó la foto en canvas 1:1, adjuntarla; si no se cambió, no enviar campo avatar
@@ -7324,6 +7383,10 @@ function setupEventListeners() {
     document.getElementById('edit-prod-id').value = video.id;
     document.getElementById('edit-prod-title').value = video.title || '';
     document.getElementById('edit-prod-price').value = (typeof video.price === 'number') ? video.price : '';
+    const editCurrSel = document.getElementById('edit-prod-currency');
+    if (editCurrSel) {
+      editCurrSel.value = video.currency || ((video.priceFormatted && video.priceFormatted.includes('USD')) ? 'USD' : 'COP');
+    }
     document.getElementById('edit-prod-delivery').value = cleanDelivery(video.delivery) || 'Domicilio Gratis';
     document.getElementById('edit-prod-city').value = video.city || 'Bogotá';
     document.getElementById('edit-prod-category').value = video.category || 'Tecnología';
@@ -7366,6 +7429,7 @@ function setupEventListeners() {
     const vidId = document.getElementById('edit-prod-id').value;
     const title = document.getElementById('edit-prod-title').value.trim();
     const price = document.getElementById('edit-prod-price').value;
+    const prodCurrency = document.getElementById('edit-prod-currency')?.value || 'COP';
     const delivery = document.getElementById('edit-prod-delivery').value.trim();
     const city = document.getElementById('edit-prod-city').value;
     const category = document.getElementById('edit-prod-category').value;
@@ -7399,6 +7463,7 @@ function setupEventListeners() {
           storeId: state.isAdmin ? 'admin' : (state.currentStore ? state.currentStore.id : 'admin'),
           title,
           price: price !== '' ? Number(price) : 0,
+          currency: prodCurrency,
           delivery,
           city,
           category,
@@ -7633,7 +7698,9 @@ function setupEventListeners() {
     e.preventDefault();
     const spotPlayUid = document.getElementById('sso-user-uid')?.value;
     const name = document.getElementById('sso-store-name')?.value.trim();
-    const whatsapp = document.getElementById('sso-store-whatsapp')?.value.trim();
+    const cCode = document.getElementById('sso-store-country-code')?.value || '+57';
+    let rawWa = document.getElementById('sso-store-whatsapp')?.value.trim() || '';
+    const whatsapp = rawWa.startsWith('+') ? rawWa : (cCode + rawWa.replace(/[^0-9]/g, ''));
     const city = document.getElementById('sso-store-city')?.value || 'Bogotá';
     const avatar = document.getElementById('sso-user-avatar')?.value || '';
     const email = document.getElementById('sso-user-email')?.value || '';
@@ -9204,7 +9271,7 @@ function setupSpotPlayUploadModal() {
     formData.append('city', cityInput ? cityInput.value : 'Toda Colombia');
     formData.append('category', catInput ? catInput.value : '🎭 Humor & Comedia');
     formData.append('delivery', isProduct && delInput ? delInput.value : '');
-    formData.append('whatsapp', waInput.value.trim());
+    formData.append('whatsapp', combinedUploadWa);
     if (state.currentStore) {
       formData.append('storeId', state.currentStore.id);
       formData.append('storeName', state.currentStore.name);
