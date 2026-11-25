@@ -55,13 +55,14 @@ export default function BottomNav({ activeTab, onSelectTab }) {
           </span>
         </div>
         <span
-          className={`text-[10px] transition-colors mt-0.5 ${
+          className={`text-[10px] transition-colors mt-0.5 whitespace-nowrap ${
             activeTab === 'vitrina'
-              ? 'text-[#ffb800] font-black drop-shadow-[0_0_6px_rgba(255,184,0,0.4)]'
-              : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
+              ? 'font-black drop-shadow-[0_0_6px_rgba(255,184,0,0.4)]'
+              : 'font-medium text-zinc-500 group-hover:text-zinc-300'
           }`}
         >
-          Vitrina
+          <span className={activeTab === 'vitrina' ? 'text-white' : ''}>Spot</span>{' '}
+          <span className={activeTab === 'vitrina' ? 'text-[#ffb800]' : 'text-amber-400/80 group-hover:text-amber-400'}>Vitrina</span>
         </span>
         {activeTab === 'vitrina' ? (
           <span className="w-1.5 h-1.5 rounded-full bg-[#ffb800] mt-0.5 opacity-95 animate-in fade-in zoom-in duration-200 shadow-[0_0_8px_rgba(255,184,0,0.8)]" />

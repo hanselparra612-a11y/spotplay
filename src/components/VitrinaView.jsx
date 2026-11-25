@@ -135,7 +135,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
             <ShoppingBag size={12} className="stroke-[2.5]" />
           </div>
           <span className="text-xs font-black text-white tracking-wide">
-            Vitrina
+            Spot <span className="text-[#ffb800]">Vitrina</span>
           </span>
           <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-[#ffb800]/20 text-[#ffb800] font-bold border border-[#ffb800]/40">
             Comercio
