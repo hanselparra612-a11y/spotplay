@@ -4,6 +4,9 @@
 // necesidad de pasarelas de pago externas ni fricciones con Play Store.
 // =====================================================================
 
+import { Capacitor } from '@capacitor/core';
+import { AdMob, RewardAdPluginEvents } from '@capacitor-community/admob';
+
 const ADMOB_STORAGE_KEY = 'spotplay_admob_config_v1';
 const ADMOB_METRICS_KEY = 'spotplay_admob_metrics_v1';
 
@@ -50,10 +53,10 @@ export const DEFAULT_ADMOB_METRICS = {
   rewardedViews: 1850,
   bannerImpressions: 12430,
   recentEvents: [
-    { id: 'ev-1', typeLabel: 'Video Bonificado Visto', user: '@carlos_music', timestamp: 'Hace 5 min', coinsAwarded: 15 },
-    { id: 'ev-2', typeLabel: 'Video Bonificado Visto', user: '@laura_dance', timestamp: 'Hace 18 min', coinsAwarded: 15 },
-    { id: 'ev-3', typeLabel: 'Video Bonificado Visto', user: '@andres_tech', timestamp: 'Hace 42 min', coinsAwarded: 15 },
-    { id: 'ev-4', typeLabel: 'Video Bonificado Visto', user: '@sofia_travel', timestamp: 'Hace 1 hora', coinsAwarded: 15 },
+    { id: 'ev-1', typeLabel: 'Video Bonificado Visto', user: '@carlos_music', timestamp: 'Hace 5 min', coinsAwarded: 5 },
+    { id: 'ev-2', typeLabel: 'Video Bonificado Visto', user: '@laura_dance', timestamp: 'Hace 18 min', coinsAwarded: 5 },
+    { id: 'ev-3', typeLabel: 'Video Bonificado Visto', user: '@andres_tech', timestamp: 'Hace 42 min', coinsAwarded: 5 },
+    { id: 'ev-4', typeLabel: 'Video Bonificado Visto', user: '@sofia_travel', timestamp: 'Hace 1 hora', coinsAwarded: 5 },
   ],
   history: [
     { date: 'Lun', impressions: 2100, earningsUSD: 7.60 },
@@ -66,13 +69,35 @@ export const DEFAULT_ADMOB_METRICS = {
   ],
 };
 
+let isAdMobInitialized = false;
+
+/**
+ * 🚀 Inicializa el SDK de Google AdMob si la app corre de forma nativa en Android o iOS
+ */
+export async function initializeAdMob() {
+  if (isAdMobInitialized) return;
+  if (!isNativePlatform()) return;
+
+  try {
+    const config = loadAdMobConfig();
+    await AdMob.initialize({
+      requestTrackingAuthorization: true,
+      testingDevices: ['EMULATOR'],
+      initializeForTesting: config.isTestMode,
+    });
+    isAdMobInitialized = true;
+    console.log('✅ Google AdMob SDK inicializado con éxito');
+  } catch (err) {
+    console.warn('⚠️ No se pudo inicializar AdMob nativo:', err);
+  }
+}
+
 export function loadAdMobConfig() {
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const raw = localStorage.getItem(ADMOB_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        // Si tiene el valor legado descalibrado de 15, migrar a 5 monedas
         const calibratedAmount = (parsed.rewardCoinsAmount === 15 || !parsed.rewardCoinsAmount) ? 5 : parsed.rewardCoinsAmount;
         return { ...DEFAULT_ADMOB_CONFIG, ...parsed, rewardCoinsAmount: calibratedAmount };
       }
@@ -178,7 +203,7 @@ export function trackAdClick(format = 'NATIVE_FEED') {
 }
 
 // Registrar un anuncio con recompensa completado (usuario ganó monedas)
-export function trackRewardedCompleted(coinsGranted = 15) {
+export function trackRewardedCompleted(coinsGranted = 5) {
   try {
     const current = loadAdMobMetrics();
     const updatedEst = Number(((current.estimatedRevenueUSD || current.totalEarnedUSD || 52.4) + 0.012).toFixed(3));
@@ -211,7 +236,7 @@ export function trackRewardedCompleted(coinsGranted = 15) {
  * 📱 Detección Inteligente: ¿La app corre nativa en Android/iOS con Capacitor o en Web/PWA?
  */
 export function isNativePlatform() {
-  return typeof window !== 'undefined' && Boolean(window.Capacitor?.isNativePlatform());
+  return typeof window !== 'undefined' && Capacitor.isNativePlatform();
 }
 
 /**
@@ -219,18 +244,36 @@ export function isNativePlatform() {
  * En Android APK invoca el SDK nativo de AdMob; en Web/PWA activa el modal interactivo de alta conversión.
  */
 export async function presentRewardedAd({ onRewardEarned, onFallbackToWebModal }) {
-  if (isNativePlatform() && window.CapacitorCustomAdMob) {
+  const config = loadAdMobConfig();
+  const rewardCoins = config.rewardCoinsAmount || 5;
+
+  if (isNativePlatform()) {
     try {
-      await window.CapacitorCustomAdMob.showRewarded();
-      trackRewardedCompleted(15);
-      if (onRewardEarned) onRewardEarned(15);
+      await initializeAdMob();
+
+      // Configurar opciones de anuncio bonificado
+      const adId = config.isTestMode 
+        ? 'ca-app-pub-3940256099942544/5224354917' 
+        : (config.adUnits?.rewardedId || 'ca-app-pub-3940256099942544/5224354917');
+
+      // Escuchar el evento de recompensa ganada
+      const rewardListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward) => {
+        console.log('🎉 Recompensa ganada en AdMob:', reward);
+        trackRewardedCompleted(rewardCoins);
+        if (onRewardEarned) onRewardEarned(rewardCoins);
+        rewardListener.remove();
+      });
+
+      // Preparar y mostrar el anuncio bonificado nativo de Google AdMob
+      await AdMob.prepareRewardVideoAd({ adId });
+      await AdMob.showRewardVideoAd();
       return;
     } catch (err) {
-      console.warn('Fallo AdMob nativo, usando modal web interactivo:', err);
+      console.warn('Fallo AdMob nativo, recurriendo a vista web:', err);
     }
   }
 
-  // Fallback transparente a modal interactivo en Web / PWA
+  // Fallback seguro en Web / PWA
   if (onFallbackToWebModal) {
     onFallbackToWebModal();
   }

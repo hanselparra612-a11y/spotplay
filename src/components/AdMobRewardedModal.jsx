@@ -55,7 +55,7 @@ export default function AdMobRewardedModal({
         <div className="flex items-center gap-2 bg-black/60 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md">
           <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-            Google AdMob Anuncio
+            SpotPlay Recompensas
           </span>
           <span className="text-zinc-500 text-xs">|</span>
           <span className="text-[11px] font-bold text-zinc-300">
@@ -100,7 +100,7 @@ export default function AdMobRewardedModal({
         {/* Sponsor Banner */}
         <div className="mb-3 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
           <ShieldCheck size={12} className="text-cyan-400" />
-          <span>Red Oficial Google Mobile Ads</span>
+          <span>Espacio Patrocinado SpotPlay</span>
         </div>
 
         {/* Dynamic Ad Preview */}
@@ -114,7 +114,7 @@ export default function AdMobRewardedModal({
           ¡Gana <span className="text-amber-400">+{rewardCoins} SpotCoins</span> Gratis!
         </h3>
         <p className="text-xs text-zinc-300 max-w-xs mb-5 leading-relaxed">
-          Gracias por apoyar a los creadores de SpotPlay. Mira el video hasta el final para recibir tus monedas sin pagar un solo peso.
+          Gracias por apoyar a los creadores de SpotPlay. Mira la promoción hasta el final para recibir tus monedas sin costo. En la app oficial de Android, los anuncios se sirven con Google Mobile Ads.
         </p>
 
         {/* Progress Bar */}
@@ -130,7 +130,7 @@ export default function AdMobRewardedModal({
           onClick={handleAdClick}
           className="w-full max-w-xs py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:brightness-110 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
-          <span>Instalar Anunciante Patrocinador</span>
+          <span>Conocer Más del Patrocinador</span>
         </button>
       </div>
 

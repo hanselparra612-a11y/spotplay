@@ -648,7 +648,7 @@ export default function ProfileView({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-[420px] bg-[#141824] border-t border-white/15 rounded-t-3xl p-5 shadow-[0_-15px_40px_rgba(0,0,0,0.9)] animate-in slide-in-from-bottom duration-300 space-y-3.5 max-h-[85vh] overflow-y-auto no-scrollbar text-left"
+            className="w-full max-w-[420px] bg-gradient-to-b from-[#151a28]/98 via-[#0e121d]/98 to-[#07090f]/98 backdrop-blur-2xl border-t border-amber-400/40 rounded-t-3xl p-5 shadow-[0_-20px_50px_rgba(0,0,0,0.95),0_0_35px_rgba(255,184,0,0.14)] animate-in slide-in-from-bottom duration-300 space-y-3.5 max-h-[85vh] overflow-y-auto no-scrollbar text-left"
           >
             {/* Barra táctil para deslizar hacia abajo */}
             <div

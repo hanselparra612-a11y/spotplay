@@ -1620,7 +1620,7 @@ export default function App() {
       </div>
 
       {/* Mobile Shell Frame */}
-      <main className="relative w-full max-w-[420px] h-[100dvh] sm:h-[94vh] sm:max-h-[880px] bg-black sm:rounded-3xl sm:border-[5px] sm:border-zinc-800 shadow-[0_0_60px_rgba(254,44,85,0.2)] overflow-hidden flex flex-col z-10">
+      <main className="relative w-full max-w-[420px] h-[100dvh] sm:h-[94vh] sm:max-h-[880px] bg-gradient-to-b from-[#0b0e16] via-[#07090e] to-[#040609] sm:rounded-3xl sm:border-[5px] sm:border-zinc-800/80 shadow-[0_0_60px_rgba(255,184,0,0.15),0_25px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col z-10">
         {/* Dynamic Island / Speaker */}
         <div className="hidden sm:block absolute top-2 left-1/2 -translate-x-1/2 w-28 h-4 bg-zinc-900 rounded-full z-40 pointer-events-none border border-white/5" />
 
