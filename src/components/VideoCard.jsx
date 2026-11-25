@@ -587,25 +587,6 @@ function VideoCard({
           )}
         </div>
 
-        {/* ✏️ Botón Editar Video (Solo en tus videos) */}
-        {isOwnVideo && onEditVideo && (
-          <div className="flex flex-col items-center animate-in zoom-in-75 duration-150">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEditVideo(video);
-              }}
-              className="w-8 h-8 rounded-full bg-amber-400/20 hover:bg-amber-400 border border-amber-400/50 flex items-center justify-center text-amber-300 hover:text-black transition-all active:scale-75 shadow-lg cursor-pointer"
-              title="Editar este video"
-            >
-              <Edit3 size={15} />
-            </button>
-            <span className="text-[9px] font-extrabold text-amber-300 drop-shadow mt-0.5">
-              Editar
-            </span>
-          </div>
-        )}
-
         {/* Like Button with Hold-to-React */}
         <div className="relative flex flex-col items-center">
           <button
