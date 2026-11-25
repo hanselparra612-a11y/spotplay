@@ -1,10 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ExternalLink, RefreshCw, ShoppingBag, ShieldCheck } from 'lucide-react';
 
-export default function VitrinaView({ currentUser, onBack, openStore = false }) {
+export default function VitrinaView({ currentUser, onBack, openStore = false, isVisible = true }) {
   const [isLoading, setIsLoading] = useState(true);
   const [iframeKey, setIframeKey] = useState(1);
   const iframeRef = useRef(null);
+
+  // ⚡ Keep-Alive Auto-Ping: evita que el servidor gratuito de Render se duerma tras 15 min de inactividad
+  useEffect(() => {
+    const keepAlivePing = () => {
+      try {
+        fetch('https://vitrinaspot.onrender.com/api/pricing', { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+      } catch (e) {}
+    };
+    // Ping inmediato de calentamiento
+    keepAlivePing();
+    // Ping preventivo cada 8 minutos para garantizar respuesta en 0 segundos
+    const interval = setInterval(keepAlivePing, 8 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Escuchar mensajes nativos de Vitrina (ej: retorno al feed)
   useEffect(() => {
@@ -19,6 +33,19 @@ export default function VitrinaView({ currentUser, onBack, openStore = false }) 
     return () => window.removeEventListener('message', handleMessage);
   }, [onBack]);
 
+  // Si openStore cambia dinámicamente, sincronizamos con la vitrina ya cargada
+  useEffect(() => {
+    if (openStore && iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        iframeRef.current.contentWindow.postMessage({
+          type: 'SPOTPLAY_OPEN_STORE',
+          openStore: true,
+          uid: currentUser?.id
+        }, '*');
+      } catch (err) {}
+    }
+  }, [openStore, currentUser]);
+
   // Temporizador de seguridad para ocultar spinner si la carga tarda más de 3.5 segundos
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,10 +54,15 @@ export default function VitrinaView({ currentUser, onBack, openStore = false }) 
     return () => clearTimeout(timer);
   }, [iframeKey]);
 
-  // Detección de entorno: Render producción vs Desarrollo local
+  // Detección de entorno: Render producción vs Túnel Cloudflare vs Desarrollo local
   const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-  const baseUrl = isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/';
-  const externalUrl = 'https://vitrinaspot.onrender.com/';
+  const isTunnel = typeof window !== 'undefined' && window.location.hostname.includes('trycloudflare.com');
+  const tunnelVitrinaUrl = 'https://shed-son-rated-elizabeth.trycloudflare.com/';
+
+  const baseUrl = isLocal 
+    ? 'http://127.0.0.1:4000/' 
+    : (isTunnel ? tunnelVitrinaUrl : 'https://vitrinaspot.onrender.com/');
+  const externalUrl = isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/');
 
   const params = new URLSearchParams();
   params.set('v', '28.2');
@@ -158,6 +190,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false }) 
           title="Vitrina Comercial Spot Play"
           className="w-full h-full border-0"
           onLoad={handleIframeLoad}
+          loading="eager"
           allow="camera; microphone; geolocation; clipboard-write"
         />
       </div>

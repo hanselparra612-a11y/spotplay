@@ -1854,16 +1854,17 @@ export default function App() {
           />
         )}
 
-        {/* VITRINA COMERCIAL (INTEGRACIÓN VITRINASPOT CON SSO AUTOMÁTICO) */}
-        {currentTab === 'vitrina' && (
+        {/* VITRINA COMERCIAL (INTEGRACIÓN VITRINASPOT CON PRECARGA & KEEP-ALIVE ULTRA RÁPIDO) */}
+        <div className={`relative w-full h-full flex flex-col ${currentTab === 'vitrina' ? '' : 'hidden'}`}>
           <Suspense fallback={<div className="w-full h-full bg-[#0c0f14] flex flex-col items-center justify-center text-white text-xs gap-2"><div className="w-8 h-8 border-2 border-[#ffb800]/20 border-t-[#ffb800] rounded-full animate-spin"></div><span>Abriendo Vitrina Comercial...</span></div>}>
             <VitrinaView
               currentUser={currentUser}
               onBack={() => setCurrentTab('feed')}
               openStore={vitrinaOpenStore}
+              isVisible={currentTab === 'vitrina'}
             />
           </Suspense>
-        )}
+        </div>
 
         {/* ⭐ TOAST FLOTANTE INTERACTIVO DE FAVORITOS (TIKTOK STYLE) */}
         {bookmarkToast && (

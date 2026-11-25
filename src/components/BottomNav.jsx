@@ -14,13 +14,13 @@ export default function BottomNav({ activeTab, onSelectTab }) {
           strokeWidth={activeTab === 'feed' ? 2.6 : 1.8}
           className={`transition-colors ${
             activeTab === 'feed'
-              ? 'text-white scale-105 drop-shadow-sm'
+              ? 'text-[#ffb800] scale-105 drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]'
               : 'text-zinc-500 group-hover:text-zinc-300'
           }`}
         />
         <span
           className={`text-[10px] transition-colors mt-0.5 ${
-            activeTab === 'feed' ? 'text-white font-extrabold' : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
+            activeTab === 'feed' ? 'text-[#ffb800] font-extrabold' : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
           }`}
         >
           Inicio
@@ -42,13 +42,13 @@ export default function BottomNav({ activeTab, onSelectTab }) {
           strokeWidth={activeTab === 'explore' ? 2.6 : 1.8}
           className={`transition-colors ${
             activeTab === 'explore'
-              ? 'text-white scale-105 drop-shadow-sm'
+              ? 'text-[#ffb800] scale-105 drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]'
               : 'text-zinc-500 group-hover:text-zinc-300'
           }`}
         />
         <span
           className={`text-[10px] transition-colors mt-0.5 ${
-            activeTab === 'explore' ? 'text-white font-extrabold' : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
+            activeTab === 'explore' ? 'text-[#ffb800] font-extrabold' : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
           }`}
         >
           Explorar
@@ -71,7 +71,7 @@ export default function BottomNav({ activeTab, onSelectTab }) {
             strokeWidth={activeTab === 'vitrina' ? 2.6 : 1.8}
             className={`transition-colors ${
               activeTab === 'vitrina'
-                ? 'text-[#ffb800] scale-105 drop-shadow-sm'
+                ? 'text-[#ffb800] scale-105 drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]'
                 : 'text-zinc-500 group-hover:text-[#ffb800]/80'
             }`}
           />
@@ -104,13 +104,13 @@ export default function BottomNav({ activeTab, onSelectTab }) {
           strokeWidth={activeTab === 'profile' ? 2.6 : 1.8}
           className={`transition-colors ${
             activeTab === 'profile'
-              ? 'text-white scale-105 drop-shadow-sm'
+              ? 'text-[#ffb800] scale-105 drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]'
               : 'text-zinc-500 group-hover:text-zinc-300'
           }`}
         />
         <span
           className={`text-[10px] transition-colors mt-0.5 ${
-            activeTab === 'profile' ? 'text-white font-extrabold' : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
+            activeTab === 'profile' ? 'text-[#ffb800] font-extrabold' : 'text-zinc-500 group-hover:text-zinc-400 font-medium'
           }`}
         >
           Perfil
