@@ -11,6 +11,7 @@ import CreatorProfileView from './components/CreatorProfileView';
 import EditProfileModal from './components/EditProfileModal';
 import EditVideoModal from './components/EditVideoModal';
 import AdMobRewardedModal from './components/AdMobRewardedModal';
+import { initializeAdMob } from './services/admobService';
 import DirectMessagesDrawer from './components/DirectMessagesDrawer';
 import GiftsDrawer from './components/GiftsDrawer';
 import CreatorWalletModal from './components/CreatorWalletModal';
@@ -225,8 +226,9 @@ export default function App() {
     setIsAdminOpen(false);
   };
 
-  // 🛡️ Detección de ruta secreta /admin y puente intercomunicador desde VitrinaSpot
+  // 🛡️ Inicialización de AdMob y detección de ruta secreta /admin
   useEffect(() => {
+    initializeAdMob();
     if (window.location.hash.includes('admin') || window.location.search.includes('admin')) {
       handleRequestMasterAccess();
     }

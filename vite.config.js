@@ -17,6 +17,9 @@ export default defineConfig({
     port: 5173,
     allowedHosts: true, // Permite conexiones desde túneles externos (Cloudflare, etc.)
     cors: true,
+    watch: {
+      ignored: ['**/android/**', '**/dist/**', '**/public/uploads/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:3001',
