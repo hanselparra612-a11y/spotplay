@@ -69,7 +69,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
     : (isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/'));
 
   const params = new URLSearchParams();
-  params.set('v', '29.4');
+  params.set('v', '29.5');
   if (typeof window !== 'undefined') {
     params.set('spotplay_origin', window.location.origin);
   }
@@ -122,7 +122,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#121723] z-20 pt-[max(12px,calc(env(safe-area-inset-top,14px)+6px))] pb-[max(78px,calc(env(safe-area-inset-bottom,14px)+66px))]">
+    <div className="relative w-full h-full flex flex-col bg-[#121723] z-20 pb-[max(78px,calc(env(safe-area-inset-bottom,14px)+66px))]">
       {/* Contenedor del Iframe / Webview a Pantalla Completa Nativa */}
       <div className="relative flex-1 w-full min-h-0 overflow-hidden bg-[#0c0f14]">
         {isLoading && (
