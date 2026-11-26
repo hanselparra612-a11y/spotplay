@@ -9,9 +9,11 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
 const DATA_DIR = path.join(ROOT_DIR, 'public', 'uploads', 'data');
 const VIDEOS_DIR = path.join(ROOT_DIR, 'public', 'uploads', 'videos');
+const THUMBS_DIR = path.join(ROOT_DIR, 'public', 'uploads', 'thumbnails');
 
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(VIDEOS_DIR)) fs.mkdirSync(VIDEOS_DIR, { recursive: true });
+if (!fs.existsSync(THUMBS_DIR)) fs.mkdirSync(THUMBS_DIR, { recursive: true });
 
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const VIDEOS_FILE = path.join(DATA_DIR, 'videos.json');
@@ -48,8 +50,186 @@ const server = http.createServer((req, res) => {
 
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  // 1.0. Endpoint dinámico de previsualización de video con imagen real para WhatsApp, Telegram y Redes Sociales (/v/:id o /api/share)
+  if (req.method === 'GET' && (url.pathname.startsWith('/v/') || url.pathname === '/api/share')) {
+    let videoId = '';
+    if (url.pathname.startsWith('/v/')) {
+      videoId = url.pathname.replace(/^\/v\//, '').split('/')[0].split('?')[0];
+    } else {
+      videoId = url.searchParams.get('id') || '';
+    }
+
+    const videos = readJson(VIDEOS_FILE, []);
+    const video = videos.find(v => v.id === videoId);
+
+    // Detección de protocolo y dominio público (soporta túneles Cloudflare, ngrok, localhost)
+    let host = req.headers['x-forwarded-host'] || req.headers['host'];
+    let proto = req.headers['x-forwarded-proto'] || (req.headers.referer?.startsWith('https') ? 'https' : 'http');
+    
+    // Si viene a través de túnel o proxy, asegurar HTTPS y el host público
+    if (req.headers['cf-ray'] || req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for']) {
+      proto = 'https';
+    }
+    const origin = `${proto}://${host}`;
+
+    // Extraer o generar la miniatura real del video
+    let imageUrl = '';
+    const thumbFileName = `${videoId}.jpg`;
+    const thumbDiskPath = path.join(THUMBS_DIR, thumbFileName);
+
+    if (fs.existsSync(thumbDiskPath)) {
+      imageUrl = `${origin}/uploads/thumbnails/${thumbFileName}`;
+    } else if (video && video.videoUrl) {
+      const videoDiskPath = path.join(ROOT_DIR, 'public', video.videoUrl.replace(/^\//, ''));
+      if (fs.existsSync(videoDiskPath)) {
+        try {
+          execSync(`ffmpeg -y -ss 00:00:01 -i "${videoDiskPath}" -vframes 1 -update 1 -q:v 2 "${thumbDiskPath}"`, { stdio: 'ignore', timeout: 10000 });
+          if (fs.existsSync(thumbDiskPath)) {
+            imageUrl = `${origin}/uploads/thumbnails/${thumbFileName}`;
+          }
+        } catch (e) {
+          console.warn('No se pudo generar miniatura con ffmpeg:', e.message);
+        }
+      }
+    }
+
+    if (!imageUrl) {
+      if (video?.thumbnail && !video.thumbnail.startsWith('data:')) {
+        imageUrl = video.thumbnail.startsWith('http') ? video.thumbnail : `${origin}${video.thumbnail}`;
+      } else if (video?.cover && !video.cover.startsWith('data:')) {
+        imageUrl = video.cover.startsWith('http') ? video.cover : `${origin}${video.cover}`;
+      } else if (video?.author?.avatar && video.author.avatar.startsWith('http')) {
+        imageUrl = video.author.avatar;
+      } else {
+        imageUrl = `${origin}/apple-touch-icon.png`;
+      }
+    }
+
+    const safeTitle = (video && video.description) 
+      ? `🎬 ${video.description.slice(0, 70)} | Spot Play`
+      : `🎬 Video de @${video?.author?.username || 'Leonardo'} en Spot Play`;
+    const safeDesc = (video && video.description)
+      ? `${video.description.slice(0, 140)}`
+      : '🔥 ¡Mira este video en Spot Play y apoya a creadores con SpotCoins!';
+    const authorName = video?.author?.username || video?.author?.name || 'Spot Play';
+    const cleanVideoId = videoId || (video ? video.id : '');
+
+    const html = `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>${safeTitle}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- Open Graph / WhatsApp / Facebook / Telegram / Discord -->
+  <meta property="og:type" content="video.other">
+  <meta property="og:site_name" content="Spot Play">
+  <meta property="og:url" content="${origin}/v/${cleanVideoId}">
+  <meta property="og:title" content="${safeTitle}">
+  <meta property="og:description" content="${safeDesc}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:secure_url" content="${imageUrl}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="720">
+  <meta property="og:image:height" content="1280">
+  <meta property="og:image:alt" content="Portada de video de @${authorName}">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@SpotPlay">
+  <meta name="twitter:title" content="${safeTitle}">
+  <meta name="twitter:description" content="${safeDesc}">
+  <meta name="twitter:image" content="${imageUrl}">
+  
+  <!-- Redirección Instantánea 0ms para Navegadores Humanos -->
+  <meta http-equiv="refresh" content="0; url=/#video-${cleanVideoId}">
+  <script>
+    window.location.replace("/#video-" + encodeURIComponent("${cleanVideoId}"));
+  </script>
+  
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0c0f14;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+    .card {
+      background: #141824;
+      border: 1px solid rgba(255, 184, 0, 0.2);
+      border-radius: 24px;
+      padding: 28px 24px;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .thumb {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 184, 0, 0.2);
+      border-top-color: #ffb800;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h2 { font-size: 18px; font-weight: 700; color: #ffb800; margin-bottom: 8px; }
+    p { font-size: 13px; color: #a1a1aa; line-height: 1.4; margin-bottom: 20px; }
+    .btn {
+      background: linear-gradient(135deg, #ffb800, #ff9000);
+      color: #000;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 14px 28px;
+      border-radius: 99px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(255,184,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="${imageUrl}" class="thumb" alt="Miniatura">
+    <div class="spinner"></div>
+    <h2>Abriendo en Spot Play...</h2>
+    <p>${safeDesc}</p>
+    <a href="/#video-${cleanVideoId}" class="btn">▶ Ver Video Ahora</a>
+  </div>
+</body>
+</html>`;
+
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600'
+    });
+    res.end(html);
+    return;
+  }
+
   // 1.5. Servir archivos estáticos de /uploads/ y /videos/ con HTTP 206 Range Streaming ultra optimizado
-  if (req.method === 'GET' && (url.pathname.startsWith('/uploads/') || url.pathname.startsWith('/videos/'))) {
+  if ((req.method === 'GET' || req.method === 'HEAD') && (url.pathname.startsWith('/uploads/') || url.pathname.startsWith('/videos/'))) {
     const safePath = path.normalize(url.pathname).replace(/^(\.\.[\/\\])+/, '');
     const filePath = path.join(ROOT_DIR, 'public', safePath);
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
@@ -63,8 +243,20 @@ const server = http.createServer((req, res) => {
         '.json': 'application/json',
         '.png': 'image/png',
         '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
       };
       const contentType = contentTypes[ext] || 'application/octet-stream';
+
+      if (req.method === 'HEAD') {
+        res.writeHead(200, {
+          'Content-Length': fileSize,
+          'Content-Type': contentType,
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        });
+        res.end();
+        return;
+      }
 
       const range = req.headers.range;
       if (range) {
@@ -170,12 +362,26 @@ const server = http.createServer((req, res) => {
           }
 
           finalVideoUrl = `/uploads/videos/${videoFileName}`;
+
+          // Generación automática de miniatura JPEG de alta resolución
+          const videoId = payload.id || `uploaded-${Date.now()}`;
+          const thumbFileName = `${videoId}.jpg`;
+          const thumbDiskPath = path.join(THUMBS_DIR, thumbFileName);
+          try {
+            execSync(`ffmpeg -y -ss 00:00:01 -i "${filePath}" -vframes 1 -update 1 -q:v 2 "${thumbDiskPath}"`, { stdio: 'ignore', timeout: 15000 });
+            payload.thumbnail = `/uploads/thumbnails/${thumbFileName}`;
+            payload.cover = `/uploads/thumbnails/${thumbFileName}`;
+          } catch (tErr) {
+            console.warn('Miniatura automática warning:', tErr.message);
+          }
         }
 
         const newVideo = {
           ...payload,
           id: payload.id || `uploaded-${Date.now()}`,
           videoUrl: finalVideoUrl,
+          thumbnail: payload.thumbnail || (fs.existsSync(path.join(THUMBS_DIR, `${payload.id}.jpg`)) ? `/uploads/thumbnails/${payload.id}.jpg` : undefined),
+          cover: payload.cover || (fs.existsSync(path.join(THUMBS_DIR, `${payload.id}.jpg`)) ? `/uploads/thumbnails/${payload.id}.jpg` : undefined),
           createdAt: new Date().toISOString()
         };
         delete newVideo.videoBase64;

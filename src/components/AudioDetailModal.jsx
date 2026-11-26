@@ -80,7 +80,12 @@ export default function AudioDetailModal({ isOpen, onClose, sound, videos = [], 
               }}
               className="relative aspect-3/4 bg-zinc-900 rounded overflow-hidden cursor-pointer group"
             >
-              <video src={video.videoUrl} className="w-full h-full object-cover" muted />
+              <video
+                src={video.videoUrl}
+                poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                className="w-full h-full object-cover"
+                muted
+              />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
               <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 text-[10px] text-white font-medium drop-shadow">
                 <Play size={10} className="fill-white" />

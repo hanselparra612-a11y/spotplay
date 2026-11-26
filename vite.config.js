@@ -21,6 +21,10 @@ export default defineConfig({
       ignored: ['**/android/**', '**/dist/**', '**/public/uploads/**'],
     },
     proxy: {
+      '/v/': {
+        target: 'http://127.0.0.1:3001',
+        changeOrigin: false,
+      },
       '/api': {
         target: 'http://127.0.0.1:3001',
         changeOrigin: true,

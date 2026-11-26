@@ -58,7 +58,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
   const isLocal = !isNative && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const isTunnel = typeof window !== 'undefined' && window.location.hostname.includes('trycloudflare.com');
-  const tunnelVitrinaUrl = 'https://controversial-cosmetic-automobile-incomplete.trycloudflare.com/';
+  const tunnelVitrinaUrl = 'https://attended-flags-incorporated-bacteria.trycloudflare.com/';
 
   // En la App Nativa APK, siempre usar la URL segura oficial de producción (HTTPS)
   const baseUrl = isNative

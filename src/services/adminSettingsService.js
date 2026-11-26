@@ -7,10 +7,9 @@ const LEGACY_COUPONS_KEY = 'toktik_coupons_1986_v1';
 
 export const DEFAULT_PLATFORM_SETTINGS = {
   modelType: 'VITRINA_DESCENTRALIZADA', // Modelo Idéntico a VitrinaSpot
-  giftMarginRate: 0.40, // 40% de retención en regalos virtuales de vivos
+  giftMarginRate: 0.40, // Margen de economía virtual en directos
   verifiedStoreMonthlyFeeCOP: 39000, // Suscripción mensual de Tienda Verificada Vitrina ($39.000 COP)
-  adMinDailyBudgetCOP: 15000, // Presupuesto mínimo de pauta publicitaria diaria ($15.000 COP)
-  minWithdrawalCOP: 20000, // Mínimo de retiro a Nequi de creadores ($20.000 COP)
+  adMinDailyBudgetCOP: 15000, // Presupuesto de pauta publicitaria diaria ($15.000 COP)
   allowGuestPurchases: true,
   autoApproveVerifiedCreators: false,
   // ⏱️ Reglas de Tiempo y Rendimiento de Directos LIVE (Anti-Fantasmas & Protección de Red)

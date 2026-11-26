@@ -313,8 +313,8 @@ export default function ProfileView({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold">
-          <span>Cobrar</span>
+        <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
+          <span>Ver Saldo</span>
           <ArrowRight size={14} />
         </div>
       </div>
@@ -547,13 +547,23 @@ export default function ProfileView({
                 onClick={() => onSelectVideo(vid.id)}
                 className="relative aspect-3/4 bg-zinc-900 rounded overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform"
               >
-                <video
-                  src={vid.videoUrl}
-                  preload="metadata"
-                  playsInline
-                  className="w-full h-full object-cover"
-                  muted
-                />
+                {vid.cover || vid.thumbnail ? (
+                  <img
+                    src={vid.cover || vid.thumbnail}
+                    alt={vid.description || 'Video'}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <video
+                    src={`${vid.videoUrl}#t=0.001`}
+                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    className="w-full h-full object-cover pointer-events-none"
+                    muted
+                    playsInline
+                    preload="metadata"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 group-hover:opacity-40 transition-opacity" />
 
                 {/* Botón Editar Video (Solo en tus videos) */}

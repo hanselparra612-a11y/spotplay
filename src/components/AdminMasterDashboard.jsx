@@ -98,7 +98,7 @@ export default function AdminMasterDashboard({
   initialTab = 'overview',
 }) {
   const [activeTab, setActiveTab] = useState(initialTab); 
-  // 'overview' | 'withdrawals' | 'creators' | 'moderation' | 'campaigns' | 'broadcast' | 'settings' | 'accounting'
+  // 'overview' | 'admob' | 'coins_gifts' | 'campaigns' | 'creators' | 'moderation' | 'broadcast' | 'settings' | 'accounting'
 
   // 1. Configuraciones de la Plataforma
   const [platformSettings, setPlatformSettings] = useState(loadPlatformSettings);
@@ -212,48 +212,13 @@ export default function AdminMasterDashboard({
     desc: '',
     coins: 30,
     duration: 3,
-    reach: '4.000 - 8.000 personas',
+    reach: '500 - 1.200 reproducciones',
     goal: 'views',
     cta: 'Ver Video Completo 🚀',
     badge: 'Popular',
   });
 
-  // 4. Liquidaciones pendientes a creadores
-  const [pendingWithdrawals, setPendingWithdrawals] = useState([
-    {
-      id: 'RET-101',
-      creator: 'valeria_fit',
-      creatorName: 'Valeria Gómez',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
-      method: 'Transferencia Móvil',
-      accountNumber: '312 456 7890',
-      amountCOP: 85000,
-      date: 'Hoy, 2:15 PM',
-      status: 'PENDING',
-    },
-    {
-      id: 'RET-102',
-      creator: 'andres_tech',
-      creatorName: 'Andrés Morales',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
-      method: 'Bancolombia Ahorros',
-      accountNumber: '031-849201-92',
-      amountCOP: 140000,
-      date: 'Hoy, 11:30 AM',
-      status: 'PENDING',
-    },
-    {
-      id: 'RET-103',
-      creator: 'elparce_humor',
-      creatorName: 'Carlos Restrepo',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100',
-      method: 'Daviplata',
-      accountNumber: '300 987 6543',
-      amountCOP: 62000,
-      date: 'Ayer',
-      status: 'COMPLETED',
-    },
-  ]);
+  // 4. Liquidaciones a creadores: DESACTIVADAS (Economía 100% Cerrada en SpotCoins, Cero Egresos)
 
   if (!isOpen) return null;
 
@@ -365,7 +330,7 @@ export default function AdminMasterDashboard({
       `Ingresos Publicitarios Google AdMob Oficial (USD convertido a COP),$${admobEarnedCOP}`,
       `Margen Retención Regalos Virtuales & SpotCoins (40%),$${giftRevenueCOP}`,
       `Total Facturación Estimada Plataforma,$${platformEarningsCOP}`,
-      `Liquidaciones Pagadas a Creadores,-$288600`,
+      `Egresos Pagados a Terceros,$0 (Economía 100% Cerrada)`,
       `Riesgo Mercantil / Pasarelas Externas,$0 (100% Monetización Legal Google AdMob)`,
       `Ganancia Neta Dueño Spot Play,$${platformEarningsCOP}`,
     ].join('\n');
@@ -379,13 +344,6 @@ export default function AdminMasterDashboard({
     link.click();
     document.body.removeChild(link);
     alert('📥 Informe Contable de Spot Play en Excel / CSV descargado.');
-  };
-
-  const handleApproveWithdrawalLocal = (withdrawId) => {
-    setPendingWithdrawals((prev) =>
-      prev.map((w) => (w.id === withdrawId ? { ...w, status: 'COMPLETED' } : w))
-    );
-    alert('✅ Retiro marcado como liquidado y transferido exitosamente al creador.');
   };
 
   return (
@@ -463,7 +421,6 @@ export default function AdminMasterDashboard({
             { id: 'overview', label: 'Bóveda & Métricas', icon: DollarSign },
             { id: 'admob', label: 'Google AdMob (Play Store)', icon: ShieldCheck, badgeText: 'PLAY STORE OK', badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' },
             { id: 'coins_gifts', label: 'SpotCoins & Regalos', icon: Coins },
-            { id: 'withdrawals', label: 'Liquidación a Creadores', icon: Smartphone, badge: pendingWithdrawals.filter((w) => w.status === 'PENDING').length || null },
             { id: 'campaigns', label: 'Pauta & Packs', icon: Flame, badge: videos.filter((v) => v.isPromoted).length || null },
             { id: 'creators', label: 'Creadores ✓', icon: Award },
             { id: 'moderation', label: 'Moderación & Denuncias', icon: Shield, badge: reports.filter((r) => r.status === 'PENDING_REVIEW').length || null },
@@ -969,7 +926,7 @@ export default function AdminMasterDashboard({
                   </div>
                 </div>
                 <p className="text-[11px] text-zinc-300 leading-relaxed pt-1">
-                  💡 <strong>¿Cómo funciona tu monetización con Google AdMob?</strong> Los usuarios obtienen SpotCoins viendo videos bonificados (Rewarded Video Ads de Google AdMob 100% legal en Google Play). Cada vista te paga dólares que Google deposita en tu cuenta bancaria. Cuando un usuario envía un regalo a un creador en un video o LIVE, tú retienes el <strong>{Math.round((platformSettings.giftMarginRate || 0.40) * 100)}% de margen neto</strong> y el creador puede solicitar su liquidación bancaria.
+                  💡 <strong>¿Cómo funciona tu monetización con Google AdMob?</strong> Los usuarios obtienen SpotCoins viendo videos bonificados (Rewarded Video Ads de Google AdMob 100% legal en Google Play). Cada vista te paga dólares que Google deposita en tu cuenta bancaria. Los creadores usan sus SpotCoins exclusivamente para promover sus videos y atraer clientes a su Vitrina Comercial por WhatsApp, sin generar costos de liquidación para ti.
                 </p>
               </div>
 
@@ -1211,66 +1168,23 @@ export default function AdminMasterDashboard({
                 <p className="text-[10px] text-zinc-400">Ajusta tus márgenes y tarifas sin tocar código.</p>
               </div>
 
-              {/* 1. Tasa de Cambio SpotCoins */}
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              {/* Modelo de Economía Cerrada SpotCoins */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/15 via-[#181d26] to-amber-500/15 border border-emerald-400/30 space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-white">Tasa Oficial SpotCoins a COP</span>
-                  <span className="text-sm font-black text-amber-400 font-mono">
-                    1 SpotCoin = $10 COP
+                  <span className="font-bold text-white flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-emerald-400" />
+                    Modelo de Economía 100% Autosostenible
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    CERO EGRESOS
                   </span>
                 </div>
-                <p className="text-[10px] text-zinc-400">
-                  Valor base para liquidación y transferencia a billeteras móviles o cuentas bancarias de creadores.
+                <p className="text-[11px] text-zinc-300 leading-relaxed">
+                  Las SpotCoins son créditos virtuales de impulso dentro de la app. Los creadores y comerciantes las utilizan para pautar sus videos y ganar clientes en su Vitrina Comercial por WhatsApp. Tú recibes el 100% de los ingresos de Google AdMob en tu cuenta bancaria sin pagarle a terceros.
                 </p>
-              </div>
-
-              {/* 2. Margen de Regalos de Vivos */}
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-white">Retención en Regalos Virtuales (LIVEs)</span>
-                  <span className="text-sm font-black text-pink-400 font-mono">
-                    {((platformSettings.giftMarginRate || 0.40) * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="0.20"
-                  max="0.60"
-                  step="0.05"
-                  value={platformSettings.giftMarginRate || 0.40}
-                  onChange={(e) =>
-                    setPlatformSettings({ ...platformSettings, giftMarginRate: parseFloat(e.target.value) })
-                  }
-                  className="w-full accent-pink-500 cursor-pointer"
-                />
-                <p className="text-[10px] text-zinc-400">
-                  Por cada $10.000 COP en monedas que reciben los creadores en vivos, tú retienes ${(10000 * (platformSettings.giftMarginRate || 0.40)).toLocaleString('es-CO')} COP de comisión por servicio.
-                </p>
-              </div>
-
-              {/* 3. Mínimo de Retiro para Creadores */}
-              <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-white">Monto Mínimo de Liquidación (Creadores)</span>
-                  <span className="text-sm font-black text-emerald-400 font-mono">
-                    ${(platformSettings.minWithdrawalCOP || 20000).toLocaleString('es-CO')} COP
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {[10000, 20000, 50000].map((amt) => (
-                    <button
-                      key={amt}
-                      type="button"
-                      onClick={() => setPlatformSettings({ ...platformSettings, minWithdrawalCOP: amt })}
-                      className={`py-1.5 rounded-xl border text-[11px] font-bold ${
-                        (platformSettings.minWithdrawalCOP || 20000) === amt
-                          ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300'
-                          : 'bg-black/30 border-white/5 text-zinc-400'
-                      }`}
-                    >
-                      ${(amt / 1000).toFixed(0)}k COP
-                    </button>
-                  ))}
+                <div className="flex items-center justify-between pt-1 border-t border-white/10 text-[10px] text-zinc-400">
+                  <span>AdMob USD: <strong className="text-emerald-400">100% Tu Ganancia</strong></span>
+                  <span>Egresos en Efectivo: <strong className="text-white">$0 COP</strong></span>
                 </div>
               </div>
 
@@ -1475,7 +1389,7 @@ export default function AdminMasterDashboard({
                       desc: '3 días de recomendación prioritaria en el feed Para Ti',
                       coins: 30,
                       duration: 3,
-                      reach: '4.000 - 8.000 personas',
+                      reach: '500 - 1.200 reproducciones',
                       goal: 'views',
                       cta: 'Ver Video Completo 🚀',
                       badge: 'Especial',
@@ -1996,73 +1910,12 @@ export default function AdminMasterDashboard({
             </div>
           )}
 
-          {/* ================= 8. SOLICITUDES DE LIQUIDACIÓN A CREADORES ================= */}
-          {activeTab === 'withdrawals' && (
-            <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-white text-xs">Solicitudes de Liquidación de Creadores</span>
-                <span className="text-[10px] text-amber-400 font-bold">
-                  {pendingWithdrawals.filter((w) => w.status === 'PENDING').length} pendientes por liquidar
-                </span>
-              </div>
-
-              <div className="space-y-2.5">
-                {pendingWithdrawals.map((w) => (
-                  <div key={w.id} className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <img src={w.avatar} alt={w.creator} className="w-8 h-8 rounded-full object-cover" />
-                        <div>
-                          <p className="font-bold text-white text-xs">@{w.creator}</p>
-                          <p className="text-[10px] text-zinc-400">{w.creatorName} • {w.date}</p>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="text-xs font-black text-emerald-400 block">
-                          ${w.amountCOP.toLocaleString('es-CO')} COP
-                        </span>
-                        <span className={`text-[9px] font-bold uppercase ${
-                          w.status === 'COMPLETED' ? 'text-zinc-400' : 'text-amber-400'
-                        }`}>
-                          {w.status === 'COMPLETED' ? 'Liquidado' : 'Pendiente'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-2 rounded-xl bg-black/40 flex items-center justify-between text-[11px]">
-                      <span className="text-zinc-400">
-                        {w.method}: <strong className="text-white font-mono">{w.accountNumber}</strong>
-                      </span>
-                      <span className="text-cyan-400 font-bold">{w.id}</span>
-                    </div>
-
-                    {w.status === 'PENDING' ? (
-                      <button
-                        onClick={() => handleApproveWithdrawalLocal(w.id)}
-                        className="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-90 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                      >
-                        <CheckCircle2 size={14} />
-                        <span>Confirmar Transferencia al Creador (Marcar Liquidado)</span>
-                      </button>
-                    ) : (
-                      <div className="flex items-center justify-center gap-1 text-zinc-400 text-[10px] py-0.5">
-                        <CheckCircle2 size={12} className="text-emerald-400" />
-                        <span>Liquidación realizada con éxito</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* ================= 8. REPORTE CONTABLE Y FINANCIERO ================= */}
           {activeTab === 'accounting' && (
             <div className="space-y-3.5 text-xs">
               <div>
                 <h3 className="font-bold text-white text-xs">Informe Financiero y Contable Spot Play</h3>
-                <p className="text-[10px] text-zinc-400">Ingresos limpios por software, publicidad y economía de regalos virtuales.</p>
+                <p className="text-[10px] text-zinc-400">Ingresos limpios por software, publicidad oficial y economía cerrada.</p>
               </div>
 
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5 font-mono text-[11px]">
@@ -2075,12 +1928,8 @@ export default function AdminMasterDashboard({
                   <span className="text-emerald-400 font-bold">+${admobEarnedCOP.toLocaleString('es-CO')} COP</span>
                 </div>
                 <div className="flex justify-between text-zinc-400">
-                  <span>Margen Retención Regalos LIVE & SpotCoins (40%):</span>
-                  <span className="text-pink-400 font-bold">+${giftRevenueCOP.toLocaleString('es-CO')} COP</span>
-                </div>
-                <div className="flex justify-between text-zinc-400">
-                  <span>Liquidaciones Pagadas a Creadores:</span>
-                  <span className="text-zinc-400">-$288.600 COP</span>
+                  <span>Egresos en Efectivo / Pagos a Terceros:</span>
+                  <span className="text-emerald-400 font-bold">$0 COP (Economía 100% Autosostenible)</span>
                 </div>
                 <div className="flex justify-between text-emerald-400 font-semibold">
                   <span>Riesgo Mercantil / Pasarelas Externas:</span>
@@ -2088,7 +1937,7 @@ export default function AdminMasterDashboard({
                 </div>
                 <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-xs">
                   <span className="text-white">Utilidad Neta de la Plataforma:</span>
-                  <span className="text-emerald-400 font-black">${platformEarningsCOP.toLocaleString('es-CO')} COP</span>
+                  <span className="text-emerald-400 font-black">${admobEarnedCOP.toLocaleString('es-CO')} COP</span>
                 </div>
               </div>
 

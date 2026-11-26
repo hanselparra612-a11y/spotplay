@@ -45,11 +45,17 @@ function VideoCard({
   onOpenMyProfile,
   onOpenReport,
 }) {
+  const authorObj = video.author || {};
   const isOwnVideo = Boolean(
-    video.author?.id === 'me' ||
-    video.author?.id === currentUserId ||
-    (currentUser && (video.author?.id === currentUser.id || video.author?.username === currentUser.username))
+    authorObj.id === 'me' ||
+    authorObj.id === currentUserId ||
+    (currentUser && (authorObj.id === currentUser.id || authorObj.username === currentUser.username))
   );
+  const authorAvatar = (isOwnVideo && currentUser?.avatar)
+    ? currentUser.avatar
+    : (authorObj.avatar || currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80');
+  const authorUsername = authorObj.username || (isOwnVideo ? (currentUser?.username || 'tú') : 'creador');
+  const musicObj = video.music || { title: 'Sonido Original - Spot Play', author: 'Spot Play' };
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -59,6 +65,8 @@ function VideoCard({
   const [showReactions, setShowReactions] = useState(false);
   const [activeReactionEmoji, setActiveReactionEmoji] = useState(null);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
+  const [isFrameReady, setIsFrameReady] = useState(false);
+  const posterUrl = video.cover || video.thumbnail || (video.id ? `/uploads/thumbnails/${video.id}.jpg` : '');
 
   // 🚀 Estados para Aceleración y Scrubbing de Video en la Barra Horizontal
   const [videoSrc, setVideoSrc] = useState(video.videoUrl);
@@ -128,6 +136,7 @@ function VideoCard({
               vid.pause();
               vid.muted = true;
               setIsPlaying(false);
+              setIsFrameReady(false);
             } else {
               setIsPlaying(true);
             }
@@ -148,6 +157,7 @@ function VideoCard({
       }
     } else {
       // 🔇 SILENCIO Y PAUSA TOTAL AL SALIR DE LA PANTALLA ACTIVA
+      setIsFrameReady(false);
       if (isPlayPendingRef.current) {
         vid.muted = true;
         setTimeout(() => {
@@ -155,12 +165,14 @@ function VideoCard({
             videoRef.current.pause();
             videoRef.current.muted = true;
             setIsPlaying(false);
+            setIsFrameReady(false);
           }
         }, 60);
       } else {
         vid.pause();
         vid.muted = true;
         setIsPlaying(false);
+        setIsFrameReady(false);
       }
     }
 
@@ -326,21 +338,44 @@ function VideoCard({
       onPointerMove={resetIdleTimer}
       onTouchStart={resetIdleTimer}
     >
+      {/* 🎬 Poster Suave Absoluto en Alta Resolución (Elimina el salto de pantalla negra entre videos) */}
+      {posterUrl && (
+        <img
+          src={posterUrl}
+          alt="Vista previa video"
+          className={`absolute inset-0 w-full h-full object-cover pointer-events-none z-[2] transition-opacity duration-300 ${
+            isPlaying && isFrameReady && !isBuffering ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+          loading="eager"
+        />
+      )}
+
       {/* Video Element con loop nativo en GPU y Preload Inteligente */}
       <video
         ref={videoRef}
         src={shouldMountMedia ? videoSrc : undefined}
-        poster={video.cover || video.thumbnail || undefined}
-        className="w-full h-full object-cover cursor-pointer"
+        poster={posterUrl || undefined}
+        className="w-full h-full object-cover cursor-pointer z-[1]"
         autoPlay={isActive}
         playsInline
         webkit-playsinline="true"
         loop
         preload={preloadMode}
         muted={!isActive || isMuted}
+        controls={false}
+        controlsList="nodownload nofullscreen noremoteplayback"
+        disablePictureInPicture
+        disableRemotePlayback
         onWaiting={() => setIsBuffering(true)}
-        onPlaying={() => setIsBuffering(false)}
+        onPlaying={() => {
+          setIsBuffering(false);
+          setIsFrameReady(true);
+        }}
         onCanPlay={() => setIsBuffering(false)}
+        onLoadedData={() => {
+          setIsBuffering(false);
+          if (isActive) setIsFrameReady(true);
+        }}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={(e) => {
           setIsBuffering(false);
@@ -444,14 +479,14 @@ function VideoCard({
               if (isOwnVideo) {
                 if (onOpenMyProfile) onOpenMyProfile();
               } else {
-                onOpenCreatorProfile(video.author);
+                onOpenCreatorProfile(authorObj);
               }
             }}
             className="font-bold text-white text-sm drop-shadow-md cursor-pointer hover:underline"
           >
-            @{video.author.username}
+            @{authorUsername}
           </span>
-          {video.author.isVerified && (
+          {authorObj.isVerified && (
             <span className="w-3.5 h-3.5 rounded-full bg-cyan-400 text-black flex items-center justify-center text-[9px] font-black">
               ✓
             </span>
@@ -465,7 +500,7 @@ function VideoCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                const phone = (video.product.whatsapp || video.author?.whatsapp || '573105558899').replace(/[^0-9]/g, '');
+                const phone = (video.product.whatsapp || authorObj?.whatsapp || '573105558899').replace(/[^0-9]/g, '');
                 const msg = encodeURIComponent(`¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`);
                 window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
               }}
@@ -510,14 +545,14 @@ function VideoCard({
         <div
           onClick={(e) => {
             e.stopPropagation();
-            onOpenAudioDetail(video.music);
+            onOpenAudioDetail(musicObj);
           }}
           className="flex items-center gap-1.5 text-white/85 text-xs pointer-events-auto cursor-pointer hover:text-white group"
         >
           <Music size={12} className="shrink-0 animate-pulse text-[#FE2C55]" />
           <div className="overflow-hidden whitespace-nowrap w-44">
             <span className="inline-block text-[11px] drop-shadow group-hover:underline">
-              {video.music.title}
+              {musicObj.title}
             </span>
           </div>
         </div>
@@ -533,11 +568,15 @@ function VideoCard({
               if (isOwnVideo) {
                 if (onOpenMyProfile) onOpenMyProfile();
               } else {
-                onOpenCreatorProfile(video.author);
+                onOpenCreatorProfile(authorObj);
               }
             }}
-            src={video.author.avatar}
-            alt={video.author.username}
+            src={authorAvatar}
+            alt={authorUsername}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80';
+            }}
             className={`w-10 h-10 rounded-full border-2 object-cover shadow-lg cursor-pointer hover:scale-105 transition-transform ${
               isOwnVideo ? 'border-[#ffb800]' : 'border-[#ffb800]/80 shadow-[0_0_8px_rgba(255,184,0,0.35)]'
             }`}
@@ -546,16 +585,16 @@ function VideoCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onToggleFollow(video.author.id, video.author.username);
+                onToggleFollow(authorObj.id || 'creator', authorUsername);
               }}
               className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 shadow-md active:scale-75 ${
-                video.author.isFollowing
+                authorObj.isFollowing
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-black border border-black/40 scale-95'
                   : 'bg-gradient-to-tr from-[#ffb800] to-[#ff8800] text-black font-black hover:scale-110 shadow-[0_0_8px_rgba(255,184,0,0.6)]'
               }`}
-              title={video.author.isFollowing ? 'Siguiendo (Toca para dejar de seguir)' : 'Seguir creador'}
+              title={authorObj.isFollowing ? 'Siguiendo (Toca para dejar de seguir)' : 'Seguir creador'}
             >
-              {video.author.isFollowing ? (
+              {authorObj.isFollowing ? (
                 <Check size={11} strokeWidth={3} className="text-black" />
               ) : (
                 <Plus size={12} strokeWidth={3} className="text-black" />
@@ -653,7 +692,7 @@ function VideoCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onOpenGifts(video.author);
+              onOpenGifts(authorObj);
             }}
             className="w-8 h-8 flex items-center justify-center transition-transform active:scale-75 relative text-white hover:text-white/80"
           >

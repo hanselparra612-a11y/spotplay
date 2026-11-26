@@ -129,7 +129,12 @@ export default function ReportModal({ isOpen, onClose, video, onSubmitReport }) 
             <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
               <div className="w-12 h-14 rounded-xl bg-zinc-800 overflow-hidden shrink-0 border border-white/10">
                 {video.videoUrl ? (
-                  <video src={video.videoUrl} className="w-full h-full object-cover" muted />
+                  <video
+                    src={video.videoUrl}
+                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    className="w-full h-full object-cover"
+                    muted
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs">🎬</div>
                 )}

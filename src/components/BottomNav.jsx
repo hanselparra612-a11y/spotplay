@@ -3,7 +3,11 @@ import { Home, ShoppingBag, User } from 'lucide-react';
 
 export default function BottomNav({ activeTab, onSelectTab }) {
   return (
-    <nav className="absolute bottom-0 left-0 right-0 z-30 flex items-center justify-around min-h-[64px] pb-[max(12px,env(safe-area-inset-bottom,12px))] pt-3 bg-gradient-to-t from-[#05070b]/98 via-[#090c13]/80 to-transparent backdrop-blur-xl border-t border-white/[0.07] px-6 select-none pointer-events-auto shadow-[0_-12px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(255,184,0,0.06)]">
+    <nav className={`absolute bottom-0 left-0 right-0 z-30 flex items-center justify-around min-h-[64px] pb-[max(12px,env(safe-area-inset-bottom,12px))] pt-3 transition-all duration-200 select-none pointer-events-auto border-t border-white/10 px-6 ${
+      activeTab === 'feed'
+        ? 'bg-gradient-to-t from-black/60 via-black/20 to-transparent backdrop-blur-xs shadow-[0_-10px_25px_rgba(0,0,0,0.4)]'
+        : 'bg-[#090c13]/85 backdrop-blur-md shadow-[0_-10px_30px_rgba(0,0,0,0.7)]'
+    }`}>
       {/* 1. Inicio */}
       <button
         onClick={() => onSelectTab('feed')}

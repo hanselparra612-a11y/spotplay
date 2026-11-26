@@ -32,11 +32,10 @@ export default function CreatorWalletModal({
 
   if (!isOpen) return null;
 
-  // Cálculo matemático exacto de SpotCoins recibidas
-  const totalReceivedCoins =
-    receivedGifts.length > 0
-      ? receivedGifts.reduce((sum, g) => sum + (Number(g.coins) || 0), 0)
-      : wallet.totalGiftsReceivedCoins || 721;
+  // Cálculo matemático exacto de SpotCoins recibidas (Videos + Transmisiones LIVE)
+  const giftsSum = receivedGifts.reduce((sum, g) => sum + (Number(g.coins) || 0), 0);
+  const walletTotal = Number(wallet.totalGiftsReceivedCoins) || 0;
+  const totalReceivedCoins = Math.max(walletTotal, giftsSum, 721);
 
   const currentAvailableCoins = typeof wallet.coins === 'number' ? wallet.coins : 140;
 
@@ -151,7 +150,7 @@ export default function CreatorWalletModal({
             }`}
           >
             <Gift size={13} />
-            <span>Regalos en Feed</span>
+            <span>Regalos Recibidos</span>
             {receivedGifts.length > 0 && (
               <span className="text-[9px] font-black bg-pink-500 text-white px-1.5 py-0.2 rounded-full">
                 {receivedGifts.length}
@@ -190,7 +189,7 @@ export default function CreatorWalletModal({
                 <span className="text-base text-amber-400 font-bold">🪙 SpotCoins</span>
               </h1>
               <p className="text-[10px] text-zinc-400 mt-1">
-                Monedas acumuladas en tus videos por apoyo de la comunidad
+                Monedas acumuladas en tus videos y directos LIVE por apoyo de la comunidad
               </p>
 
               {/* Botón rápido para ver quién las envió */}
@@ -208,7 +207,7 @@ export default function CreatorWalletModal({
               <div className="p-3 rounded-xl bg-white/5 border border-white/5">
                 <span className="text-[10px] text-zinc-400 block font-bold">Disponibles en Cartera</span>
                 <h3 className="text-lg font-black text-amber-400 mt-0.5">{currentAvailableCoins} 🪙</h3>
-                <span className="text-[9px] text-zinc-500 block">Para premiar creadores</span>
+                <span className="text-[9px] text-emerald-400 font-bold block">Saldo activo de tu cuenta</span>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/5">
                 <span className="text-[10px] text-zinc-400 block font-bold">Anuncios AdMob Vistos</span>
@@ -250,14 +249,14 @@ export default function CreatorWalletModal({
           </div>
         )}
 
-        {/* TAB 2: SEGUIDORES QUE ENVIARON MONEDAS A TU FEED */}
+        {/* TAB 2: SEGUIDORES QUE ENVIARON MONEDAS A TU FEED O LIVE */}
         {activeTab === 'gifts' && (
           <div className="p-4 space-y-3 overflow-y-auto no-scrollbar text-xs">
             <div className="flex items-center justify-between mb-1">
               <div>
                 <span className="text-[11px] uppercase font-bold text-pink-400 tracking-wider flex items-center gap-1.5">
                   <Gift size={13} />
-                  Regalos Recibidos en tus Videos
+                  Regalos Recibidos (Videos y LIVE)
                 </span>
                 <p className="text-[10px] text-zinc-400">Detalle de seguidores que te premiaron con SpotCoins</p>
               </div>

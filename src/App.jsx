@@ -369,8 +369,11 @@ export default function App() {
             });
 
             setVideos(() => {
-              // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales
-              const sanitized = sortedServerVideos.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => v);
+              // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales y asegurar miniaturas
+              const sanitized = sortedServerVideos.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => {
+                const thumb = v.thumbnail || v.cover || `/uploads/thumbnails/${v.id}.jpg`;
+                return { ...v, thumbnail: thumb, cover: thumb };
+              });
               // Guardar lista oficial autoritativa en localStorage
               savePersistedVideos(sanitized);
               // 🎲 Aplicar métricas de visualización intercaladas con el catálogo completo del servidor
@@ -551,6 +554,39 @@ export default function App() {
     return ordered.length > 0 ? ordered : visibleVideos;
   }, [videos, feedSequence, feedFilter, blockedUsers]);
 
+  // 🎬 Detección y salto directo a video compartido por enlace (#video-[id] o ?v=[id])
+  useEffect(() => {
+    const handleCheckSharedVideo = () => {
+      const hash = window.location.hash || '';
+      let targetId = null;
+      if (hash.startsWith('#video-')) {
+        targetId = decodeURIComponent(hash.replace('#video-', ''));
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('v')) targetId = params.get('v');
+      }
+
+      if (targetId && displayedVideos.length > 0) {
+        const foundIdx = displayedVideos.findIndex((v) => v.id === targetId);
+        if (foundIdx !== -1) {
+          setCurrentTab('feed');
+          setFeedFilter('foryou');
+          setActiveVideoIndex(foundIdx);
+          setIsFeedPlaybackActive(true);
+          setTimeout(() => {
+            if (videoRefs.current && videoRefs.current[foundIdx]) {
+              videoRefs.current[foundIdx].scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 250);
+        }
+      }
+    };
+
+    handleCheckSharedVideo();
+    window.addEventListener('hashchange', handleCheckSharedVideo);
+    return () => window.removeEventListener('hashchange', handleCheckSharedVideo);
+  }, [displayedVideos]);
+
   // ♾️ Extender feed automáticamente con un nuevo ciclo aleatorio e intercalado
   const handleExtendFeed = useCallback(() => {
     if (isExtendingFeedRef.current || feedFilter !== 'foryou') return;
@@ -606,12 +642,12 @@ export default function App() {
             }
           }
         });
-        if (candidateIndex !== -1 && maxRatio >= 0.6) {
+        if (candidateIndex !== -1 && maxRatio >= 0.5) {
           setActiveVideoIndex((prev) => (prev !== candidateIndex ? candidateIndex : prev));
         }
       },
       {
-        threshold: [0.6, 0.75],
+        threshold: [0.5, 0.75],
       }
     );
 
@@ -1408,35 +1444,6 @@ export default function App() {
     });
   };
 
-  // 💸 Handle Creator Wallet Withdrawal
-  const handleWithdrawSuccess = (withdrawData) => {
-    const amountNum = typeof withdrawData === 'object' ? Number(withdrawData.amount) : Number(withdrawData);
-    const method = typeof withdrawData === 'object' ? (withdrawData.method || 'nequi') : 'nequi';
-    const accountNumber = typeof withdrawData === 'object' ? (withdrawData.accountNumber || '') : '';
-
-    setCurrentUser((prev) => {
-      const currentTransactions = prev.wallet?.transactions || [];
-      const newTx = {
-        id: `tx-wd-${Date.now()}`,
-        type: 'WITHDRAWAL',
-        title: `Retiro a ${method.toUpperCase()}`,
-        subtitle: accountNumber ? `Cuenta/Cel: ${accountNumber}` : 'Transferencia procesada',
-        amount: -amountNum,
-        status: 'COMPLETED',
-        date: 'Hoy',
-        icon: 'withdraw',
-      };
-
-      return {
-        ...prev,
-        wallet: {
-          ...prev.wallet,
-          balanceCOP: Math.max(0, (prev.wallet?.balanceCOP || 0) - amountNum),
-          transactions: [newTx, ...currentTransactions],
-        },
-      };
-    });
-  };
 
   // 🔥 Handle Video Promotion (In-Feed Ads con cobro real, paquetes y segmentación)
   const handlePromoteSuccess = ({
@@ -1511,12 +1518,15 @@ export default function App() {
   // 🔴 Handle Live Stream Finished (Calibrado Google AdMob & SpotCoins)
   const handleFinishLive = ({ totalCoins = 0, giftCoins = 0, admobCoins = 0, earnedCOP = 0, giftsCount = 0, viewers = 0 }) => {
     const coinsToAdd = totalCoins > 0 ? totalCoins : Math.round(earnedCOP / 100);
+    const giftCoinsReceived = giftCoins > 0 ? giftCoins : coinsToAdd;
+
     if (coinsToAdd > 0 || earnedCOP > 0) {
       setCurrentUser((prev) => {
         const prevWallet = prev?.wallet || {};
         const prevCoins = typeof prevWallet.coins === 'number' ? prevWallet.coins : 140;
         const prevTotalReceived = typeof prevWallet.totalGiftsReceivedCoins === 'number' ? prevWallet.totalGiftsReceivedCoins : 721;
         const currentTransactions = prevWallet.transactions || [];
+        const currentReceivedGifts = Array.isArray(prev.receivedGifts) ? prev.receivedGifts : [];
 
         const newTx = {
           id: `tx-live-${Date.now()}`,
@@ -1530,6 +1540,20 @@ export default function App() {
           icon: 'gift',
         };
 
+        const newGiftRecord = {
+          id: `rg-live-${Date.now()}`,
+          giftId: 'gift-live',
+          giftName: 'Regalos en Transmisión LIVE',
+          emoji: '👑',
+          coins: giftCoinsReceived,
+          senderName: 'Audiencia en Vivo',
+          senderUsername: 'comunidad_live',
+          senderAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+          videoTitle: `En Vivo (${viewers} espectadores)`,
+          videoId: `live-${Date.now()}`,
+          date: 'Justo ahora',
+        };
+
         const updatedUser = {
           ...prev,
           wallet: {
@@ -1540,6 +1564,7 @@ export default function App() {
             giftEarningsCOP: (prevWallet.giftEarningsCOP || 0) + (earnedCOP || coinsToAdd * 100),
             transactions: [newTx, ...currentTransactions],
           },
+          receivedGifts: giftCoinsReceived > 0 ? [newGiftRecord, ...currentReceivedGifts] : currentReceivedGifts,
         };
 
         savePersistedUser(updatedUser);
@@ -2113,7 +2138,6 @@ export default function App() {
           wallet={currentUser.wallet}
           receivedGifts={currentUser.receivedGifts}
           onClose={() => setIsWalletOpen(false)}
-          onWithdrawSuccess={handleWithdrawSuccess}
           onWatchAdForCoins={() => {
             setIsWalletOpen(false);
             setIsAdMobRewardedOpen(true);

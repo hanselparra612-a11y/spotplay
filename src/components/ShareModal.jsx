@@ -11,8 +11,8 @@ export default function ShareModal({ isOpen, onClose, video, onShareSuccess, onO
 
   if (!isOpen || !video) return null;
 
-  // Construir URL limpia del video
-  const shareUrl = `${window.location.origin}/#video-${video.id}`;
+  // Construir URL limpia del video con soporte Open Graph para WhatsApp y Redes Sociales
+  const shareUrl = `${window.location.origin}/v/${video.id}`;
   const shareTitle = `🎬 Mira este video de @${video.author?.username || 'Spot Play'}`;
   const shareText = `🔥 ¡Mira este video en Spot Play!: "${video.description?.slice(0, 80) || ''}..." 👇\n${shareUrl}`;
 
@@ -165,7 +165,12 @@ export default function ShareModal({ isOpen, onClose, video, onShareSuccess, onO
         <div className="flex items-center justify-between pb-3 border-b border-white/5">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="w-10 h-10 rounded-xl overflow-hidden bg-black/50 border border-white/10 shrink-0 relative">
-              <video src={video.videoUrl} className="w-full h-full object-cover" muted />
+              <video
+                src={video.videoUrl}
+                poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                className="w-full h-full object-cover"
+                muted
+              />
               <div className="absolute inset-0 bg-black/20" />
             </div>
             <div className="truncate">

@@ -143,7 +143,10 @@ export function loadPersistedVideos() {
           })
         : [];
       if (cleaned.length > 0) {
-        list = cleaned;
+        // Asegurar que si INITIAL_VIDEOS tiene nuevos videos subidos, se incluyan siempre
+        const existingIds = new Set(cleaned.map((v) => v.id));
+        const missingFromInitial = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id));
+        list = [...missingFromInitial, ...cleaned];
       }
     }
     return list.map((v) => {

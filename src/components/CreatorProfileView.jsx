@@ -190,7 +190,22 @@ export default function CreatorProfileView({
               onClick={() => onSelectVideo(video.id, creator)}
               className="relative aspect-3/4 bg-zinc-900 rounded overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform"
             >
-              <video src={video.videoUrl} className="w-full h-full object-cover" muted preload="metadata" />
+              {video.cover || video.thumbnail ? (
+                <img
+                  src={video.cover || video.thumbnail}
+                  alt={video.description || 'Video'}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              ) : (
+                <video
+                  src={video.videoUrl}
+                  poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                  className="w-full h-full object-cover"
+                  muted
+                  preload="metadata"
+                />
+              )}
               <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
 
               {/* Botón Editar si es tu propio perfil */}

@@ -28,3 +28,9 @@ iniciar_estudio.bat
 *.njsproj
 *.sln
 *.sw?
+ 
+*.apk
+apk_release/
+android/app/build/
+android/.gradle/
+android/build/

@@ -30,7 +30,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialRegis
     try {
       if (isRegisterMode) {
         const newUser = await registerWithFirebase({ email, password, name, username });
-        alert(`🎉 ¡Bienvenido a Spot Play, @${newUser.username}!\nRecibiste 50 SpotCoins de bienvenida en tu billetera.`);
+        alert(`🎉 ¡Bienvenido a Spot Play, @${newUser.username}!\nRecibiste 20 SpotCoins de bienvenida en tu billetera.`);
         onAuthSuccess(newUser);
       } else {
         const loggedUser = await loginWithFirebase({ email, password });

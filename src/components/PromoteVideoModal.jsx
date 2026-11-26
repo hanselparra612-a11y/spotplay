@@ -133,9 +133,9 @@ export default function PromoteVideoModal({
   const coinsNeeded = selectedPack ? (selectedPack.coins || 20) : (budget || 20);
 
   const budgetOptions = [
-    { value: 20, coins: 20, reach: '1.500 - 3.500 personas', label: '20 SpotCoins 🪙' },
-    { value: 50, coins: 50, reach: '5.000 - 12.000 personas', label: '50 SpotCoins 🪙', popular: true },
-    { value: 100, coins: 100, reach: '15.000 - 30.000 personas', label: '100 SpotCoins 🪙' },
+    { value: 20, coins: 20, reach: '250 - 600 reproducciones prioritarias', label: '20 SpotCoins 🪙' },
+    { value: 50, coins: 50, reach: '800 - 1.800 reproducciones en Para Ti', label: '50 SpotCoins 🪙', popular: true },
+    { value: 100, coins: 100, reach: '2.500 - 5.000 reproducciones garantizadas', label: '100 SpotCoins 🪙' },
   ];
 
   const handleSelectPack = (pack) => {

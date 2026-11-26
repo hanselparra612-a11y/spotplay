@@ -226,7 +226,12 @@ export default function ExploreView({
                     className="w-36 p-2 bg-gradient-to-b from-[#181a24] to-[#12141c] rounded-2xl shrink-0 border border-amber-500/30 hover:border-amber-400 transition-all cursor-pointer shadow-md group flex flex-col"
                   >
                     <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black mb-1.5">
-                      <video src={video.videoUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted />
+                      <video
+                        src={video.videoUrl}
+                        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        muted
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                       {Boolean(video.product.price) && (
                         <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-amber-400 text-black text-[9px] font-mono font-black shadow">
@@ -315,6 +320,7 @@ export default function ExploreView({
                 >
                   <video
                     src={video.videoUrl}
+                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
                     className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-300"
                     muted
                   />
@@ -407,7 +413,12 @@ export default function ExploreView({
                       onClick={() => onSelectVideo && onSelectVideo(video.id)}
                       className="group relative aspect-9/14 bg-[#14161f] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/5 hover:border-[#ffb800]/40 transition-all"
                     >
-                      <video src={video.videoUrl} className="w-full h-full object-cover" muted />
+                      <video
+                        src={video.videoUrl}
+                        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                        className="w-full h-full object-cover"
+                        muted
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                       <div className="absolute bottom-2 left-2 right-2 text-white">
                         <p className="text-[11px] font-semibold line-clamp-2 leading-tight drop-shadow mb-1">
@@ -437,7 +448,12 @@ export default function ExploreView({
                   onClick={() => onSelectVideo && onSelectVideo(video.id)}
                   className="group relative aspect-9/14 bg-[#14161f] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
                 >
-                  <video src={video.videoUrl} className="w-full h-full object-cover" muted />
+                  <video
+                    src={video.videoUrl}
+                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    className="w-full h-full object-cover"
+                    muted
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   <div className="absolute bottom-2 left-2 right-2 text-white">
                     <p className="text-[11px] font-semibold line-clamp-2 leading-tight drop-shadow mb-1">
@@ -460,7 +476,12 @@ export default function ExploreView({
                   className="group relative bg-[#141822] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-amber-500/20 hover:border-amber-400 transition-all flex flex-col"
                 >
                   <div className="relative aspect-9/12 bg-black">
-                    <video src={video.videoUrl} className="w-full h-full object-cover" muted />
+                    <video
+                    src={video.videoUrl}
+                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    className="w-full h-full object-cover"
+                    muted
+                  />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent" />
                     <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[#ffb800] text-[9px] font-bold border border-amber-400/40 flex items-center gap-1">
                       <ShoppingBag size={10} />

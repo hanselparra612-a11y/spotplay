@@ -484,7 +484,7 @@ export default function LiveStreamModal({
 
         {/* 🔭 Selector de Lente & Encuadre Gran Angular (0.5x / 1x / Ajustar / Espejo) */}
         {stream && (
-          <div className="absolute right-3.5 top-20 z-30 flex flex-col items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-2xl border border-white/15 shadow-xl">
+          <div className="absolute right-3.5 top-[max(126px,calc(env(safe-area-inset-top,0px)+98px))] z-30 flex flex-col items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-2xl border border-white/15 shadow-xl">
             <button
               onClick={() => handleSetZoom('0.5x')}
               className={`w-8 h-7 rounded-xl text-[10px] font-black tracking-wider flex items-center justify-center transition-all ${
@@ -562,76 +562,84 @@ export default function LiveStreamModal({
       <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10" />
 
       {/* 🌟 HEADER DEL LIVE (Z-20) */}
-      <header className="relative z-20 flex items-center justify-between px-3.5 pt-[max(14px,env(safe-area-inset-top,14px))] pb-2 pointer-events-auto">
-        {/* Creator Info + Live Badge */}
-        <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md border border-white/10 rounded-full pl-1.5 pr-3 py-1">
-          <img
-            src={currentUser.avatar}
-            alt={currentUser.name}
-            className="w-8 h-8 rounded-full object-cover border border-white/20"
-          />
-          <div className="flex flex-col text-left">
-            <span className="text-xs font-bold text-white truncate max-w-[100px]">
-              @{currentUser.username}
-            </span>
-            <div className="flex items-center gap-1.5 text-[10px]">
-              <span className="flex items-center gap-1 text-red-500 font-black">
-                <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
-                EN VIVO
+      <header className="relative z-20 flex flex-col gap-2 px-3.5 pt-[max(44px,calc(env(safe-area-inset-top,0px)+16px))] pb-2 pointer-events-auto">
+        {/* Fila Principal: Creador a la izquierda + Espectadores y Botón Finalizar Rojo a la derecha */}
+        <div className="flex items-center justify-between gap-2 w-full">
+          {/* Creator Info + Live Badge */}
+          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/15 rounded-full pl-1.5 pr-3 py-1 shrink min-w-0">
+            <img
+              src={currentUser.avatar}
+              alt={currentUser.name}
+              className="w-8 h-8 rounded-full object-cover border border-white/20 shrink-0"
+            />
+            <div className="flex flex-col text-left min-w-0">
+              <span className="text-xs font-bold text-white truncate max-w-[90px] sm:max-w-[120px]">
+                @{currentUser.username}
               </span>
-              <span className="text-zinc-400">|</span>
-              {remainingSec !== null ? (
-                <span
-                  className={`font-mono flex items-center gap-1 font-bold ${
-                    remainingSec <= 300
-                      ? remainingSec <= 60
-                        ? 'text-red-400 font-black animate-pulse'
-                        : 'text-amber-300 font-black animate-pulse'
-                      : 'text-cyan-300'
-                  }`}
-                  title="Tiempo restante de esta sesión de Live"
-                >
-                  <Timer size={11} className={remainingSec <= 300 ? 'text-amber-400' : 'text-cyan-400'} />
-                  {formatTimer(remainingSec)} rest.
+              <div className="flex items-center gap-1.5 text-[10px]">
+                <span className="flex items-center gap-1 text-red-500 font-black shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                  LIVE
                 </span>
-              ) : (
-                <span className="text-zinc-300 font-mono flex items-center gap-1">
-                  <Clock size={11} className="text-zinc-400" />
-                  {formatTimer(liveSeconds)}
-                </span>
-              )}
+                <span className="text-zinc-500">|</span>
+                {remainingSec !== null ? (
+                  <span
+                    className={`font-mono flex items-center gap-1 font-bold ${
+                      remainingSec <= 300
+                        ? remainingSec <= 60
+                          ? 'text-red-400 font-black animate-pulse'
+                          : 'text-amber-300 font-black animate-pulse'
+                        : 'text-cyan-300'
+                    }`}
+                    title="Tiempo restante de esta sesión de Live"
+                  >
+                    <Timer size={10} className={remainingSec <= 300 ? 'text-amber-400' : 'text-cyan-400'} />
+                    {formatTimer(remainingSec)}
+                  </span>
+                ) : (
+                  <span className="text-zinc-300 font-mono flex items-center gap-1">
+                    <Clock size={10} className="text-zinc-400" />
+                    {formatTimer(liveSeconds)}
+                  </span>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Acciones Derecha: Espectadores + Botón Finalizar Destacado */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Espectadores */}
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-bold shadow-sm">
+              <Eye size={13} className="text-cyan-400" />
+              <span>{formatNumber(viewers)}</span>
+            </div>
+
+            {/* Botón Finalizar Rojo (100% visible, amplio, seguro y sin recortes) */}
+            <button
+              type="button"
+              onClick={() => handleEndLiveRequest('user')}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full text-xs font-black tracking-wider uppercase shadow-[0_2px_12px_rgba(220,38,38,0.7)] border border-red-300/40 active:scale-95 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+              title="Finalizar transmisión en vivo"
+            >
+              <X size={13} strokeWidth={3} className="text-white" />
+              <span>Finalizar</span>
+            </button>
           </div>
         </div>
 
-        {/* Viewers & Diamonds counter + End Live Button */}
-        <div className="flex items-center gap-2">
-          {/* Espectadores */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-white text-xs font-bold">
-            <Eye size={13} className="text-cyan-400" />
-            <span>{formatNumber(viewers)}</span>
+        {/* Fila Secundaria: SpotCoins / Regalos Acumulados (Estilo TikTok LIVE, debajo del creador) */}
+        <div className="flex items-center justify-start pl-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/50 text-amber-300 text-[11px] font-black shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+            <Coins size={13} className="text-amber-400 fill-amber-400" />
+            <span className="font-mono text-xs">+{totalLiveCoins}</span>
+            <span className="text-[10px] text-amber-400/80 uppercase font-bold tracking-tight">SpotCoins</span>
           </div>
-
-          {/* Ganancias SpotCoins acumuladas en vivo (Calibrado AdMob) */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/25 via-yellow-500/20 to-amber-600/25 backdrop-blur-md border border-amber-400/50 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(255,184,0,0.25)] animate-in fade-in">
-            <Coins size={14} className="text-amber-400 fill-amber-400" />
-            <span className="font-mono">+{totalLiveCoins}</span>
-            <span className="text-[10px] text-amber-400/80 uppercase font-bold tracking-tight">Coins</span>
-          </div>
-
-          {/* Botón Finalizar */}
-          <button
-            onClick={() => handleEndLiveRequest('user')}
-            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs font-black tracking-wider uppercase shadow-lg active:scale-95 transition-all"
-          >
-            Finalizar
-          </button>
         </div>
       </header>
 
       {/* ⚠️ BANNER DE AVISO: QUEDAN MENOS DE 5 MINUTOS DE SESIÓN */}
       {showTimeWarning && (
-        <div className="absolute top-16 inset-x-3.5 z-30 flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/90 via-red-500/90 to-amber-600/90 backdrop-blur-md text-white shadow-2xl animate-in slide-in-from-top duration-300 border border-white/25">
+        <div className="absolute top-[max(116px,calc(env(safe-area-inset-top,0px)+90px))] inset-x-3.5 z-30 flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/90 via-red-500/90 to-amber-600/90 backdrop-blur-md text-white shadow-2xl animate-in slide-in-from-top duration-300 border border-white/25">
           <div className="flex items-center gap-2 text-left">
             <Timer size={18} className="text-amber-200 animate-pulse shrink-0" />
             <div className="leading-tight">
@@ -676,7 +684,7 @@ export default function LiveStreamModal({
 
       {/* 🎁 POPUP DE REGALO RECIBIDO EN TIEMPO REAL */}
       {currentGiftPopup && (
-        <div className="absolute top-28 left-4 z-30 flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-black/85 backdrop-blur-xl border border-amber-400/60 shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-in slide-in-from-left duration-300 pointer-events-none">
+        <div className="absolute top-[max(140px,calc(env(safe-area-inset-top,0px)+112px))] left-4 z-30 flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-black/85 backdrop-blur-xl border border-amber-400/60 shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-in slide-in-from-left duration-300 pointer-events-none">
           <span className="text-3xl animate-bounce">{currentGiftPopup.gift.emoji}</span>
           <div>
             <p className="text-xs font-black text-amber-300">
@@ -692,7 +700,7 @@ export default function LiveStreamModal({
 
       {/* 🔥 RACHA DE REGALOS COMBO */}
       {giftCombo > 1 && (
-        <div className="absolute top-44 left-4 z-30 flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-[#FE2C55] text-black font-black text-xs shadow-[0_0_25px_rgba(254,44,85,0.9)] animate-bounce pointer-events-none border border-white/40">
+        <div className="absolute top-[max(200px,calc(env(safe-area-inset-top,0px)+172px))] left-4 z-30 flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-[#FE2C55] text-black font-black text-xs shadow-[0_0_25px_rgba(254,44,85,0.9)] animate-bounce pointer-events-none border border-white/40">
           <Flame size={16} className="fill-black" />
           <span>¡COMBO x{giftCombo}! 🔥</span>
         </div>
