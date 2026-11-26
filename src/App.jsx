@@ -67,78 +67,93 @@ function shuffleArray(items) {
   return result;
 }
 
-// 🎯 Algoritmo Inteligente de Feed (Estilo TikTok / VitrinaSpot):
-// 1. Prioriza los videos nuevos subidos por el usuario para que nunca falte ninguna publicación en el feed.
-// 2. Garantiza que NINGÚN video ni autor se repita consecutivamente.
-// 3. Distribuye de forma equilibrada los videos subidos y el catálogo oficial.
+// 🎯 Algoritmo de Descubrimiento Inteligente y Equitativo (Estilo TikTok / VitrinaSpot):
+// 1. Barajado dinámico cada vez que se abre la app (nunca la misma secuencia inicial).
+// 2. Agrupación por creador/autor y distribución Round-Robin aleatoria.
+// 3. Regla Anti-Consecutiva Estricta: NUNCA dos videos del mismo autor o con el mismo ID seguidos.
 function generateShuffledFeed(videoList, lastVideoId = null) {
   if (!Array.isArray(videoList) || videoList.length === 0) return [];
 
   const available = videoList.filter((v) => !v.isHidden);
   if (available.length === 0) return [];
+  if (available.length === 1) return [available[0].id];
 
-  // Separar los videos subidos por el usuario y los videos oficiales
-  const userUploads = available.filter((v) => v.id && v.id.startsWith('uploaded-'));
-  const catalogVideos = available.filter((v) => !v.id || !v.id.startsWith('uploaded-'));
+  // 1. Agrupar videos por autor (id, username o nombre)
+  const authorBuckets = new Map();
+  available.forEach((video) => {
+    const authorKey =
+      video.author?.id ||
+      video.author?.username ||
+      video.author?.name ||
+      'anon_' + (video.id || Math.random());
+    if (!authorBuckets.has(authorKey)) {
+      authorBuckets.set(authorKey, []);
+    }
+    authorBuckets.get(authorKey).push(video);
+  });
 
-  // Ordenar los subidos por fecha más reciente
-  userUploads.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-  // Barajar el catálogo oficial
-  const shuffledCatalog = shuffleArray([...catalogVideos]);
-
-  // Intercalar equilibradamente: cada 1 o 2 videos oficiales, incluir un video del usuario
-  const fullSequence = [];
-  let userIdx = 0;
-  let catIdx = 0;
-
-  // Si hay videos del usuario, el más reciente arranca de primero o segundo
-  if (userUploads.length > 0 && Math.random() > 0.4) {
-    fullSequence.push(userUploads[userIdx++]);
+  // 2. Barajar internamente los videos de cada autor para que nunca salgan en el mismo orden
+  for (const [authorKey, vList] of authorBuckets.entries()) {
+    authorBuckets.set(authorKey, shuffleArray(vList));
   }
 
-  while (userIdx < userUploads.length || catIdx < shuffledCatalog.length) {
-    // Agregar 1 o 2 del catálogo
-    if (catIdx < shuffledCatalog.length) {
-      fullSequence.push(shuffledCatalog[catIdx++]);
+  // 3. Intercalar de forma Round-Robin aleatoria evitando autores consecutivos
+  const distributed = [];
+  let lastAuthor = null;
+
+  while (authorBuckets.size > 0) {
+    const candidateAuthors = Array.from(authorBuckets.keys()).filter(
+      (a) => (authorBuckets.get(a) || []).length > 0
+    );
+    if (candidateAuthors.length === 0) break;
+
+    // Buscar autores diferentes al autor del video anterior
+    let validCandidates = candidateAuthors.filter((a) => a !== lastAuthor);
+    if (validCandidates.length === 0) {
+      // Si solo quedan videos del mismo autor, se usan
+      validCandidates = candidateAuthors;
     }
-    if (catIdx < shuffledCatalog.length && userIdx >= userUploads.length) {
-      fullSequence.push(shuffledCatalog[catIdx++]);
-    }
-    // Agregar 1 del usuario
-    if (userIdx < userUploads.length) {
-      fullSequence.push(userUploads[userIdx++]);
+
+    // Elegir aleatoriamente entre los autores válidos para máxima variedad y sorpresa
+    const selectedAuthor = validCandidates[Math.floor(Math.random() * validCandidates.length)];
+    const authorVideos = authorBuckets.get(selectedAuthor);
+    const video = authorVideos.shift();
+    distributed.push(video);
+    lastAuthor = selectedAuthor;
+
+    if (authorVideos.length === 0) {
+      authorBuckets.delete(selectedAuthor);
     }
   }
 
-  // Prevención estricta de videos consecutivos iguales:
-  const finalResult = [];
-  for (let i = 0; i < fullSequence.length; i++) {
-    const cur = fullSequence[i];
-    const prev = finalResult[finalResult.length - 1];
-    if (prev && (prev.id === cur.id || prev.videoUrl === cur.videoUrl)) {
-      // Buscar el siguiente elemento que no sea idéntico y cambiarlo
-      let swapIdx = -1;
-      for (let j = i + 1; j < fullSequence.length; j++) {
-        if (fullSequence[j].id !== cur.id && fullSequence[j].videoUrl !== cur.videoUrl) {
-          swapIdx = j;
+  // 4. Post-proceso de seguridad anti-consecutivo estricto:
+  // Si quedaron dos del mismo autor pegados al final, intercambiarlos con una posición anterior
+  for (let i = 1; i < distributed.length; i++) {
+    const prev = distributed[i - 1];
+    const cur = distributed[i];
+    const prevAuthor = prev.author?.id || prev.author?.username || prev.author?.name;
+    const curAuthor = cur.author?.id || cur.author?.username || cur.author?.name;
+
+    if ((prevAuthor && curAuthor && prevAuthor === curAuthor) || prev.id === cur.id) {
+      // Buscar una posición j hacia adelante para intercambiar con un autor diferente
+      for (let j = i + 1; j < distributed.length; j++) {
+        const next = distributed[j];
+        const nextAuthor = next.author?.id || next.author?.username || next.author?.name;
+        if (nextAuthor !== prevAuthor && next.id !== prev.id) {
+          [distributed[i], distributed[j]] = [distributed[j], distributed[i]];
           break;
         }
       }
-      if (swapIdx !== -1) {
-        [fullSequence[i], fullSequence[swapIdx]] = [fullSequence[swapIdx], fullSequence[i]];
-      }
     }
-    finalResult.push(fullSequence[i]);
   }
 
-  // Si se provee el último video del ciclo anterior, evitar que el primer video sea idéntico
-  if (lastVideoId && finalResult.length > 1 && finalResult[0].id === lastVideoId) {
-    const temp = finalResult.shift();
-    finalResult.push(temp);
+  // 5. Si se proporciona lastVideoId (scroll infinito), evitar que el primero del nuevo lote sea idéntico al último
+  if (lastVideoId && distributed.length > 1 && distributed[0].id === lastVideoId) {
+    const swapIdx = Math.floor(Math.random() * (distributed.length - 1)) + 1;
+    [distributed[0], distributed[swapIdx]] = [distributed[swapIdx], distributed[0]];
   }
 
-  return finalResult.map((v) => v.id);
+  return distributed.map((v) => v.id);
 }
 
 export default function App() {
