@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 export default function VitrinaView({ currentUser, onBack, openStore = false, isVisible = true }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -53,15 +54,19 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
     return () => clearTimeout(timer);
   }, [iframeKey]);
 
-  // Detección de entorno: Render producción vs Túnel Cloudflare vs Desarrollo local
-  const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  // Detección de entorno: Nativo Android (APK) vs Render producción vs Túnel Cloudflare vs Desarrollo local
+  const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
+  const isLocal = !isNative && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const isTunnel = typeof window !== 'undefined' && window.location.hostname.includes('trycloudflare.com');
   const tunnelVitrinaUrl = 'https://shed-son-rated-elizabeth.trycloudflare.com/';
 
-  const baseUrl = isLocal 
-    ? 'http://127.0.0.1:4000/' 
-    : (isTunnel ? tunnelVitrinaUrl : 'https://vitrinaspot.onrender.com/');
-  const externalUrl = isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/');
+  // En la App Nativa APK, siempre usar la URL segura oficial de producción (HTTPS)
+  const baseUrl = isNative
+    ? 'https://vitrinaspot.onrender.com/'
+    : (isLocal ? 'http://127.0.0.1:4000/' : (isTunnel ? tunnelVitrinaUrl : 'https://vitrinaspot.onrender.com/'));
+  const externalUrl = isNative
+    ? 'https://vitrinaspot.onrender.com/'
+    : (isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/'));
 
   const params = new URLSearchParams();
   params.set('v', '28.9');
@@ -117,7 +122,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#0c0f14] z-20 pb-[60px]">
+    <div className="relative w-full h-full flex flex-col bg-[#121723] z-20 pt-[max(12px,calc(env(safe-area-inset-top,14px)+6px))] pb-[max(78px,calc(env(safe-area-inset-bottom,14px)+66px))]">
       {/* Contenedor del Iframe / Webview a Pantalla Completa Nativa */}
       <div className="relative flex-1 w-full min-h-0 overflow-hidden bg-[#0c0f14]">
         {isLoading && (
