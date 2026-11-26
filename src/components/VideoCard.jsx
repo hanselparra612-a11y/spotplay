@@ -470,7 +470,7 @@ function VideoCard({
       <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-10" />
 
       {/* Bottom Video Info (Con ancho completo y libre de solapamientos) */}
-      <div className="video-bottom-info absolute bottom-[76px] left-3.5 right-4 z-20 pointer-events-none text-left will-change-[opacity,transform] origin-bottom-left">
+      <div className="video-bottom-info absolute bottom-[calc(max(106px,calc(env(safe-area-inset-bottom,12px)+92px)))] left-3.5 right-4 z-20 pointer-events-none text-left will-change-[opacity,transform] origin-bottom-left">
         {/* Creator Handle + Promoted Tag */}
         <div className="flex items-center gap-1.5 mb-1.5 pointer-events-auto">
           <span
@@ -761,7 +761,7 @@ function VideoCard({
         onPointerCancel={handleScrubPointerUp}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
-        className="absolute bottom-[62px] left-0 right-0 h-7 z-30 flex items-center cursor-pointer select-none group touch-none"
+        className="absolute bottom-[calc(max(82px,calc(env(safe-area-inset-bottom,12px)+68px)))] left-0 right-0 h-6 z-30 flex items-center cursor-pointer select-none group touch-none"
       >
         {/* Floating Timestamp Tooltip Pill estilo TikTok / Reels */}
         {isScrubbing && (
