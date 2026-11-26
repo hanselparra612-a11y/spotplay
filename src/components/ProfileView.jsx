@@ -173,16 +173,16 @@ export default function ProfileView({
   return (
     <div
       ref={profileContainerRef}
-      className="flex-1 min-h-0 w-full bg-[#121316] overflow-y-auto overscroll-y-contain touch-pan-y no-scrollbar pt-[max(16px,calc(env(safe-area-inset-top,14px)+12px))] pb-24 px-4 flex flex-col items-center select-none"
+      className="flex-1 min-h-0 w-full bg-[#121316] overflow-y-auto overscroll-y-contain touch-pan-y no-scrollbar pt-[max(10px,env(safe-area-inset-top,10px))] pb-24 px-3 sm:px-3.5 flex flex-col items-center select-none"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
     >
-      {/* Top action bar */}
-      <div className="w-full flex items-center justify-between text-white mb-4 shrink-0">
-        <h2 className="text-base font-bold">@{currentUser.username}</h2>
-        <div className="flex items-center gap-1.5">
+      {/* Top action bar (Alineada al mismo renglón exacto del riel superior de Inicio) */}
+      <div className="w-full h-8 flex items-center justify-between text-white mb-4 shrink-0">
+        <h2 className="text-base font-bold flex items-center h-8 leading-none">@{currentUser.username}</h2>
+        <div className="flex items-center gap-1.5 h-8">
           <button
             onClick={() => {
               if (navigator.clipboard) {
@@ -190,7 +190,7 @@ export default function ProfileView({
               }
               alert('¡Enlace de tu perfil copiado!');
             }}
-            className="p-1.5 text-zinc-300 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center text-zinc-300 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
             title="Compartir perfil"
           >
             <Share2 size={19} />
@@ -198,7 +198,7 @@ export default function ProfileView({
           {onOpenInbox && (
             <button
               onClick={onOpenInbox}
-              className="p-1.5 text-zinc-300 hover:text-[#ffb800] hover:bg-white/10 rounded-full transition-colors cursor-pointer relative"
+              className="w-8 h-8 flex items-center justify-center text-zinc-300 hover:text-[#ffb800] hover:bg-white/10 rounded-full transition-colors cursor-pointer relative"
               title="Bandeja de mensajes y notificaciones"
             >
               <MessageSquare size={19} />
@@ -207,7 +207,7 @@ export default function ProfileView({
           )}
           <button
             onClick={() => setIsMenuDrawerOpen(true)}
-            className="p-1.5 text-zinc-300 hover:text-[#ffb800] hover:bg-white/10 rounded-full transition-colors cursor-pointer flex items-center justify-center active:scale-90"
+            className="w-8 h-8 flex items-center justify-center text-zinc-300 hover:text-[#ffb800] hover:bg-white/10 rounded-full transition-colors cursor-pointer active:scale-90"
             title="Menú de opciones del perfil"
           >
             <Menu size={22} className="stroke-[2.2]" />

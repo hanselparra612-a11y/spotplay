@@ -124,7 +124,7 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   return (
     <div
       className="relative w-full h-full flex flex-col bg-[#121723] z-20 pb-[max(78px,calc(env(safe-area-inset-bottom,14px)+66px))]"
-      style={{ paddingTop: 'max(10px, env(safe-area-inset-top, 10px))' }}
+      style={{ paddingTop: 'max(1.33px, calc(env(safe-area-inset-top, 0px) + 1.33px))' }}
     >
       {/* Contenedor del Iframe / Webview a Pantalla Completa Nativa */}
       <div className="relative flex-1 w-full min-h-0 overflow-hidden bg-[#0c0f14]">
