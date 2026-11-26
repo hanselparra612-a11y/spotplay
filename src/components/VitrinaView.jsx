@@ -58,18 +58,18 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   const isNative = typeof Capacitor !== 'undefined' && Capacitor.isNativePlatform();
   const isLocal = !isNative && typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const isTunnel = typeof window !== 'undefined' && window.location.hostname.includes('trycloudflare.com');
-  const tunnelVitrinaUrl = 'https://shed-son-rated-elizabeth.trycloudflare.com/';
+  const tunnelVitrinaUrl = 'https://controversial-cosmetic-automobile-incomplete.trycloudflare.com/';
 
   // En la App Nativa APK, siempre usar la URL segura oficial de producción (HTTPS)
   const baseUrl = isNative
     ? 'https://vitrinaspot.onrender.com/'
-    : (isLocal ? 'http://127.0.0.1:4000/' : (isTunnel ? tunnelVitrinaUrl : 'https://vitrinaspot.onrender.com/'));
+    : (isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/'));
   const externalUrl = isNative
     ? 'https://vitrinaspot.onrender.com/'
     : (isTunnel ? tunnelVitrinaUrl : (isLocal ? 'http://127.0.0.1:4000/' : 'https://vitrinaspot.onrender.com/'));
 
   const params = new URLSearchParams();
-  params.set('v', '28.9');
+  params.set('v', '29.1');
   if (typeof window !== 'undefined') {
     params.set('spotplay_origin', window.location.origin);
   }
