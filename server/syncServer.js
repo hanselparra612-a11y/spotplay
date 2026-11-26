@@ -310,13 +310,27 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 2. Guardar nuevo video subido (con archivo base64 o metadata)
+  // 2. Guardar nuevo video subido (con archivo base64 o metadata, hasta 60 MB y 2 minutos)
   if (req.method === 'POST' && url.pathname === '/api/videos') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
+    let body = [];
+    let bodyLength = 0;
+    const MAX_UPLOAD_BYTES = 60 * 1024 * 1024; // 60 MB máximo (soporta hasta 2 minutos en 720p)
+
+    req.on('data', chunk => {
+      bodyLength += chunk.length;
+      if (bodyLength > MAX_UPLOAD_BYTES) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'El archivo supera el límite de 60 MB. Por favor recórtalo a 2 minutos máximo.' }));
+        req.destroy();
+        return;
+      }
+      body.push(chunk);
+    });
+
     req.on('end', () => {
       try {
-        const payload = JSON.parse(body);
+        const fullBuffer = Buffer.concat(body);
+        const payload = JSON.parse(fullBuffer.toString('utf-8'));
 
         // 🚫 Bloqueo permanente de videos de prueba / anime descartados
         const BANNED_IDS = new Set([
@@ -333,6 +347,23 @@ const server = http.createServer((req, res) => {
         }
 
         let finalVideoUrl = payload.videoUrl;
+        const videoId = payload.id || `uploaded-${Date.now()}`;
+        const thumbFileName = `${videoId}.jpg`;
+        const thumbDiskPath = path.join(THUMBS_DIR, thumbFileName);
+
+        // Si el cliente envió una miniatura generada en el navegador (Canvas)
+        if (payload.thumbnailBase64) {
+          try {
+            const rawThumb = payload.thumbnailBase64.includes(';base64,')
+              ? payload.thumbnailBase64.split(';base64,')[1]
+              : payload.thumbnailBase64.replace(/^data:image\/[^;]+;base64,/, '');
+            fs.writeFileSync(thumbDiskPath, Buffer.from(rawThumb, 'base64'));
+            payload.thumbnail = `/uploads/thumbnails/${thumbFileName}`;
+            payload.cover = `/uploads/thumbnails/${thumbFileName}`;
+          } catch (tErr) {
+            console.warn('Error guardando miniatura canvas:', tErr.message);
+          }
+        }
 
         // Si el video viene en base64 (grabado desde la cámara o subido desde galería)
         if (payload.videoBase64) {
@@ -343,7 +374,7 @@ const server = http.createServer((req, res) => {
             : payload.videoBase64.replace(/^data:video\/[^;]+;base64,/, '');
           fs.writeFileSync(filePath, Buffer.from(rawBase64, 'base64'));
 
-          // Transcodificación y optimización web ultra-fluida con FFmpeg (+faststart)
+          // Transcodificación y optimización web ultra-fluida con FFmpeg (+faststart) si está disponible
           try {
             const tmpPath = filePath + '.opt.mp4';
             const stat = fs.statSync(filePath);
@@ -352,39 +383,39 @@ const server = http.createServer((req, res) => {
               ? `ffmpeg -i "${filePath}" -c:v libx264 -preset veryfast -crf 24 -maxrate 2800k -bufsize 5600k -pix_fmt yuv420p -vf "scale='min(720,iw)':-2" -c:a aac -b:a 128k -movflags +faststart "${tmpPath}" -y`
               : `ffmpeg -i "${filePath}" -c copy -movflags +faststart "${tmpPath}" -y`;
 
-            execSync(ffmpegCmd, { stdio: 'ignore', timeout: 60000 });
+            execSync(ffmpegCmd, { stdio: 'ignore', timeout: 90000 });
             if (fs.existsSync(tmpPath) && fs.statSync(tmpPath).size > 0) {
               fs.unlinkSync(filePath);
               fs.renameSync(tmpPath, filePath);
             }
           } catch (e) {
-            console.warn('FFmpeg transcoding warning (fallback activo):', e.message);
+            // FFmpeg no instalado en entorno (ej. contenedor Render) o timeout; se conserva el archivo original
           }
 
           finalVideoUrl = `/uploads/videos/${videoFileName}`;
 
-          // Generación automática de miniatura JPEG de alta resolución
-          const videoId = payload.id || `uploaded-${Date.now()}`;
-          const thumbFileName = `${videoId}.jpg`;
-          const thumbDiskPath = path.join(THUMBS_DIR, thumbFileName);
-          try {
-            execSync(`ffmpeg -y -ss 00:00:01 -i "${filePath}" -vframes 1 -update 1 -q:v 2 "${thumbDiskPath}"`, { stdio: 'ignore', timeout: 15000 });
-            payload.thumbnail = `/uploads/thumbnails/${thumbFileName}`;
-            payload.cover = `/uploads/thumbnails/${thumbFileName}`;
-          } catch (tErr) {
-            console.warn('Miniatura automática warning:', tErr.message);
+          // Generación automática de miniatura JPEG con FFmpeg si no vino una del cliente
+          if (!fs.existsSync(thumbDiskPath)) {
+            try {
+              execSync(`ffmpeg -y -ss 00:00:01 -i "${filePath}" -vframes 1 -update 1 -q:v 2 "${thumbDiskPath}"`, { stdio: 'ignore', timeout: 15000 });
+              if (fs.existsSync(thumbDiskPath)) {
+                payload.thumbnail = `/uploads/thumbnails/${thumbFileName}`;
+                payload.cover = `/uploads/thumbnails/${thumbFileName}`;
+              }
+            } catch (tErr) {}
           }
         }
 
         const newVideo = {
           ...payload,
-          id: payload.id || `uploaded-${Date.now()}`,
+          id: videoId,
           videoUrl: finalVideoUrl,
-          thumbnail: payload.thumbnail || (fs.existsSync(path.join(THUMBS_DIR, `${payload.id}.jpg`)) ? `/uploads/thumbnails/${payload.id}.jpg` : undefined),
-          cover: payload.cover || (fs.existsSync(path.join(THUMBS_DIR, `${payload.id}.jpg`)) ? `/uploads/thumbnails/${payload.id}.jpg` : undefined),
+          thumbnail: payload.thumbnail || (fs.existsSync(thumbDiskPath) ? `/uploads/thumbnails/${thumbFileName}` : undefined),
+          cover: payload.cover || (fs.existsSync(thumbDiskPath) ? `/uploads/thumbnails/${thumbFileName}` : undefined),
           createdAt: new Date().toISOString()
         };
         delete newVideo.videoBase64;
+        delete newVideo.thumbnailBase64;
 
         const currentVideos = readJson(VIDEOS_FILE, []);
         // Si ya existe lo actualiza, si no lo coloca de primero

@@ -14,6 +14,41 @@ function blobToBase64(blob) {
   });
 }
 
+function extractClientThumbnail(blob) {
+  return new Promise((resolve) => {
+    try {
+      const vid = document.createElement('video');
+      vid.crossOrigin = 'anonymous';
+      vid.muted = true;
+      vid.playsInline = true;
+      const url = URL.createObjectURL(blob);
+      vid.src = url;
+      vid.currentTime = 0.5;
+      vid.onloadeddata = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = vid.videoWidth || 720;
+          canvas.height = vid.videoHeight || 1280;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          URL.revokeObjectURL(url);
+          resolve(dataUrl);
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          resolve(null);
+        }
+      };
+      vid.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+    } catch (err) {
+      resolve(null);
+    }
+  });
+}
+
 export default function UploadModal({
   isOpen,
   onClose,
@@ -108,18 +143,47 @@ export default function UploadModal({
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('video/')) {
-      if (videoFile && videoPreview && videoPreview !== initialVideoUrl) {
-        try {
-          URL.revokeObjectURL(videoPreview);
-        } catch (err) {}
-      }
-      setVideoFile(file);
-      setVideoBlob(file);
-      setVideoPreview(URL.createObjectURL(file));
-    } else {
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
       alert('Por favor selecciona un archivo de video válido (MP4 o WebM).');
+      return;
     }
+
+    // 🔒 Límite de seguridad de 50 MB para garantizar subida fluida y evitar costos excesivos de nube
+    const MAX_MB = 50;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      alert(`⚠️ Este video pesa ${(file.size / (1024 * 1024)).toFixed(1)} MB.\nEl límite recomendado en Spot Play es de hasta ${MAX_MB} MB (aprox. hasta 2 minutos de video). Por favor recorta o comprime el video antes de subirlo.`);
+      e.target.value = '';
+      return;
+    }
+
+    // ⏱️ Validación de duración de video (hasta 2 minutos / 120s con margen de 125s)
+    try {
+      const tempVideo = document.createElement('video');
+      tempVideo.preload = 'metadata';
+      const tempUrl = URL.createObjectURL(file);
+      tempVideo.src = tempUrl;
+      tempVideo.onloadedmetadata = () => {
+        URL.revokeObjectURL(tempUrl);
+        if (tempVideo.duration > 125) {
+          alert(`⏱️ El video dura ${(tempVideo.duration / 60).toFixed(1)} minutos (${Math.round(tempVideo.duration)}s).\nPara una mejor experiencia móvil en Spot Play, la duración máxima permitida es de 2 minutos (120 segundos).`);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+          setVideoFile(null);
+          setVideoBlob(null);
+          setVideoPreview(null);
+        }
+      };
+    } catch (vErr) {}
+
+    if (videoFile && videoPreview && videoPreview !== initialVideoUrl) {
+      try {
+        URL.revokeObjectURL(videoPreview);
+      } catch (err) {}
+    }
+    setVideoFile(file);
+    setVideoBlob(file);
+    setVideoPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -172,10 +236,15 @@ export default function UploadModal({
         // 💾 Persistencia Real y Permanente en Disco (Accesible en Celular y PC sin perderse)
         let persistentUrl = videoPreview;
         const uploadId = 'uploaded-' + Date.now();
+        let clientThumbnail = null;
 
         if (targetBlob) {
           try {
-            setUploadProgress(40);
+            setUploadProgress(30);
+            // Extraer miniatura nítida con Canvas en el navegador
+            clientThumbnail = await extractClientThumbnail(targetBlob);
+            setUploadProgress(50);
+
             const base64Data = await blobToBase64(targetBlob);
             setUploadProgress(75);
 
@@ -186,6 +255,7 @@ export default function UploadModal({
                 id: uploadId,
                 ...videoMeta,
                 videoBase64: base64Data,
+                thumbnailBase64: clientThumbnail,
                 isUserUploaded: true,
               }),
             });
@@ -195,15 +265,23 @@ export default function UploadModal({
               if (resData.video && resData.video.videoUrl) {
                 persistentUrl = resData.video.videoUrl;
               }
+            } else if (syncRes.status === 413) {
+              throw new Error('El video es demasiado pesado para la nube (máx 50 MB). Por favor recórtalo a 2 minutos máximo.');
             }
           } catch (syncErr) {
             console.warn('Sync server fallback to memory:', syncErr);
+            if (syncErr.message && syncErr.message.includes('50 MB')) {
+              throw syncErr;
+            }
           }
         }
 
+        const thumbPath = `/uploads/thumbnails/${uploadId}.jpg`;
         uploadedVideo = {
           id: uploadId,
           videoUrl: persistentUrl,
+          thumbnail: clientThumbnail || thumbPath,
+          cover: clientThumbnail || thumbPath,
           ...videoMeta,
           isUserUploaded: true,
           stats: { likes: 1, comments: 0, bookmarks: 0, shares: 0, giftsCount: 0 },

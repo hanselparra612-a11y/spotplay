@@ -1109,20 +1109,20 @@ export default function CameraRecorder({ isOpen, onClose, onFinishRecording }) {
           ) : (
             /* RECORDING CONTROLS */
             <>
-              {/* Duration selector pills (15s | 30s | 60s) */}
+              {/* Duration selector pills (15s | 30s | 60s | 90s | 2m) */}
               {!isRecording && (
-                <div className="flex items-center gap-2 mb-4 bg-black/50 backdrop-blur-md px-2 py-1 rounded-full border border-white/15 shadow-lg">
-                  {[15, 30, 60].map((dur) => (
+                <div className="flex items-center gap-1.5 mb-4 bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/15 shadow-lg">
+                  {[15, 30, 60, 90, 120].map((dur) => (
                     <button
                       key={dur}
                       onClick={() => setDurationMode(dur)}
-                      className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
                         durationMode === dur
                           ? 'bg-[#ffb800] text-black shadow-md scale-105'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      {dur}s
+                      {dur === 60 ? '60s' : dur === 90 ? '90s' : dur === 120 ? '2m' : `${dur}s`}
                     </button>
                   ))}
                 </div>
@@ -1155,7 +1155,7 @@ export default function CameraRecorder({ isOpen, onClose, onFinishRecording }) {
                 <div className="flex items-center gap-2 mt-2 bg-black/60 px-3 py-0.5 rounded-full border border-white/10">
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                   <span className="text-xs font-mono font-bold text-white">
-                    00:{recordingSeconds < 10 ? `0${recordingSeconds}` : recordingSeconds} / {durationMode}s
+                    {formatTimer(recordingSeconds)} / {formatTimer(durationMode)}
                   </span>
                 </div>
               )}
