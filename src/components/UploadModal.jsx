@@ -20,6 +20,34 @@ function extractClientThumbnail(blob) {
   return extractVideoThumbnail(blob, 0.3);
 }
 
+// Sincronización en segundo plano con el servidor de la nube (Render)
+async function syncToCloudServerInBackground(uploadId, videoMeta, targetBlob, clientThumbnail) {
+  try {
+    // Si el video es gigantesco (> 45MB), no saturar la conexión celular ni tumbar el servidor gratuito
+    if (targetBlob?.size && targetBlob.size > 45 * 1024 * 1024) {
+      console.log('Video HD de gran tamaño (>45MB) protegido localmente en el dispositivo.');
+      return;
+    }
+    const base64Data = await blobToBase64(targetBlob);
+    if (!base64Data) return;
+
+    await fetch(getApiUrl('/api/videos'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: uploadId,
+        ...videoMeta,
+        videoBase64: base64Data,
+        thumbnailBase64: clientThumbnail,
+        isUserUploaded: true,
+      }),
+    });
+    console.log('Video sincronizado exitosamente con la nube en segundo plano.');
+  } catch (err) {
+    console.warn('Sincronización en segundo plano con la nube finalizada o omitida:', err?.message);
+  }
+}
+
 export default function UploadModal({
   isOpen,
   onClose,
@@ -212,6 +240,8 @@ export default function UploadModal({
         const uploadId = 'uploaded-' + Date.now();
         let clientThumbnail = capturedThumbnail;
 
+        setUploadProgress(35);
+
         // 1. Extraer inmediatamente del video que ya está activo y reproduciéndose en pantalla
         if (!clientThumbnail && uploadVideoRef.current && uploadVideoRef.current.videoWidth > 0) {
           try {
@@ -229,45 +259,14 @@ export default function UploadModal({
         // 2. Fallback de extracción con Canvas asistido
         if (!clientThumbnail && targetBlob) {
           try {
-            setUploadProgress(30);
+            setUploadProgress(55);
             clientThumbnail = await extractClientThumbnail(targetBlob);
-            setUploadProgress(50);
           } catch (cErr) {}
         }
 
-        if (targetBlob) {
-          try {
-            const base64Data = await blobToBase64(targetBlob);
-            setUploadProgress(75);
+        setUploadProgress(80);
 
-            const syncRes = await fetch(getApiUrl('/api/videos'), {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                id: uploadId,
-                ...videoMeta,
-                videoBase64: base64Data,
-                thumbnailBase64: clientThumbnail,
-                isUserUploaded: true,
-              }),
-            });
-
-            if (syncRes.ok) {
-              const resData = await syncRes.json();
-              if (resData.video && resData.video.videoUrl) {
-                persistentUrl = resData.video.videoUrl;
-              }
-            } else if (syncRes.status === 413) {
-              throw new Error('El video es demasiado pesado para la nube (máx 50 MB). Por favor recórtalo a 2 minutos máximo.');
-            }
-          } catch (syncErr) {
-            console.warn('Sync server fallback to memory:', syncErr);
-            if (syncErr.message && syncErr.message.includes('50 MB')) {
-              throw syncErr;
-            }
-          }
-        }
-
+        // 3. Objeto de video listo para visualización y almacenamiento inmediato
         const thumbPath = `/uploads/thumbnails/${uploadId}.jpg`;
         uploadedVideo = {
           id: uploadId,
@@ -281,8 +280,16 @@ export default function UploadModal({
           isBookmarked: false,
           comments: [],
         };
+
+        setUploadProgress(95);
+
+        // 4. Iniciar la sincronización con la nube en segundo plano (asíncrono, nunca congela en 75%)
+        if (targetBlob) {
+          syncToCloudServerInBackground(uploadId, videoMeta, targetBlob, clientThumbnail);
+        }
       }
 
+      await new Promise((r) => setTimeout(r, 150));
       setUploadProgress(100);
       onUploadSuccess(uploadedVideo, targetBlob);
       setPublishedVideoInfo(uploadedVideo);
