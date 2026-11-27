@@ -360,8 +360,8 @@ export default function CreatorWalletModal({
                 type="button"
                 onClick={() => {
                   if (onRechargeCoins) {
-                    onRechargeCoins(25, 'Bono Diario de Creador (+25 SpotCoins)');
-                    setRechargeSuccessMsg('¡Reclamaste tu Bono Diario de +25 SpotCoins!');
+                    onRechargeCoins(1, 'Bono Diario de Ingreso (+1 SpotCoin)');
+                    setRechargeSuccessMsg('¡Reclamaste tu Bono Diario de +1 SpotCoin!');
                     setTimeout(() => setRechargeSuccessMsg(null), 3000);
                   }
                 }}
@@ -371,10 +371,10 @@ export default function CreatorWalletModal({
                   <span className="text-base">🎁</span>
                   <div>
                     <span className="font-bold text-white text-xs block">Reclamar Bono Diario</span>
-                    <span className="text-[9px] text-zinc-400">Regalo de la comunidad por iniciar sesión</span>
+                    <span className="text-[9px] text-zinc-400">Recompensa diaria por ingresar a la app</span>
                   </div>
                 </div>
-                <span className="text-xs font-black text-amber-400">+25 🪙</span>
+                <span className="text-xs font-black text-amber-400">+1 🪙</span>
               </button>
 
               {onWatchAdForCoins && (
