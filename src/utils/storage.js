@@ -135,13 +135,30 @@ export function loadPersistedVideos() {
       ];
       const cleaned = Array.isArray(parsed)
         ? parsed.filter((v) => {
-            if (!v.videoUrl || v.videoUrl.startsWith('blob:')) return false;
             // Descartar videos mock de prueba antiguos
             if (v.id && (v.id.startsWith('vid-') || v.id.startsWith('demo-'))) return false;
             if (v.author && mockAuthors.includes(v.author.username)) return false;
             return true;
           })
         : [];
+
+      // Integrar metadatos de videos subidos por el usuario desde el backup v2
+      try {
+        const userMetaRaw = localStorage.getItem('spotplay_user_uploaded_meta_v2');
+        if (userMetaRaw) {
+          const userMetaList = JSON.parse(userMetaRaw);
+          if (Array.isArray(userMetaList) && userMetaList.length > 0) {
+            const currentIds = new Set(cleaned.map((v) => v.id));
+            userMetaList.forEach((uVid) => {
+              if (!currentIds.has(uVid.id)) {
+                cleaned.unshift(uVid);
+                currentIds.add(uVid.id);
+              }
+            });
+          }
+        }
+      } catch (uErr) {}
+
       if (cleaned.length > 0) {
         // Asegurar que si INITIAL_VIDEOS tiene nuevos videos subidos, se incluyan siempre
         const existingIds = new Set(cleaned.map((v) => v.id));
@@ -215,15 +232,15 @@ export function loadPersistedVideos() {
 
 export function savePersistedVideos(videos) {
   try {
-    // No persistir URLs efímeras de blobs ni avatares gigantes en base64 para evitar QuotaExceededError
+    // Preservar los videos del usuario sin persistir URLs efímeras de blobs muertas en localStorage
     const serializableVideos = (videos || [])
-      .filter((v) => !v.videoUrl || !v.videoUrl.startsWith('blob:'))
       .map(({ product, isPromoted, promotedCta, ...cleanVid }) => {
         let cleanAuthor = cleanVid.author;
         if (cleanAuthor && typeof cleanAuthor.avatar === 'string' && cleanAuthor.avatar.startsWith('data:image')) {
           cleanAuthor = { ...cleanAuthor, avatar: '/default-avatar.png' };
         }
-        return { ...cleanVid, author: cleanAuthor };
+        const safeUrl = (cleanVid.videoUrl && cleanVid.videoUrl.startsWith('blob:')) ? '' : cleanVid.videoUrl;
+        return { ...cleanVid, videoUrl: safeUrl, author: cleanAuthor };
       });
     localStorage.setItem(VIDEOS_STORAGE_KEY, JSON.stringify(serializableVideos));
   } catch (err) {

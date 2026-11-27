@@ -384,9 +384,17 @@ export default function App() {
               return numB - numA;
             });
 
-            setVideos(() => {
+            setVideos((prevVideos) => {
+              // 🛡️ PRESERVAR de forma estricta los videos subidos por el usuario para que nunca se borren al sincronizar el servidor
+              const userUploaded = (prevVideos || []).filter(
+                (v) => v.isUserUploaded || (v.id && v.id.startsWith('uploaded-'))
+              );
+              const userIds = new Set(userUploaded.map((v) => v.id));
+              const nonDupeServer = sortedServerVideos.filter((v) => !userIds.has(v.id));
+              const merged = [...userUploaded, ...nonDupeServer];
+
               // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales y asegurar miniaturas
-              const sanitized = sortedServerVideos.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => {
+              const sanitized = merged.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => {
                 const thumb = v.thumbnail || v.cover || `/uploads/thumbnails/${v.id}.jpg`;
                 return { ...v, thumbnail: thumb, cover: thumb };
               });

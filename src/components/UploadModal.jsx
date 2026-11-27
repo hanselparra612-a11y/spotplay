@@ -53,6 +53,7 @@ export default function UploadModal({
   const fileInputRef = useRef(null);
   const uploadVideoRef = useRef(null);
   const [isUploadMuted, setIsUploadMuted] = useState(false);
+  const [capturedThumbnail, setCapturedThumbnail] = useState(null);
   const keyboardHeight = useVirtualKeyboard();
 
   const handleResetForm = () => {
@@ -62,6 +63,7 @@ export default function UploadModal({
     setVideoFile(null);
     setVideoBlob(null);
     setVideoPreview(null);
+    setCapturedThumbnail(null);
     setCaption('');
     setTags('parati, viral, creador');
     setIsCommercialVideo(false);
@@ -207,15 +209,33 @@ export default function UploadModal({
         // 💾 Persistencia Real y Permanente en Disco (Accesible en Celular y PC sin perderse)
         let persistentUrl = videoPreview;
         const uploadId = 'uploaded-' + Date.now();
-        let clientThumbnail = null;
+        let clientThumbnail = capturedThumbnail;
+
+        // 1. Extraer inmediatamente del video que ya está activo y reproduciéndose en pantalla
+        if (!clientThumbnail && uploadVideoRef.current && uploadVideoRef.current.videoWidth > 0) {
+          try {
+            const vid = uploadVideoRef.current;
+            const c = document.createElement('canvas');
+            c.width = Math.min(vid.videoWidth, 480);
+            c.height = Math.round((c.width / vid.videoWidth) * vid.videoHeight);
+            const ctx = c.getContext('2d');
+            ctx.drawImage(vid, 0, 0, c.width, c.height);
+            const d = c.toDataURL('image/jpeg', 0.82);
+            if (d && d.length > 200) clientThumbnail = d;
+          } catch (err) {}
+        }
+
+        // 2. Fallback de extracción con Canvas asistido
+        if (!clientThumbnail && targetBlob) {
+          try {
+            setUploadProgress(30);
+            clientThumbnail = await extractClientThumbnail(targetBlob);
+            setUploadProgress(50);
+          } catch (cErr) {}
+        }
 
         if (targetBlob) {
           try {
-            setUploadProgress(30);
-            // Extraer miniatura nítida con Canvas en el navegador
-            clientThumbnail = await extractClientThumbnail(targetBlob);
-            setUploadProgress(50);
-
             const base64Data = await blobToBase64(targetBlob);
             setUploadProgress(75);
 
@@ -472,6 +492,36 @@ export default function UploadModal({
                   autoPlay
                   playsInline
                   muted={isUploadMuted}
+                  onLoadedData={(e) => {
+                    try {
+                      const vid = e.currentTarget;
+                      if (vid.videoWidth > 0) {
+                        const c = document.createElement('canvas');
+                        c.width = Math.min(vid.videoWidth, 480);
+                        c.height = Math.round((c.width / vid.videoWidth) * vid.videoHeight);
+                        const ctx = c.getContext('2d');
+                        ctx.drawImage(vid, 0, 0, c.width, c.height);
+                        const d = c.toDataURL('image/jpeg', 0.82);
+                        if (d && d.length > 200) setCapturedThumbnail(d);
+                      }
+                    } catch (err) {}
+                  }}
+                  onTimeUpdate={(e) => {
+                    if (!capturedThumbnail) {
+                      try {
+                        const vid = e.currentTarget;
+                        if (vid.videoWidth > 0 && vid.currentTime > 0.1) {
+                          const c = document.createElement('canvas');
+                          c.width = Math.min(vid.videoWidth, 480);
+                          c.height = Math.round((c.width / vid.videoWidth) * vid.videoHeight);
+                          const ctx = c.getContext('2d');
+                          ctx.drawImage(vid, 0, 0, c.width, c.height);
+                          const d = c.toDataURL('image/jpeg', 0.82);
+                          if (d && d.length > 200) setCapturedThumbnail(d);
+                        }
+                      } catch (err) {}
+                    }
+                  }}
                   onEnded={() => {
                     if (uploadVideoRef.current) {
                       uploadVideoRef.current.currentTime = 0;

@@ -32,26 +32,63 @@ function openDB(customDbName = DB_NAME) {
 }
 
 /**
- * Guarda un video y su archivo binario (Blob) en almacenamiento permanente IndexedDB
+ * Guarda un video y su archivo binario en almacenamiento permanente IndexedDB.
+ * En Android WebView, un objeto 'File' directo suele lanzar DataCloneError o perder permisos de content://.
+ * Convertir a ArrayBuffer garantiza persistencia binaria 100% libre de fallos de clonación.
  */
 export async function saveVideoToIndexedDB(videoItem, blob) {
   try {
     const db = await openDB(DB_NAME);
-    return new Promise((resolve, reject) => {
+
+    let binaryData = blob;
+    let mimeType = blob?.type || 'video/mp4';
+    if (blob instanceof Blob || (typeof File !== 'undefined' && blob instanceof File)) {
+      try {
+        binaryData = await blob.arrayBuffer();
+      } catch (abErr) {
+        binaryData = blob;
+      }
+    }
+
+    return new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
 
       const record = {
         ...videoItem,
-        videoBlob: blob,
+        videoBlob: binaryData,
+        mimeType,
         createdAt: videoItem.createdAt || Date.now(),
       };
       // Eliminar videoUrl temporal para no persistir URLs muertas
       delete record.videoUrl;
 
       const req = store.put(record);
-      req.onsuccess = () => resolve(true);
-      req.onerror = () => reject(req.error);
+      req.onsuccess = () => {
+        // Backup de metadatos liviano en localStorage para visibilidad inmediata
+        try {
+          const metaKey = 'spotplay_user_uploaded_meta_v2';
+          const existingMeta = JSON.parse(localStorage.getItem(metaKey) || '[]');
+          const withoutCurrent = existingMeta.filter((v) => v.id !== videoItem.id);
+          const metaToSave = { ...videoItem, mimeType };
+          delete metaToSave.videoUrl;
+          delete metaToSave.videoBlob;
+          localStorage.setItem(metaKey, JSON.stringify([metaToSave, ...withoutCurrent]));
+        } catch (mErr) {}
+        resolve(true);
+      };
+      req.onerror = () => {
+        console.warn('Error en request put de IndexedDB:', req.error);
+        resolve(false);
+      };
+      tx.onerror = () => {
+        console.warn('Error en transacción IndexedDB:', tx.error);
+        resolve(false);
+      };
+      tx.onabort = () => {
+        console.warn('Transacción abortada en IndexedDB:', tx.error);
+        resolve(false);
+      };
     });
   } catch (err) {
     console.warn('Error guardando video en IndexedDB:', err);
@@ -66,34 +103,28 @@ export async function saveVideoToIndexedDB(videoItem, blob) {
 export async function loadVideosFromIndexedDB() {
   try {
     const db = await openDB(DB_NAME);
-    let records = await new Promise((resolve, reject) => {
+    let records = await new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
       const store = tx.objectStore(STORE_NAME);
       const req = store.getAll();
       req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
+      req.onerror = () => resolve([]);
     });
 
     // Si la nueva base de datos está vacía, intentar migrar desde la base de datos previa
     if (records.length === 0) {
       try {
         const legacyDb = await openDB(LEGACY_DB_NAME);
-        const legacyRecords = await new Promise((resolve, reject) => {
+        const legacyRecords = await new Promise((resolve) => {
           const tx = legacyDb.transaction(STORE_NAME, 'readonly');
           const store = tx.objectStore(STORE_NAME);
           const req = store.getAll();
           req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => reject(req.error);
+          req.onerror = () => resolve([]);
         });
 
         if (legacyRecords.length > 0) {
           records = legacyRecords;
-          // Migrar registros en segundo plano
-          for (const rec of legacyRecords) {
-            if (rec.videoBlob) {
-              await saveVideoToIndexedDB(rec, rec.videoBlob);
-            }
-          }
         }
       } catch (legacyErr) {
         // No hay base de datos previa o no se pudo acceder
@@ -104,26 +135,34 @@ export async function loadVideosFromIndexedDB() {
       records.map(async (rec) => {
         if (!rec.videoBlob) return null;
         try {
-          const freshUrl = URL.createObjectURL(rec.videoBlob);
+          // Convertir ArrayBuffer a Blob si fue guardado como buffer binario
+          let usableBlob = rec.videoBlob;
+          if (usableBlob instanceof ArrayBuffer) {
+            usableBlob = new Blob([usableBlob], { type: rec.mimeType || 'video/mp4' });
+          } else if (usableBlob && !(usableBlob instanceof Blob)) {
+            usableBlob = new Blob([usableBlob], { type: rec.mimeType || 'video/mp4' });
+          }
+
+          const freshUrl = URL.createObjectURL(usableBlob);
           let thumb = rec.thumbnail || rec.cover;
           const isRealDataThumb = thumb && typeof thumb === 'string' && thumb.startsWith('data:image');
           // Si la miniatura no es base64 embebido (p. ej. rutas rotas /uploads/thumbnails/... o nulas),
           // extraerla de inmediato desde el Blob y persistirla en IndexedDB para que cargue en 0ms
-          if (!isRealDataThumb && rec.videoBlob) {
+          if (!isRealDataThumb && usableBlob) {
             try {
-              const generatedThumb = await extractVideoThumbnail(rec.videoBlob, 0.2);
+              const generatedThumb = await extractVideoThumbnail(usableBlob, 0.2);
               if (generatedThumb) {
                 thumb = generatedThumb;
                 rec.thumbnail = generatedThumb;
                 rec.cover = generatedThumb;
-                saveVideoToIndexedDB(rec, rec.videoBlob).catch(() => {});
+                saveVideoToIndexedDB(rec, usableBlob).catch(() => {});
               }
             } catch (tErr) {}
           }
           return {
             ...rec,
             videoUrl: freshUrl,
-            videoBlob: rec.videoBlob,
+            videoBlob: usableBlob,
             thumbnail: thumb || rec.thumbnail,
             cover: thumb || rec.cover,
           };
@@ -136,8 +175,6 @@ export async function loadVideosFromIndexedDB() {
     return activeVideos
       .filter(Boolean)
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-    return activeVideos;
   } catch (err) {
     console.warn('Error leyendo videos de IndexedDB:', err);
     return [];

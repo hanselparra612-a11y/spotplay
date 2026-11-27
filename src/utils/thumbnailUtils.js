@@ -9,7 +9,12 @@ export function extractVideoThumbnail(videoSource, targetTime = 0.2) {
       if (!videoSource) return resolve(null);
 
       const vid = document.createElement('video');
-      vid.crossOrigin = 'anonymous';
+      // ⚠️ IMPORTANTE: Solo asignar crossOrigin para URLs remotas http/https.
+      // Si se asigna a blobs locales (blob:), Chromium en Android tienta el canvas
+      // y toDataURL() lanza SecurityError impidiendo generar la miniatura.
+      if (typeof videoSource === 'string' && (videoSource.startsWith('http://') || videoSource.startsWith('https://'))) {
+        vid.crossOrigin = 'anonymous';
+      }
       vid.muted = true;
       vid.defaultMuted = true;
       vid.playsInline = true;
