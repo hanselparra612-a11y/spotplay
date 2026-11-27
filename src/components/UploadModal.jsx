@@ -4,6 +4,7 @@ import { X, UploadCloud, Film, Music, Hash, Check, Camera, ShoppingBag, Gift, Sp
 import { uploadVideoToFirebase } from '../firebase/videoService';
 import { isFirebaseConfigured } from '../firebase/config';
 import { formatCOP } from '../utils/format';
+import { getApiUrl } from '../utils/apiUrl';
 
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
@@ -248,7 +249,7 @@ export default function UploadModal({
             const base64Data = await blobToBase64(targetBlob);
             setUploadProgress(75);
 
-            const syncRes = await fetch('/api/videos', {
+            const syncRes = await fetch(getApiUrl('/api/videos'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

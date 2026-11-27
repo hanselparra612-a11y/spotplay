@@ -32,6 +32,7 @@ const VitrinaView = lazy(() => import('./components/VitrinaView'));
 const LiveStreamModal = lazy(() => import('./components/LiveStreamModal'));
 const AdminMasterDashboard = lazy(() => import('./components/AdminMasterDashboard'));
 import { SEED_CREATORS_MAP } from './data/mockVideos';
+import { getApiUrl } from './utils/apiUrl';
 import {
   loadPersistedVideos,
   savePersistedVideos,
@@ -332,7 +333,7 @@ export default function App() {
     async function initSharedSync() {
       try {
         // 1. Sincronizar videos desde el servidor compartido (compartidos entre PC y Celular)
-        const res = await fetch('/api/videos');
+        const res = await fetch(getApiUrl('/api/videos'));
         if (res.ok) {
           const rawServerVideos = await res.json();
           if (Array.isArray(rawServerVideos) && rawServerVideos.length > 0) {
@@ -935,7 +936,7 @@ export default function App() {
 
     // Sincronizar actualización con IndexedDB y el servidor central
     saveVideoToIndexedDB(updatedVideo).catch(() => {});
-    fetch('/api/videos/' + updatedVideo.id, {
+    fetch(getApiUrl('/api/videos/' + updatedVideo.id), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedVideo),
@@ -948,7 +949,7 @@ export default function App() {
 
   const handleDeleteVideo = (videoId) => {
     // 🗑️ Eliminar permanentemente del servidor central y de IndexedDB
-    fetch('/api/videos/' + videoId, { method: 'DELETE' }).catch(() => {});
+    fetch(getApiUrl('/api/videos/' + videoId), { method: 'DELETE' }).catch(() => {});
     deleteVideoFromIndexedDB(videoId).catch(() => {});
 
     setVideos((prev) => {

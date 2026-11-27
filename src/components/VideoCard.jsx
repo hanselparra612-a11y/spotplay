@@ -20,6 +20,7 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { formatNumber, formatTime, formatCOP } from '../utils/format';
+import { resolveMediaUrl } from '../utils/apiUrl';
 import ReactionsTray from './ReactionsTray';
 
 function VideoCard({
@@ -51,9 +52,10 @@ function VideoCard({
     authorObj.id === currentUserId ||
     (currentUser && (authorObj.id === currentUser.id || authorObj.username === currentUser.username))
   );
-  const authorAvatar = (isOwnVideo && currentUser?.avatar)
+  const rawAvatar = (isOwnVideo && currentUser?.avatar)
     ? currentUser.avatar
     : (authorObj.avatar || currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80');
+  const authorAvatar = resolveMediaUrl(rawAvatar);
   const authorUsername = authorObj.username || (isOwnVideo ? (currentUser?.username || 'tú') : 'creador');
   const musicObj = video.music || { title: 'Sonido Original - Spot Play', author: 'Spot Play' };
   const videoRef = useRef(null);
@@ -66,13 +68,14 @@ function VideoCard({
   const [activeReactionEmoji, setActiveReactionEmoji] = useState(null);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
   const [isFrameReady, setIsFrameReady] = useState(false);
-  const posterUrl = video.cover || video.thumbnail || (video.id ? `/uploads/thumbnails/${video.id}.jpg` : '');
+  const rawPoster = video.cover || video.thumbnail || (video.id ? `/uploads/thumbnails/${video.id}.jpg` : '');
+  const posterUrl = resolveMediaUrl(rawPoster);
 
   // 🚀 Estados para Aceleración y Scrubbing de Video en la Barra Horizontal
-  const [videoSrc, setVideoSrc] = useState(video.videoUrl);
+  const [videoSrc, setVideoSrc] = useState(resolveMediaUrl(video.videoUrl));
 
   useEffect(() => {
-    setVideoSrc(video.videoUrl);
+    setVideoSrc(resolveMediaUrl(video.videoUrl));
   }, [video.videoUrl]);
 
   const [isScrubbing, setIsScrubbing] = useState(false);
