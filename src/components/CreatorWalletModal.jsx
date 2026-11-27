@@ -17,6 +17,7 @@ import {
   Award,
   BarChart3,
   Tv,
+  Plus,
 } from 'lucide-react';
 import { loadAdMobConfig } from '../services/admobService';
 
@@ -26,18 +27,20 @@ export default function CreatorWalletModal({
   wallet = {},
   receivedGifts = [],
   onWatchAdForCoins,
+  onRechargeCoins,
 }) {
   const admobConfig = loadAdMobConfig();
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'gifts' | 'history'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'recharge' | 'gifts' | 'history'
+  const [rechargeSuccessMsg, setRechargeSuccessMsg] = useState(null);
 
   if (!isOpen) return null;
 
   // Cálculo matemático exacto de SpotCoins recibidas (Videos + Transmisiones LIVE)
   const giftsSum = receivedGifts.reduce((sum, g) => sum + (Number(g.coins) || 0), 0);
   const walletTotal = Number(wallet.totalGiftsReceivedCoins) || 0;
-  const totalReceivedCoins = Math.max(walletTotal, giftsSum, 721);
+  const totalReceivedCoins = walletTotal > 0 ? walletTotal : (giftsSum > 0 ? giftsSum : 0);
 
-  const currentAvailableCoins = typeof wallet.coins === 'number' ? wallet.coins : 140;
+  const currentAvailableCoins = typeof wallet.coins === 'number' ? wallet.coins : 0;
 
   const transactions = wallet.transactions && wallet.transactions.length > 0
     ? wallet.transactions
@@ -144,13 +147,26 @@ export default function CreatorWalletModal({
           </button>
 
           <button
+            onClick={() => setActiveTab('recharge')}
+            className={`flex-1 py-2 text-xs font-bold transition-all relative flex items-center justify-center gap-1 cursor-pointer ${
+              activeTab === 'recharge' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Plus size={13} />
+            <span>Recargar</span>
+            {activeTab === 'recharge' && (
+              <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            )}
+          </button>
+
+          <button
             onClick={() => setActiveTab('gifts')}
             className={`flex-1 py-2 text-xs font-bold transition-all relative flex items-center justify-center gap-1 cursor-pointer ${
               activeTab === 'gifts' ? 'text-pink-400' : 'text-zinc-400 hover:text-white'
             }`}
           >
             <Gift size={13} />
-            <span>Regalos Recibidos</span>
+            <span>Regalos</span>
             {receivedGifts.length > 0 && (
               <span className="text-[9px] font-black bg-pink-500 text-white px-1.5 py-0.2 rounded-full">
                 {receivedGifts.length}
@@ -168,7 +184,7 @@ export default function CreatorWalletModal({
             }`}
           >
             <Clock size={13} />
-            <span>Movimientos</span>
+            <span>Historial</span>
             {activeTab === 'history' && (
               <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
             )}
@@ -204,15 +220,37 @@ export default function CreatorWalletModal({
 
             {/* Tarjetas métricas de SpotCoins */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[10px] text-zinc-400 block font-bold">Disponibles en Cartera</span>
-                <h3 className="text-lg font-black text-amber-400 mt-0.5">{currentAvailableCoins} 🪙</h3>
-                <span className="text-[9px] text-emerald-400 font-bold block">Saldo activo de tu cuenta</span>
+              <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] text-zinc-400 block font-bold">Disponibles en Cartera</span>
+                  <h3 className="text-lg font-black text-amber-400 mt-0.5">{currentAvailableCoins} 🪙</h3>
+                  <span className="text-[9px] text-emerald-400 font-bold block">Saldo activo de tu cuenta</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('recharge')}
+                  className="mt-2 py-1 px-2.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-[10px] font-black uppercase flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer shadow-sm"
+                >
+                  <Plus size={11} strokeWidth={3} />
+                  <span>Recargar</span>
+                </button>
               </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[10px] text-zinc-400 block font-bold">Anuncios AdMob Vistos</span>
-                <h3 className="text-lg font-black text-cyan-400 mt-0.5">{wallet.adMobRewardsWatched || 28} 🎬</h3>
-                <span className="text-[9px] text-emerald-400 font-bold">Recompensas ganadas</span>
+              <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] text-zinc-400 block font-bold">Anuncios AdMob Vistos</span>
+                  <h3 className="text-lg font-black text-cyan-400 mt-0.5">{wallet.adMobRewardsWatched || 0} 🎬</h3>
+                  <span className="text-[9px] text-emerald-400 font-bold">Recompensas ganadas</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onWatchAdForCoins) onWatchAdForCoins();
+                  }}
+                  className="mt-2 py-1 px-2.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-400/30 text-[10px] font-bold uppercase flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer shadow-sm"
+                >
+                  <Play size={10} className="fill-cyan-300" />
+                  <span>Ver Anuncio</span>
+                </button>
               </div>
             </div>
 
@@ -249,7 +287,117 @@ export default function CreatorWalletModal({
           </div>
         )}
 
-        {/* TAB 2: SEGUIDORES QUE ENVIARON MONEDAS A TU FEED O LIVE */}
+        {/* TAB 2: RECARGAR SPOTCOINS */}
+        {activeTab === 'recharge' && (
+          <div className="p-4 space-y-3.5 overflow-y-auto no-scrollbar text-xs">
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-[#181d2a] to-amber-500/10 border border-emerald-400/30 flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Tu Saldo Actual</span>
+                <p className="text-xl font-black text-white flex items-center gap-1.5 mt-0.5">
+                  <span>{currentAvailableCoins}</span>
+                  <span className="text-xs text-amber-400">🪙 SpotCoins</span>
+                </p>
+              </div>
+              <span className="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[9px] border border-emerald-400/30">
+                ✓ Billetera Activa
+              </span>
+            </div>
+
+            {rechargeSuccessMsg && (
+              <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-in zoom-in-95">
+                <CheckCircle size={15} />
+                <span>{rechargeSuccessMsg}</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-zinc-300 block">Elige un Paquete de SpotCoins:</span>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { coins: 50, price: '$2.500 COP', label: 'Básico', popular: false },
+                  { coins: 150, price: '$6.500 COP', label: 'Popular', popular: true },
+                  { coins: 350, price: '$14.000 COP', label: 'Pro', popular: false },
+                  { coins: 1000, price: '$38.000 COP', label: 'Master', popular: false },
+                ].map((pack) => (
+                  <button
+                    key={pack.coins}
+                    type="button"
+                    onClick={() => {
+                      if (onRechargeCoins) {
+                        onRechargeCoins(pack.coins, `Recarga Paquete ${pack.label} (+${pack.coins} SpotCoins)`);
+                        setRechargeSuccessMsg(`¡Recargaste +${pack.coins} SpotCoins exitosamente!`);
+                        setTimeout(() => setRechargeSuccessMsg(null), 3000);
+                      }
+                    }}
+                    className={`p-3 rounded-2xl border text-left relative transition-all active:scale-95 cursor-pointer flex flex-col justify-between ${
+                      pack.popular
+                        ? 'bg-gradient-to-b from-amber-500/20 to-transparent border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.15)]'
+                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    {pack.popular && (
+                      <span className="absolute -top-2 right-2 text-[8px] font-black uppercase tracking-wider bg-amber-400 text-black px-1.5 py-0.2 rounded-full">
+                        Popular
+                      </span>
+                    )}
+                    <div className="flex items-center gap-1.5 text-base font-black text-amber-400">
+                      <span>+{pack.coins}</span>
+                      <Coins size={14} className="text-amber-400" />
+                    </div>
+                    <div className="mt-1">
+                      <span className="text-[10px] text-zinc-400 block font-medium">{pack.label}</span>
+                      <span className="text-xs font-bold text-white block mt-0.5">{pack.price}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Misiones gratuitas */}
+            <div className="space-y-2 pt-1 border-t border-white/10">
+              <span className="text-[11px] font-bold text-zinc-300 block">Otras Formas Gratuitas de Ganar:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onRechargeCoins) {
+                    onRechargeCoins(25, 'Bono Diario de Creador (+25 SpotCoins)');
+                    setRechargeSuccessMsg('¡Reclamaste tu Bono Diario de +25 SpotCoins!');
+                    setTimeout(() => setRechargeSuccessMsg(null), 3000);
+                  }
+                }}
+                className="w-full p-2.5 rounded-xl bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 hover:border-purple-400 flex items-center justify-between text-left transition-all active:scale-98 cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🎁</span>
+                  <div>
+                    <span className="font-bold text-white text-xs block">Reclamar Bono Diario</span>
+                    <span className="text-[9px] text-zinc-400">Regalo de la comunidad por iniciar sesión</span>
+                  </div>
+                </div>
+                <span className="text-xs font-black text-amber-400">+25 🪙</span>
+              </button>
+
+              {onWatchAdForCoins && (
+                <button
+                  type="button"
+                  onClick={onWatchAdForCoins}
+                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-400/40 hover:border-amber-400 flex items-center justify-between text-left transition-all active:scale-98 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Tv size={16} className="text-amber-400" />
+                    <div>
+                      <span className="font-bold text-white text-xs block">Ver Video Google AdMob</span>
+                      <span className="text-[9px] text-zinc-400">Anuncio bonificado oficial (Sin límite)</span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-black text-amber-400">+5 🪙</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: SEGUIDORES QUE ENVIARON MONEDAS A TU FEED O LIVE */}
         {activeTab === 'gifts' && (
           <div className="p-4 space-y-3 overflow-y-auto no-scrollbar text-xs">
             <div className="flex items-center justify-between mb-1">

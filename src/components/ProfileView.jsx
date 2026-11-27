@@ -407,7 +407,7 @@ export default function ProfileView({
           <div>
             <p className="text-[10px] uppercase font-bold text-amber-400">Tu Billetera SpotPlay</p>
             <p className="text-sm font-black text-white flex items-center gap-1.5">
-              <span>{currentUser.wallet?.coins || 140} SpotCoins</span>
+              <span>{typeof currentUser.wallet?.coins === 'number' ? currentUser.wallet.coins : 0} SpotCoins</span>
               <span className="text-[10px] text-zinc-400 font-normal">disponibles</span>
             </p>
           </div>
@@ -808,7 +808,7 @@ export default function ProfileView({
                   <div className="text-left">
                     <span className="text-xs font-bold text-white block">Tu Billetera SpotPlay</span>
                     <span className="text-[10px] text-amber-400 font-semibold">
-                      {currentUser.wallet?.coins || 140} SpotCoins Disponibles
+                      {typeof currentUser.wallet?.coins === 'number' ? currentUser.wallet.coins : 0} SpotCoins Disponibles
                     </span>
                   </div>
                 </div>

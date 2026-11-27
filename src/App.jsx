@@ -1300,6 +1300,7 @@ export default function App() {
       const currentTransactions = prev.wallet?.transactions || [];
       const currentReceivedGifts = prev.receivedGifts || [];
 
+      let updatedUser;
       if (isMyVideo) {
         const newGiftRecord = {
           id: `rg-${Date.now()}`,
@@ -1326,7 +1327,7 @@ export default function App() {
           icon: 'gift',
         };
 
-        return {
+        updatedUser = {
           ...prev,
           wallet: {
             ...prev.wallet,
@@ -1336,15 +1337,30 @@ export default function App() {
           },
           receivedGifts: [newGiftRecord, ...currentReceivedGifts],
         };
+      } else {
+        const sendTx = {
+          id: `tx-gift-sent-${Date.now()}`,
+          type: 'GIFT_SENT',
+          title: `Regalo enviado: ${gift.emoji} ${gift.name}`,
+          subtitle: `A @${creator.username || 'creador'}`,
+          coins: -gift.coins,
+          status: 'COMPLETED',
+          date: 'Hoy',
+          icon: 'gift',
+        };
+
+        updatedUser = {
+          ...prev,
+          wallet: {
+            ...prev.wallet,
+            coins: remainingCoins,
+            transactions: [sendTx, ...currentTransactions],
+          },
+        };
       }
 
-      return {
-        ...prev,
-        wallet: {
-          ...prev.wallet,
-          coins: remainingCoins,
-        },
-      };
+      savePersistedUser(updatedUser);
+      return updatedUser;
     });
 
     // 2. Trigger visual celebration animation on screen
@@ -1376,14 +1392,27 @@ export default function App() {
     }
   };
 
-  // 🪙 Handle Recharge Coins (Con persistencia)
-  const handleRechargeCoins = (coinsAdded) => {
+  // 🪙 Handle Recharge Coins (Con persistencia y registro de transacción)
+  const handleRechargeCoins = (coinsAdded, title = 'Recarga de SpotCoins') => {
     setCurrentUser((prev) => {
+      const currentTransactions = prev.wallet?.transactions || [];
+      const newTx = {
+        id: `tx-recharge-${Date.now()}`,
+        type: 'COIN_RECHARGE',
+        title: title,
+        subtitle: `Acreditado a tu cuenta • @${prev.username}`,
+        coins: coinsAdded,
+        status: 'COMPLETED',
+        date: 'Hoy',
+        icon: 'coins',
+      };
+
       const updated = {
         ...prev,
         wallet: {
           ...prev.wallet,
-          coins: (prev.wallet?.coins || 0) + coinsAdded,
+          coins: (typeof prev.wallet?.coins === 'number' ? prev.wallet.coins : 0) + coinsAdded,
+          transactions: [newTx, ...currentTransactions],
         },
       };
       savePersistedUser(updated);
@@ -1420,7 +1449,7 @@ export default function App() {
           icon: 'ad',
         };
 
-        return {
+        const updated = {
           ...prev,
           wallet: {
             ...prev.wallet,
@@ -1428,16 +1457,35 @@ export default function App() {
             transactions: [newTx, ...currentTransactions],
           },
         };
+        savePersistedUser(updated);
+        return updated;
       });
     } else if (paymentMethod === 'coins') {
       const coinsCost = Math.round(budget / 1000);
-      setCurrentUser((prev) => ({
-        ...prev,
-        wallet: {
-          ...prev.wallet,
-          coins: Math.max(0, (prev.wallet?.coins || 0) - coinsCost),
-        },
-      }));
+      setCurrentUser((prev) => {
+        const currentTransactions = prev.wallet?.transactions || [];
+        const newTx = {
+          id: `tx-promo-coins-${Date.now()}`,
+          type: 'AD_CAMPAIGN',
+          title: `Pauta SpotCoins: ${packTitle || 'Campaña Spot'}`,
+          subtitle: `In-Feed Ad · ${goal}`,
+          coins: -coinsCost,
+          status: 'COMPLETED',
+          date: 'Hoy',
+          icon: 'ad',
+        };
+
+        const updated = {
+          ...prev,
+          wallet: {
+            ...prev.wallet,
+            coins: Math.max(0, (prev.wallet?.coins || 0) - coinsCost),
+            transactions: [newTx, ...currentTransactions],
+          },
+        };
+        savePersistedUser(updated);
+        return updated;
+      });
     }
 
     // 2. Marcar video como promocionado con datos enriquecidos de campaña publicitaria
@@ -1470,8 +1518,8 @@ export default function App() {
     if (coinsToAdd > 0 || earnedCOP > 0) {
       setCurrentUser((prev) => {
         const prevWallet = prev?.wallet || {};
-        const prevCoins = typeof prevWallet.coins === 'number' ? prevWallet.coins : 140;
-        const prevTotalReceived = typeof prevWallet.totalGiftsReceivedCoins === 'number' ? prevWallet.totalGiftsReceivedCoins : 721;
+        const prevCoins = typeof prevWallet.coins === 'number' ? prevWallet.coins : 0;
+        const prevTotalReceived = typeof prevWallet.totalGiftsReceivedCoins === 'number' ? prevWallet.totalGiftsReceivedCoins : 0;
         const currentTransactions = prevWallet.transactions || [];
         const currentReceivedGifts = Array.isArray(prev.receivedGifts) ? prev.receivedGifts : [];
 
@@ -2089,6 +2137,7 @@ export default function App() {
             setIsWalletOpen(false);
             setIsAdMobRewardedOpen(true);
           }}
+          onRechargeCoins={handleRechargeCoins}
         />
 
         {/* 🔥 Promote Video Modal (Publicidad con Billetera, Nequi y Segmentación) */}
