@@ -10,7 +10,7 @@ export const CURRENT_USER = {
   "baseLikesCount": 0,
   "likesCount": 0,
   "wallet": {
-    "coins": 140,
+    "coins": 5,
     "totalGiftsReceivedCoins": 721,
     "adMobRewardsWatched": 28,
     "transactions": [

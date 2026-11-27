@@ -37,7 +37,7 @@ export async function registerWithFirebase({ email, password, name, username }) 
       likesCount: '0',
       wallet: {
         balanceCOP: 0,
-        coins: 20, // 🎁 20 SpotCoins de bienvenida
+        coins: 5, // 🎁 5 SpotCoins de bienvenida
         giftEarningsCOP: 0,
       },
     };
@@ -65,7 +65,7 @@ export async function registerWithFirebase({ email, password, name, username }) 
     likesCount: '0',
     wallet: {
       balanceCOP: 0,
-      coins: 20, // 🎁 20 SpotCoins de regalo
+      coins: 5, // 🎁 5 SpotCoins de bienvenida
       giftEarningsCOP: 0,
     },
     createdAt: serverTimestamp(),
@@ -96,7 +96,7 @@ export async function loginWithFirebase({ email, password }) {
       likesCount: '0',
       wallet: {
         balanceCOP: 0,
-        coins: 20,
+        coins: 5,
         giftEarningsCOP: 0,
       },
     };
@@ -121,7 +121,7 @@ export async function loginWithFirebase({ email, password }) {
     followingCount: 0,
     followersCount: '0',
     likesCount: '0',
-    wallet: { balanceCOP: 0, coins: 20, giftEarningsCOP: 0 },
+    wallet: { balanceCOP: 0, coins: 5, giftEarningsCOP: 0 },
   };
 }
 
@@ -140,7 +140,7 @@ export async function loginWithGoogle() {
       followingCount: 5,
       followersCount: '340',
       likesCount: '1.5K',
-      wallet: { balanceCOP: 0, coins: 20, giftEarningsCOP: 0, affiliateEarningsCOP: 0, pendingCOP: 0 },
+      wallet: { balanceCOP: 0, coins: 5, giftEarningsCOP: 0, affiliateEarningsCOP: 0, pendingCOP: 0 },
     };
   }
 
@@ -158,7 +158,7 @@ export async function loginWithGoogle() {
     followingCount: 0,
     followersCount: '0',
     likesCount: '0',
-    wallet: { balanceCOP: 0, coins: 20, giftEarningsCOP: 0 },
+    wallet: { balanceCOP: 0, coins: 5, giftEarningsCOP: 0 },
   };
 
   if (db) {
