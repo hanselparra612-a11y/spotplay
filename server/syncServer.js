@@ -105,12 +105,18 @@ const server = http.createServer((req, res) => {
       }
     }
 
-    const safeTitle = (video && video.description) 
-      ? `🎬 ${video.description.slice(0, 70)} | Spot Play`
-      : `🎬 Video de @${video?.author?.username || 'Leonardo'} en Spot Play`;
-    const safeDesc = (video && video.description)
-      ? `${video.description.slice(0, 140)}`
-      : '🔥 ¡Mira este video en Spot Play y apoya a creadores con SpotCoins!';
+    const prodName = video?.product?.name;
+    const prodPrice = video?.product?.price ? `$${Math.round(video.product.price).toLocaleString('es-CO')} COP` : '';
+    const safeTitle = prodName
+      ? `🛍️ ${prodName}${prodPrice ? ' · ' + prodPrice : ''} | Spot Play`
+      : (video && video.description) 
+        ? `🎬 ${video.description.slice(0, 70)} | Spot Play`
+        : `🎬 Video de @${video?.author?.username || 'Leonardo'} en Spot Play`;
+    const safeDesc = prodName
+      ? `¡Oferta en Spot Play!: ${prodName} ${prodPrice ? '(' + prodPrice + ')' : ''}. ${video.description || 'Toca para ver el video completo.'}`
+      : (video && video.description)
+        ? `${video.description.slice(0, 140)}`
+        : '🔥 ¡Mira este video en Spot Play y apoya a creadores con SpotCoins!';
     const authorName = video?.author?.username || video?.author?.name || 'Spot Play';
     const cleanVideoId = videoId || (video ? video.id : '');
 

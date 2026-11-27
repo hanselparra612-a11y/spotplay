@@ -3,7 +3,7 @@ import {
   Search, Flame, TrendingUp, Play, X, UserPlus, UserCheck, 
   Sparkles, CheckCircle2, ChevronRight, Tag, ArrowLeft, Heart, ShoppingBag
 } from 'lucide-react';
-import { formatNumber, formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser, getTelegramLink } from '../utils/format';
+import { formatNumber, formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser, getTelegramLink, buildProductOrderMessage } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
@@ -335,7 +335,7 @@ export default function ExploreView({
                         const rawTg = video.product?.telegram || video.author?.telegram || '';
                         const cleanTg = normalizeTelegramUser(rawTg);
                         const primaryChat = video.product?.primaryChat || video.author?.primaryChat || (cleanTg && !video.product?.whatsapp ? 'telegram' : 'whatsapp');
-                        const orderMsg = `¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`;
+                        const orderMsg = buildProductOrderMessage(video.product, video);
                         const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
                         const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
                         if (primaryChat === 'telegram' && tgUrl) {
@@ -592,7 +592,7 @@ export default function ExploreView({
                         const rawTg = video.product?.telegram || video.author?.telegram || '';
                         const cleanTg = normalizeTelegramUser(rawTg);
                         const primaryChat = video.product?.primaryChat || video.author?.primaryChat || (cleanTg && !video.product?.whatsapp ? 'telegram' : 'whatsapp');
-                        const orderMsg = `¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`;
+                        const orderMsg = buildProductOrderMessage(video.product, video);
                         const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
                         const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
                         if (primaryChat === 'telegram' && tgUrl) {

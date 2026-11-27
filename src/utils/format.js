@@ -58,3 +58,19 @@ export function getTelegramLink(rawTelegram, message) {
   return `https://t.me/${user}${msgParam}`;
 }
 
+export function buildProductOrderMessage(product, video) {
+  const prodName = product?.name || 'este producto';
+  const priceText = product?.price ? formatCOP(product.price) : '';
+  const priceDetail = priceText ? ` (${priceText})` : '';
+
+  // Detección de origen público para previsualización enriquecida con miniatura Open Graph en WhatsApp y Telegram
+  const origin = typeof window !== 'undefined' && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
+    ? window.location.origin
+    : 'https://spotplay-1.onrender.com';
+
+  const videoId = video?.id || '';
+  const videoLink = videoId ? `${origin}/v/${videoId}` : origin;
+
+  return `¡Hola! Me interesa pedir *${prodName}*${priceDetail} que vi en tu video de Spot Play.\n\n🛍️ *Producto:* ${prodName}${priceText ? '\n💰 *Precio:* ' + priceText : ''}\n🎬 *Ver video de la oferta:*\n${videoLink}`;
+}
+

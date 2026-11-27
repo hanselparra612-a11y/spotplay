@@ -20,7 +20,7 @@ import {
   Send,
   X,
 } from 'lucide-react';
-import { formatNumber, formatTime, formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser, getTelegramLink } from '../utils/format';
+import { formatNumber, formatTime, formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser, getTelegramLink, buildProductOrderMessage } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { getVideoBlobFromIndexedDB } from '../utils/videoDB';
 import ReactionsTray from './ReactionsTray';
@@ -541,7 +541,7 @@ function VideoCard({
           const cleanTg = normalizeTelegramUser(rawTg);
           const primaryChat = video.product.primaryChat || authorObj?.primaryChat || (isOwnVideo && currentUser?.primaryChat) || (cleanTg && !video.product.whatsapp ? 'telegram' : 'whatsapp');
 
-          const orderMsg = `¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`;
+          const orderMsg = buildProductOrderMessage(video.product, video);
           const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
           const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
 
@@ -895,7 +895,7 @@ function VideoCard({
         const cleanWa = normalizeWhatsAppNumber(rawWa);
         const rawTg = video.product.telegram || authorObj?.telegram || (isOwnVideo && currentUser?.telegram) || '';
         const cleanTg = normalizeTelegramUser(rawTg);
-        const orderMsg = `¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`;
+        const orderMsg = buildProductOrderMessage(video.product, video);
         const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
         const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
 
