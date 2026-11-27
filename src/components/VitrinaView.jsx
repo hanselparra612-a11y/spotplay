@@ -72,7 +72,8 @@ export default function VitrinaView({ currentUser, onBack, openStore = false, is
   params.set('v', '29.7');
   params.set('embedded', '1');
   if (typeof window !== 'undefined') {
-    params.set('spotplay_origin', window.location.origin);
+    const origin = isNative ? 'https://spotplay-1.onrender.com' : window.location.origin;
+    params.set('spotplay_origin', origin);
   }
 
   // Si se solicita abrir la tienda del usuario directamente (ej. desde Perfil)
