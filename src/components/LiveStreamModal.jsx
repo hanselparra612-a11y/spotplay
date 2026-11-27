@@ -94,57 +94,133 @@ export default function LiveStreamModal({
   const keyboardHeight = useVirtualKeyboard();
 
   const videoRef = useRef(null);
+  const streamRef = useRef(null);
   const timerIntervalRef = useRef(null);
   const simulationIntervalRef = useRef(null);
   const commentsEndRef = useRef(null);
   const comboTimeoutRef = useRef(null);
 
-  // Iniciar cámara web / móvil
-  const startCamera = async () => {
+  // Detener la cámara y liberar físicamente el hardware
+  const stopCamera = () => {
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      } catch (e) {}
+      streamRef.current = null;
+    }
+    if (videoRef.current && videoRef.current.srcObject) {
+      try {
+        const activeTracks = videoRef.current.srcObject.getTracks?.() || [];
+        activeTracks.forEach((track) => track.stop());
+      } catch (e) {}
+      videoRef.current.srcObject = null;
+    }
+    setStream(null);
+  };
+
+  // Iniciar cámara con el modo objetivo ('user' o 'environment')
+  const startCameraWithMode = async (targetMode = facingMode) => {
     try {
       setCameraError(null);
+      stopCamera();
+
+      // Pequeña pausa de 80ms para que Android/iOS libere el sensor previo en hardware
+      await new Promise((r) => setTimeout(r, 80));
+
       let mediaStream = null;
 
-      // Intento 1: Cámara frontal/trasera con latencia ultra baja
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode,
-            width: { ideal: 720 },
-            height: { ideal: 1280 },
-            frameRate: { ideal: 60, min: 30 },
-            latency: { ideal: 0 },
-          },
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-            latency: { ideal: 0, max: 0.02 },
-          },
-        });
-      } catch (e1) {
-        console.warn('Fallo intento 1 (con mic), reintentando solo video:', e1);
-        // Intento 2: Solo video con facingMode
+      if (targetMode === 'environment') {
+        // Intento 1: Buscar dispositivo trasero real por enumerateDevices (Altamente confiable en Android)
+        try {
+          if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+            const rearDevice = videoInputs.find((d) =>
+              /back|rear|trasera|environment|externa/i.test(d.label)
+            ) || (videoInputs.length > 1 ? videoInputs[videoInputs.length - 1] : null);
+
+            if (rearDevice && rearDevice.deviceId) {
+              mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                  deviceId: { exact: rearDevice.deviceId },
+                  width: { ideal: 1280, max: 1920 },
+                  height: { ideal: 720, max: 1080 },
+                },
+                audio: !isMuted,
+              });
+            }
+          }
+        } catch (eDev) {
+          console.warn('Intento con rear deviceId falló, pasando a exact environment:', eDev);
+        }
+
+        // Intento 2: W3C standard facingMode exact: 'environment' (obliga a usar la trasera sin fallback a frontal)
+        if (!mediaStream) {
+          try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { exact: 'environment' },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+              },
+              audio: !isMuted,
+            });
+          } catch (eExact) {
+            console.warn('Intento exact environment con audio falló:', eExact);
+          }
+        }
+
+        // Intento 3: exact 'environment' sin audio
+        if (!mediaStream) {
+          try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { exact: 'environment' },
+              },
+              audio: false,
+            });
+          } catch (eExactNoAudio) {
+            console.warn('Intento exact environment sin audio falló:', eExactNoAudio);
+          }
+        }
+
+        // Intento 4: ideal 'environment' (fallback si exact no es soportado)
+        if (!mediaStream) {
+          try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: 'environment' },
+              },
+              audio: !isMuted,
+            });
+          } catch (eIdeal) {
+            mediaStream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'environment' },
+              audio: false,
+            });
+          }
+        }
+      } else {
+        // Cámara Frontal (Selfie)
         try {
           mediaStream = await navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode,
-              frameRate: { ideal: 60, min: 30 },
-              latency: { ideal: 0 },
+              facingMode: 'user',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
             },
-            audio: false,
+            audio: !isMuted,
           });
-        } catch (e2) {
-          console.warn('Fallo intento 2 (con facingMode), reintentando video genérico:', e2);
-          // Intento 3: Video genérico básico
+        } catch (eFront) {
           mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: { latency: { ideal: 0 } },
+            video: { facingMode: 'user' },
             audio: false,
           });
         }
       }
 
       if (mediaStream) {
+        streamRef.current = mediaStream;
         setStream(mediaStream);
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
@@ -152,9 +228,13 @@ export default function LiveStreamModal({
         }
       }
     } catch (err) {
-      console.warn('Cámara no permitida o no disponible:', err);
-      setCameraError('Permiso de cámara denegado o no disponible. Toca "Conectar Cámara" y pulsa "Permitir" en Chrome.');
+      console.warn('Error accediendo a cámara:', err);
+      setCameraError('No se pudo acceder a la cámara seleccionada. Toca "Conectar Cámara" y pulsa "Permitir" en Chrome.');
     }
+  };
+
+  const startCamera = async () => {
+    return startCameraWithMode(facingMode);
   };
 
   const handleEndLiveRequest = (reason = 'user') => {
@@ -220,7 +300,7 @@ export default function LiveStreamModal({
     setShowInactivityModal(false);
     setFinishReason('user');
 
-    startCamera();
+    startCameraWithMode(facingMode);
 
     return () => {
       stopCamera();
@@ -228,7 +308,7 @@ export default function LiveStreamModal({
       if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current);
       if (inactivityCountdownIntervalRef.current) clearInterval(inactivityCountdownIntervalRef.current);
     };
-  }, [isOpen, facingMode]);
+  }, [isOpen]);
 
   // ⏱️ El cronómetro y temporizadores corren ÚNICAMENTE cuando se pulsa "EMPEZAR LIVE"
   useEffect(() => {
@@ -304,22 +384,16 @@ export default function LiveStreamModal({
     commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [comments]);
 
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
-    }
-  };
-
-  const toggleCameraFacing = () => {
+  const toggleCameraFacing = async () => {
     recordActivity();
-    setFacingMode((prev) => {
-      const nextMode = prev === 'user' ? 'environment' : 'user';
-      setIsMirrored(nextMode === 'user');
-      setShowZoomToast(nextMode === 'user' ? '📷 Cámara Frontal (Selfie)' : '📷 Cámara Principal (Trasera)');
-      setTimeout(() => setShowZoomToast(null), 2200);
-      return nextMode;
-    });
+    const nextMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextMode);
+    setIsMirrored(nextMode === 'user');
+    setShowZoomToast(nextMode === 'user' ? '📷 Cámara Frontal (Selfie)' : '📷 Cámara Principal (Trasera)');
+    setTimeout(() => setShowZoomToast(null), 2200);
+
+    // Cambiar físicamente de cámara deteniendo la anterior e iniciando la nueva
+    await startCameraWithMode(nextMode);
   };
 
   const handleCancelPreview = () => {
