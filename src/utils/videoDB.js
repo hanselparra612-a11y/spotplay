@@ -206,6 +206,14 @@ export async function loadVideosFromIndexedDB() {
  */
 export async function deleteVideoFromIndexedDB(id) {
   try {
+    // 1. Limpiar también de metadatos locales para evitar que reviva en el feed
+    try {
+      const metaKey = 'spotplay_user_uploaded_meta_v2';
+      const existing = JSON.parse(localStorage.getItem(metaKey) || '[]');
+      const filtered = existing.filter((v) => v.id !== id && !v.description?.toLowerCase().includes('piloto'));
+      localStorage.setItem(metaKey, JSON.stringify(filtered));
+    } catch {}
+
     const db = await openDB(DB_NAME);
     return new Promise((resolve, reject) => {
       const tx = db.transaction(STORE_NAME, 'readwrite');

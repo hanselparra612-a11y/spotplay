@@ -44,6 +44,8 @@ import {
   savePersistedReports,
   loadPersistedBlockedUsers,
   savePersistedBlockedUsers,
+  getDeletedVideoIds,
+  markVideoAsDeleted,
 } from './utils/storage';
 import {
   saveVideoToIndexedDB,
@@ -385,12 +387,13 @@ export default function App() {
             });
 
             setVideos((prevVideos) => {
-              // 🛡️ PRESERVAR de forma estricta los videos subidos por el usuario para que nunca se borren al sincronizar el servidor
+              const deletedIds = getDeletedVideoIds();
+              // 🛡️ PRESERVAR de forma estricta los videos subidos por el usuario para que nunca se borren al sincronizar el servidor, EXCEPTO los eliminados por el usuario
               const userUploaded = (prevVideos || []).filter(
-                (v) => v.isUserUploaded || (v.id && v.id.startsWith('uploaded-'))
+                (v) => (v.isUserUploaded || (v.id && v.id.startsWith('uploaded-'))) && !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto')
               );
               const userIds = new Set(userUploaded.map((v) => v.id));
-              const nonDupeServer = sortedServerVideos.filter((v) => !userIds.has(v.id));
+              const nonDupeServer = sortedServerVideos.filter((v) => !userIds.has(v.id) && !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
               const merged = [...userUploaded, ...nonDupeServer];
 
               // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales y asegurar miniaturas
@@ -470,10 +473,12 @@ export default function App() {
       try {
         const storedVideos = await loadVideosFromIndexedDB();
         if (storedVideos && storedVideos.length > 0) {
+          const deletedIds = getDeletedVideoIds();
+          const validStored = storedVideos.filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
           setVideos((prev) => {
-            const storedIds = new Set(storedVideos.map((v) => v.id));
-            const existingWithoutDupes = prev.filter((v) => !storedIds.has(v.id));
-            return [...storedVideos, ...existingWithoutDupes];
+            const storedIds = new Set(validStored.map((v) => v.id));
+            const existingWithoutDupes = prev.filter((v) => !storedIds.has(v.id) && !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
+            return [...validStored, ...existingWithoutDupes];
           });
         }
       } catch (err) {
@@ -498,7 +503,9 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = subscribeVideos((latestVideos) => {
       if (latestVideos && latestVideos.length > 0) {
-        setVideos(latestVideos);
+        const deletedIds = getDeletedVideoIds();
+        const filtered = latestVideos.filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
+        setVideos(filtered);
       }
     });
 
@@ -891,17 +898,22 @@ export default function App() {
   };
 
   const handleDeleteVideo = (videoId) => {
+    const targetVideo = videos.find((v) => v.id === videoId);
+    // 🛡️ Registrar en la lista negra permanente para que nunca vuelva a resucitar
+    markVideoAsDeleted(videoId, targetVideo?.description);
+
     // 🗑️ Eliminar permanentemente del servidor central y de IndexedDB
     fetch(getApiUrl('/api/videos/' + videoId), { method: 'DELETE' }).catch(() => {});
     deleteVideoFromIndexedDB(videoId).catch(() => {});
 
     setVideos((prev) => {
-      const updated = prev.filter((v) => v.id !== videoId);
+      const updated = prev.filter((v) => v.id !== videoId && !v.description?.toLowerCase().includes('piloto'));
       savePersistedVideos(updated);
       return updated;
     });
+    setFeedSequence((prev) => prev.filter((item) => item.id !== videoId));
     setEditingVideo(null);
-    setOrderToast({ message: '🗑️ Video eliminado de tu perfil' });
+    setOrderToast({ message: '🗑️ Video eliminado permanentemente' });
     setTimeout(() => setOrderToast(null), 3000);
   };
 

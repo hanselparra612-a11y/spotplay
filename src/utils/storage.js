@@ -22,6 +22,37 @@ const BOOKMARKS_STORAGE_KEY = 'spotplay_bookmarks_v2';
 const LIKES_STORAGE_KEY = 'spotplay_likes_v2';
 const REPORTS_STORAGE_KEY = 'spotplay_reports_v1';
 const BLOCKED_USERS_STORAGE_KEY = 'spotplay_blocked_users_v1';
+const DELETED_VIDEOS_KEY = 'spotplay_deleted_video_ids_v2';
+
+export function getDeletedVideoIds() {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(DELETED_VIDEOS_KEY) : null;
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+export function markVideoAsDeleted(id, description = '') {
+  if (!id && !description) return;
+  try {
+    const set = getDeletedVideoIds();
+    if (id) set.add(String(id));
+    localStorage.setItem(DELETED_VIDEOS_KEY, JSON.stringify(Array.from(set)));
+
+    // Limpiar también de spotplay_user_uploaded_meta_v2 para que no resucite
+    try {
+      const metaKey = 'spotplay_user_uploaded_meta_v2';
+      const existingMeta = JSON.parse(localStorage.getItem(metaKey) || '[]');
+      const filtered = existingMeta.filter((v) => {
+        if (id && v.id === id) return false;
+        if (v.description && typeof v.description === 'string' && v.description.toLowerCase().includes('piloto')) return false;
+        return true;
+      });
+      localStorage.setItem(metaKey, JSON.stringify(filtered));
+    } catch {}
+  } catch {}
+}
 
 // Claves legadas para migración transparente sin pérdida de datos
 const LEGACY_VIDEOS_KEY = 'toktik_videos_1986_v2';
@@ -133,8 +164,12 @@ export function loadPersistedVideos() {
         'mariana_dance', 'alejo_skate', 'isa_makeup', 'david_gamestudio',
         'cata_yoga', 'juanma_tatuajes'
       ];
+      const deletedIds = getDeletedVideoIds();
       const cleaned = Array.isArray(parsed)
         ? parsed.filter((v) => {
+            // Descartar videos eliminados permanentemente o que contengan 'piloto'
+            if (deletedIds.has(v.id)) return false;
+            if (v.description && typeof v.description === 'string' && v.description.toLowerCase().includes('piloto')) return false;
             // Descartar videos mock de prueba antiguos
             if (v.id && (v.id.startsWith('vid-') || v.id.startsWith('demo-'))) return false;
             if (v.author && mockAuthors.includes(v.author.username)) return false;
@@ -150,7 +185,11 @@ export function loadPersistedVideos() {
           if (Array.isArray(userMetaList) && userMetaList.length > 0) {
             const currentIds = new Set(cleaned.map((v) => v.id));
             userMetaList.forEach((uVid) => {
-              if (!currentIds.has(uVid.id)) {
+              if (
+                !currentIds.has(uVid.id) &&
+                !deletedIds.has(uVid.id) &&
+                !(uVid.description && typeof uVid.description === 'string' && uVid.description.toLowerCase().includes('piloto'))
+              ) {
                 cleaned.unshift(uVid);
                 currentIds.add(uVid.id);
               }
@@ -162,11 +201,12 @@ export function loadPersistedVideos() {
       if (cleaned.length > 0) {
         // Asegurar que si INITIAL_VIDEOS tiene nuevos videos subidos, se incluyan siempre
         const existingIds = new Set(cleaned.map((v) => v.id));
-        const missingFromInitial = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id));
+        const missingFromInitial = INITIAL_VIDEOS.filter((v) => !existingIds.has(v.id) && !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
         list = [...missingFromInitial, ...cleaned];
       }
     }
-    return list.map((v) => {
+    const deletedIds = getDeletedVideoIds();
+    return list.filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto')).map((v) => {
       const { product, isPromoted, promotedCta, ...cleanVid } = v;
       const realCommentsList = (v.comments || []).map((c) => ({
         ...c,
