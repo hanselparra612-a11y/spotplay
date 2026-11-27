@@ -201,9 +201,9 @@ export default function LiveStreamModal({
     setEarnedGiftCoins(0);
     setAdmobBonusCoins(0);
     setGiftsReceivedCount(0);
-    setViewers(Math.floor(Math.random() * 80) + 120);
+    setViewers(0);
     setComments([
-      { user: 'sistema', text: '🔴 Transmisión iniciada. ¡Tu audiencia está entrando!', avatar: null, isSystem: true }
+      { user: 'sistema', text: '🔴 Transmisión iniciada. El chat está listo.', avatar: null, isSystem: true }
     ]);
     warnedRef.current = false;
     lastActivityRef.current = Date.now();
