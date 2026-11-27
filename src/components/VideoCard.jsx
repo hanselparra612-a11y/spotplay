@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { formatNumber, formatTime, formatCOP } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
+import { getVideoBlobFromIndexedDB } from '../utils/videoDB';
 import ReactionsTray from './ReactionsTray';
 
 function VideoCard({
@@ -70,11 +71,32 @@ function VideoCard({
   const posterUrl = resolveMediaUrl(rawPoster);
 
   // 🚀 Estados para Aceleración y Scrubbing de Video en la Barra Horizontal
-  const [videoSrc, setVideoSrc] = useState(resolveMediaUrl(video.videoUrl));
+  const [videoSrc, setVideoSrc] = useState(() => resolveMediaUrl(video.videoUrl));
+  const [hasPlaybackError, setHasPlaybackError] = useState(false);
 
   useEffect(() => {
-    setVideoSrc(resolveMediaUrl(video.videoUrl));
-  }, [video.videoUrl]);
+    let isMounted = true;
+    const initialSrc = resolveMediaUrl(video.videoUrl);
+    setVideoSrc(initialSrc || '');
+    setHasPlaybackError(false);
+
+    // Si la URL inicial está vacía o es un video local de IndexedDB, cargar el blob directamente
+    const needsBlob = !initialSrc || initialSrc.startsWith('blob:') || (video.id && (video.id.startsWith('uploaded-') || video.isUserUploaded));
+    if (needsBlob) {
+      getVideoBlobFromIndexedDB(video.id)
+        .then((blob) => {
+          if (isMounted && blob) {
+            const freshBlobUrl = URL.createObjectURL(blob);
+            setVideoSrc(freshBlobUrl);
+          }
+        })
+        .catch(() => {});
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [video.id, video.videoUrl]);
 
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [scrubTime, setScrubTime] = useState(0);
@@ -320,7 +342,7 @@ function VideoCard({
           src={posterUrl}
           alt="Vista previa video"
           className={`absolute inset-0 w-full h-full object-cover pointer-events-none z-[2] transition-opacity duration-300 ${
-            isPlaying && isFrameReady && !isBuffering ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            isPlaying && isFrameReady && !isBuffering && !hasPlaybackError ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
           loading="eager"
         />
@@ -329,7 +351,7 @@ function VideoCard({
       {/* Video Element con loop nativo en GPU y Preload Inteligente */}
       <video
         ref={videoRef}
-        src={shouldMountMedia ? videoSrc : undefined}
+        src={shouldMountMedia && videoSrc ? videoSrc : undefined}
         poster={posterUrl || undefined}
         className="w-full h-full object-cover cursor-pointer z-[1]"
         style={{ transform: 'translateZ(0)', willChange: 'transform' }}
@@ -347,6 +369,7 @@ function VideoCard({
         onPlaying={() => {
           setIsBuffering(false);
           setIsFrameReady(true);
+          setHasPlaybackError(false);
           if (videoRef.current) {
             videoRef.current.playbackRate = 1.0;
           }
@@ -375,6 +398,19 @@ function VideoCard({
         onError={(err) => {
           setIsBuffering(false);
           console.warn('Playback error on video:', video.id, err);
+          // Intentar recuperación binaria inmediata desde IndexedDB
+          getVideoBlobFromIndexedDB(video.id)
+            .then((blob) => {
+              if (blob) {
+                const freshBlobUrl = URL.createObjectURL(blob);
+                setVideoSrc(freshBlobUrl);
+              } else {
+                setHasPlaybackError(true);
+              }
+            })
+            .catch(() => {
+              setHasPlaybackError(true);
+            });
         }}
         onEnded={() => {
           const vid = videoRef.current;
@@ -385,8 +421,21 @@ function VideoCard({
         }}
       />
 
+      {/* ⚠️ Alerta suave si un video no tiene archivo reproducible */}
+      {hasPlaybackError && isActive && (
+        <div className="absolute inset-0 bg-black/65 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center z-[3] pointer-events-none">
+          <p className="text-white text-xs font-bold mb-1">Video en sincronización</p>
+          <p className="text-zinc-400 text-[10px] max-w-xs mb-3">
+            El archivo de este video se está sincronizando. Desliza hacia abajo para continuar con el feed.
+          </p>
+          <span className="text-[10px] bg-white/10 px-2.5 py-1 rounded-full text-zinc-300 font-semibold border border-white/10">
+            ↓ Desliza para el siguiente
+          </span>
+        </div>
+      )}
+
       {/* Indicador de Carga / Buffer TikTok Style */}
-      {isBuffering && isActive && (
+      {isBuffering && isActive && !hasPlaybackError && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 transition-opacity">
           <div className="w-12 h-12 rounded-full border-3 border-amber-400/30 border-t-amber-400 animate-spin" />
         </div>

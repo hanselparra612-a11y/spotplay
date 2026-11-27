@@ -219,3 +219,31 @@ export async function deleteVideoFromIndexedDB(id) {
     return false;
   }
 }
+
+/**
+ * Recupera el archivo binario de un video desde IndexedDB si está disponible localmente
+ */
+export async function getVideoBlobFromIndexedDB(id) {
+  if (!id) return null;
+  try {
+    const db = await openDB(DB_NAME);
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const rec = req.result;
+        if (!rec) return resolve(null);
+        if (rec.videoBlob) return resolve(rec.videoBlob);
+        if (rec.arrayBuffer) {
+          const b = new Blob([rec.arrayBuffer], { type: rec.mimeType || 'video/mp4' });
+          return resolve(b);
+        }
+        resolve(null);
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (err) {
+    return null;
+  }
+}

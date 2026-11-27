@@ -556,31 +556,34 @@ export default function App() {
 
     // 3. Mapear en la secuencia infinita con claves únicas de instancia
     const ordered = [];
-    const addedIds = new Set();
+    const initialPromotedIds = new Set(promotedVideos.map((p) => p.id));
 
     // 🚀 INYECTAR PRIMERO LOS VIDEOS EN CAMPAÑA PROMOVIDA (Aparecen de #1 en el Feed)
     promotedVideos.forEach((vid, pIdx) => {
       ordered.push({ ...vid, feedInstanceId: `${vid.id}-promo-${pIdx}` });
-      addedIds.add(vid.id);
     });
 
+    // ♾️ RECORRER TODO feedSequence SIN BLOQUEOS PARA GARANTIZAR SCROLL INFINITO REAL
     feedSequence.forEach((item) => {
       const vid = videoMap.get(item.id);
-      if (vid && !vid.isHidden && !addedIds.has(vid.id)) {
+      if (vid && !vid.isHidden) {
         const authorId = vid.author?.id;
         const authorUsername = vid.author?.username;
         if (!(authorId && blockedUsers.includes(authorId)) && !(authorUsername && blockedUsers.includes(authorUsername))) {
+          // Solo en el ciclo inicial, evitar duplicar de inmediato el video si ya está de #1 en pauta
+          if (item.instanceKey.includes('-c0-') && initialPromotedIds.has(vid.id)) {
+            return;
+          }
           ordered.push({ ...vid, feedInstanceId: item.instanceKey });
-          addedIds.add(vid.id);
         }
       }
     });
 
-    // 4. Si hay videos que no estaban en la secuencia inicial, agregarlos
+    // 4. Si hay videos recién subidos que aún no están en la secuencia, agregarlos al inicio
     visibleVideos.forEach((vid) => {
-      if (!addedIds.has(vid.id)) {
-        ordered.push({ ...vid, feedInstanceId: `${vid.id}-c0-fallback` });
-        addedIds.add(vid.id);
+      const alreadyInOrdered = ordered.some((o) => o.id === vid.id);
+      if (!alreadyInOrdered) {
+        ordered.unshift({ ...vid, feedInstanceId: `${vid.id}-new-upload` });
       }
     });
 
@@ -634,14 +637,14 @@ export default function App() {
     }
     setTimeout(() => {
       isExtendingFeedRef.current = false;
-    }, 800);
+    }, 300);
   }, [videos, feedFilter]);
 
   // Disparar extensión cuando el usuario se acerca al final del feed
   useEffect(() => {
     if (currentTab !== 'feed' || feedFilter !== 'foryou') return;
     if (displayedVideos.length === 0) return;
-    if (activeVideoIndex >= displayedVideos.length - 3) {
+    if (activeVideoIndex >= displayedVideos.length - 4) {
       handleExtendFeed();
     }
   }, [activeVideoIndex, displayedVideos.length, currentTab, feedFilter, handleExtendFeed]);
@@ -700,7 +703,7 @@ export default function App() {
     if (!container) return;
 
     const onScroll = () => {
-      if (container.scrollHeight - (container.scrollTop + container.clientHeight) < 1200) {
+      if (container.scrollHeight - (container.scrollTop + container.clientHeight) < 2500) {
         handleExtendFeed();
       }
     };
@@ -1794,11 +1797,11 @@ export default function App() {
                       preloadMode={
                         activeVideoIndex === index
                           ? 'auto'
-                          : Math.abs(activeVideoIndex - index) <= 1
+                          : Math.abs(activeVideoIndex - index) <= 2
                           ? 'auto'
                           : 'metadata'
                       }
-                      shouldMountMedia={Math.abs(activeVideoIndex - index) <= 2}
+                      shouldMountMedia={Math.abs(activeVideoIndex - index) <= 5}
                       isMuted={isMuted}
                       onToggleMute={() => setIsMuted((prev) => !prev)}
                       onToggleLike={handleToggleLike}
