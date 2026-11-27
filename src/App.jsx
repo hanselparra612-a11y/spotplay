@@ -551,13 +551,22 @@ export default function App() {
       return visibleVideos;
     }
 
-    // 2. Mapear en la secuencia infinita con claves únicas de instancia
+    // 2. Prioridad de Anuncios: Separar videos en campaña publicitaria activa
+    const promotedVideos = visibleVideos.filter((v) => v.isPromoted);
+
+    // 3. Mapear en la secuencia infinita con claves únicas de instancia
     const ordered = [];
     const addedIds = new Set();
 
+    // 🚀 INYECTAR PRIMERO LOS VIDEOS EN CAMPAÑA PROMOVIDA (Aparecen de #1 en el Feed)
+    promotedVideos.forEach((vid, pIdx) => {
+      ordered.push({ ...vid, feedInstanceId: `${vid.id}-promo-${pIdx}` });
+      addedIds.add(vid.id);
+    });
+
     feedSequence.forEach((item) => {
       const vid = videoMap.get(item.id);
-      if (vid && !vid.isHidden) {
+      if (vid && !vid.isHidden && !addedIds.has(vid.id)) {
         const authorId = vid.author?.id;
         const authorUsername = vid.author?.username;
         if (!(authorId && blockedUsers.includes(authorId)) && !(authorUsername && blockedUsers.includes(authorUsername))) {
@@ -567,7 +576,7 @@ export default function App() {
       }
     });
 
-    // 3. Si hay videos que no estaban en la secuencia inicial, agregarlos al final
+    // 4. Si hay videos que no estaban en la secuencia inicial, agregarlos
     visibleVideos.forEach((vid) => {
       if (!addedIds.has(vid.id)) {
         ordered.push({ ...vid, feedInstanceId: `${vid.id}-c0-fallback` });

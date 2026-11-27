@@ -287,7 +287,7 @@ export default function PromoteVideoModal({
       setTimeout(() => {
         setConfirmed(false);
         onClose();
-      }, 1600);
+      }, 4500);
     }, 1200);
   };
 
@@ -333,78 +333,102 @@ export default function PromoteVideoModal({
         {/* MONITOR EN VIVO SI EL VIDEO YA ESTÁ EN CAMPAÑA */}
         {video.isPromoted && !confirmed ? (
           <div className="p-4 space-y-4 text-xs overflow-y-auto no-scrollbar">
-            <div className="p-3 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-zinc-900 border border-emerald-400/40 rounded-2xl">
+            <div className="p-3.5 bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-zinc-900 border border-emerald-400/50 rounded-2xl shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
                   Campaña Activa en el Feed
                 </span>
-                <span className="text-[10px] bg-emerald-400/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full">
+                <span className="text-[10px] bg-emerald-400/20 text-emerald-300 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-400/30">
                   Prioridad #1
                 </span>
               </div>
-              <h3 className="text-sm font-black text-white">{video.promotedCta || 'Pedir por Chat 💬'}</h3>
+              <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+                <Flame size={14} className="fill-amber-400 text-amber-400" />
+                <span>{video.promotedCta || 'Pedir por Chat 💬'}</span>
+              </h3>
               <p className="text-[11px] text-zinc-300 mt-1">
-                Segmentación: <strong className="text-amber-400">{video.promotedCity || 'Toda Colombia'}</strong>
+                📍 Audiencia: <strong className="text-amber-400">{video.promotedCity || 'Toda Colombia'}</strong>
               </p>
-              {video.packTitle && (
-                <p className="text-[10px] text-zinc-400 mt-0.5">
-                  Paquete: <strong>{video.packTitle}</strong>
-                </p>
-              )}
+              <p className="text-[10px] text-zinc-400 mt-0.5">
+                ⚡ Ubicación: <strong className="text-emerald-300">Primeras posiciones del feed "Para Ti"</strong>
+              </p>
             </div>
 
-            {/* Métricas estimadas */}
-            <div className="grid grid-cols-2 gap-2 text-center">
-              <div className="p-3 bg-white/5 border border-white/5 rounded-xl">
-                <p className="text-[10px] text-zinc-400 uppercase font-bold">Alcance estimado</p>
-                <p className="text-base font-black text-amber-400 mt-0.5">
-                  ~{((video.promotedBudget || 50000) / 7).toFixed(0)} vistas
-                </p>
-              </div>
-              <div className="p-3 bg-white/5 border border-white/5 rounded-xl">
-                <p className="text-[10px] text-zinc-400 uppercase font-bold">Inversión</p>
-                <p className="text-base font-black text-amber-400 mt-0.5 flex items-center justify-center gap-1">
-                  <Coins size={14} className="text-amber-400" />
-                  <span>{Math.round((video.promotedBudget || 50000) / 1000)} SpotCoins</span>
-                </p>
-              </div>
-            </div>
+            {/* Métricas e Inversión Reales en SpotCoins */}
+            {(() => {
+              const bCoins = Number(video.promotedBudget) <= 500
+                ? Number(video.promotedBudget || 5)
+                : Math.round(Number(video.promotedBudget || 50000) / 1000);
+              const reachText = bCoins >= 100 ? '5.000 - 10.000 vistas' : bCoins >= 50 ? '1.800 - 3.500 vistas' : bCoins >= 20 ? '500 - 1.200 vistas' : '100 - 250 vistas';
+              return (
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <p className="text-[10px] text-zinc-400 uppercase font-bold">Alcance Prioritario</p>
+                    <p className="text-sm font-black text-amber-400 mt-0.5">
+                      ~{reachText}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <p className="text-[10px] text-zinc-400 uppercase font-bold">Inversión Usada</p>
+                    <p className="text-sm font-black text-amber-400 mt-0.5 flex items-center justify-center gap-1">
+                      <Coins size={14} className="text-amber-400" />
+                      <span>{bCoins} SpotCoins</span>
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
 
-            <div className="flex items-center gap-2.5 p-2 rounded-xl bg-white/5 border border-white/5">
-              <video src={video.videoUrl} className="w-10 h-14 rounded-lg object-cover" muted />
+            <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/10">
+              <video src={video.videoUrl} className="w-10 h-14 rounded-lg object-cover bg-black" muted />
               <div className="min-w-0">
-                <p className="font-semibold text-white line-clamp-1">{video.description}</p>
-                <p className="text-[10px] text-zinc-400">@{video.author?.username}</p>
+                <p className="font-bold text-white text-xs line-clamp-1">{video.description || 'Tu video publicitario'}</p>
+                <p className="text-[10px] text-amber-400 font-medium">Insignia activa: 🔥 Patrocinado</p>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                alert('¡Campaña extendida por 48 horas adicionales!');
-                onClose();
-              }}
-              className="w-full py-2.5 bg-amber-400 hover:bg-amber-300 text-black font-black text-xs rounded-xl shadow active:scale-95 transition-all flex items-center justify-center gap-1.5"
-            >
-              <Sparkles size={14} />
-              <span>Extender Campaña (+ 20 SpotCoins 🪙)</span>
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-xs rounded-xl shadow active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>Entendido, Ir al Feed</span>
+              </button>
+            </div>
           </div>
         ) : confirmed ? (
           /* SUCCESS SCREEN */
-          <div className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-            <div className="w-16 h-16 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center animate-bounce shadow-[0_0_20px_rgba(251,191,36,0.5)]">
-              <Sparkles size={34} />
+          <div className="p-6 text-center flex flex-col items-center justify-center space-y-3 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.5)]">
+              <Flame size={32} className="fill-amber-400 text-amber-400 animate-pulse" />
             </div>
             <h3 className="text-base font-black text-white">¡Campaña Publicitaria Activada!</h3>
-            <p className="text-xs text-zinc-300 leading-relaxed max-w-xs">
-              Tu video ahora tiene <strong>prioridad máxima en el feed</strong> para compradores en{' '}
-              <strong className="text-amber-400">{city}</strong> con el botón{' '}
-              <strong className="text-emerald-400">
-                "{selectedPack ? selectedPack.cta : campaignCatalog.find((c) => c.id === selectedGoal)?.cta}"
-              </strong>.
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-left space-y-1.5 w-full text-xs">
+              <p className="text-zinc-200 font-semibold">
+                🪙 <strong>Inversión:</strong> {coinsNeeded} SpotCoins deducidas.
+              </p>
+              <p className="text-zinc-200 font-semibold">
+                🚀 <strong>Posición:</strong> Puesto #1 en el Feed Para Ti.
+              </p>
+              <p className="text-zinc-200 font-semibold">
+                🏷️ <strong>Distintivo:</strong> Insignia «🔥 Patrocinado».
+              </p>
+              <p className="text-zinc-200 font-semibold">
+                🎯 <strong>Botón directo:</strong> "{selectedPack ? selectedPack.cta : campaignCatalog.find((c) => c.id === selectedGoal)?.cta}".
+              </p>
+            </div>
+            <p className="text-[11px] text-zinc-400">
+              Cualquier usuario que abra la app verá tu video primero.
             </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-xs rounded-xl shadow active:scale-95 transition-all cursor-pointer"
+            >
+              ¡Ver mi Video en el Feed Ahora!
+            </button>
           </div>
         ) : isCreatingPack || editingPack ? (
           /* ============================================================ */
