@@ -149,13 +149,13 @@ export default function CreatorWalletModal({
           <button
             onClick={() => setActiveTab('recharge')}
             className={`flex-1 py-2 text-xs font-bold transition-all relative flex items-center justify-center gap-1 cursor-pointer ${
-              activeTab === 'recharge' ? 'text-emerald-400' : 'text-zinc-400 hover:text-white'
+              activeTab === 'recharge' ? 'text-amber-400' : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <Plus size={13} />
-            <span>Recargar</span>
+            <Sparkles size={13} />
+            <span>Ganar Monedas</span>
             {activeTab === 'recharge' && (
-              <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+              <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-amber-400 rounded-full shadow-[0_0_8px_rgba(255,184,0,0.8)]" />
             )}
           </button>
 
@@ -231,8 +231,8 @@ export default function CreatorWalletModal({
                   onClick={() => setActiveTab('recharge')}
                   className="mt-2 py-1 px-2.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-black text-[10px] font-black uppercase flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer shadow-sm"
                 >
-                  <Plus size={11} strokeWidth={3} />
-                  <span>Recargar</span>
+                  <Sparkles size={11} strokeWidth={2.5} />
+                  <span>Ganar Monedas</span>
                 </button>
               </div>
               <div className="p-3 rounded-xl bg-white/5 border border-white/5 flex flex-col justify-between">
@@ -287,19 +287,19 @@ export default function CreatorWalletModal({
           </div>
         )}
 
-        {/* TAB 2: RECARGAR SPOTCOINS */}
+        {/* TAB 2: GANAR SPOTCOINS (100% GOOGLE ADMOB & PLAY STORE SAFE) */}
         {activeTab === 'recharge' && (
           <div className="p-4 space-y-3.5 overflow-y-auto no-scrollbar text-xs">
             <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-[#181d2a] to-amber-500/10 border border-emerald-400/30 flex items-center justify-between">
               <div>
-                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Tu Saldo Actual</span>
+                <span className="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Tu Saldo Disponible</span>
                 <p className="text-xl font-black text-white flex items-center gap-1.5 mt-0.5">
                   <span>{currentAvailableCoins}</span>
                   <span className="text-xs text-amber-400">🪙 SpotCoins</span>
                 </p>
               </div>
               <span className="px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[9px] border border-emerald-400/30">
-                ✓ Billetera Activa
+                100% ADMOB REWARDS
               </span>
             </div>
 
@@ -310,52 +310,42 @@ export default function CreatorWalletModal({
               </div>
             )}
 
-            <div className="space-y-2">
-              <span className="text-[11px] font-bold text-zinc-300 block">Elige un Paquete de SpotCoins:</span>
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  { coins: 50, price: '$2.500 COP', label: 'Básico', popular: false },
-                  { coins: 150, price: '$6.500 COP', label: 'Popular', popular: true },
-                  { coins: 350, price: '$14.000 COP', label: 'Pro', popular: false },
-                  { coins: 1000, price: '$38.000 COP', label: 'Master', popular: false },
-                ].map((pack) => (
-                  <button
-                    key={pack.coins}
-                    type="button"
-                    onClick={() => {
-                      if (onRechargeCoins) {
-                        onRechargeCoins(pack.coins, `Recarga Paquete ${pack.label} (+${pack.coins} SpotCoins)`);
-                        setRechargeSuccessMsg(`¡Recargaste +${pack.coins} SpotCoins exitosamente!`);
-                        setTimeout(() => setRechargeSuccessMsg(null), 3000);
-                      }
-                    }}
-                    className={`p-3 rounded-2xl border text-left relative transition-all active:scale-95 cursor-pointer flex flex-col justify-between ${
-                      pack.popular
-                        ? 'bg-gradient-to-b from-amber-500/20 to-transparent border-amber-400 shadow-[0_0_15px_rgba(255,184,0,0.15)]'
-                        : 'bg-white/5 border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    {pack.popular && (
-                      <span className="absolute -top-2 right-2 text-[8px] font-black uppercase tracking-wider bg-amber-400 text-black px-1.5 py-0.2 rounded-full">
-                        Popular
-                      </span>
-                    )}
-                    <div className="flex items-center gap-1.5 text-base font-black text-amber-400">
-                      <span>+{pack.coins}</span>
-                      <Coins size={14} className="text-amber-400" />
-                    </div>
-                    <div className="mt-1">
-                      <span className="text-[10px] text-zinc-400 block font-medium">{pack.label}</span>
-                      <span className="text-xs font-bold text-white block mt-0.5">{pack.price}</span>
-                    </div>
-                  </button>
-                ))}
+            {/* Misión Principal: Ver Video Google AdMob (Sin límites) */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#1b212f] to-[#121620] border-2 border-amber-400 shadow-[0_0_25px_rgba(255,184,0,0.2)] space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  <Tv size={14} className="text-amber-400" />
+                  Misión Principal Google AdMob
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-black text-[9px] border border-amber-400/40">
+                  +5 🪙 Por Anuncio
+                </span>
               </div>
+
+              <div>
+                <h4 className="text-sm font-black text-white">Ver Video Patrocinado (30 seg)</h4>
+                <p className="text-[11px] text-zinc-300 mt-0.5 leading-relaxed">
+                  Apoya la plataforma viendo anuncios de la red Google AdMob. Cada video completado te premia de inmediato con 5 SpotCoins para apoyar a tus creadores favoritos.
+                </p>
+              </div>
+
+              {onWatchAdForCoins && (
+                <button
+                  type="button"
+                  onClick={onWatchAdForCoins}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 via-[#ffa000] to-amber-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all cursor-pointer hover:brightness-110"
+                >
+                  <Play size={14} className="fill-black" />
+                  <span>Ver Video AdMob (+5 SpotCoins Gratis)</span>
+                </button>
+              )}
             </div>
 
-            {/* Misiones gratuitas */}
-            <div className="space-y-2 pt-1 border-t border-white/10">
-              <span className="text-[11px] font-bold text-zinc-300 block">Otras Formas Gratuitas de Ganar:</span>
+            {/* Misiones secundarias gratuitas */}
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold text-zinc-300 block">Misiones Comunitarias Gratuitas:</span>
+
+              {/* Bono Diario */}
               <button
                 type="button"
                 onClick={() => {
@@ -365,34 +355,56 @@ export default function CreatorWalletModal({
                     setTimeout(() => setRechargeSuccessMsg(null), 3000);
                   }
                 }}
-                className="w-full p-2.5 rounded-xl bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-purple-500/30 hover:border-purple-400 flex items-center justify-between text-left transition-all active:scale-98 cursor-pointer"
+                className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-400/40 flex items-center justify-between text-left transition-all active:scale-98 cursor-pointer"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-base">🎁</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🎁</span>
                   <div>
-                    <span className="font-bold text-white text-xs block">Reclamar Bono Diario</span>
-                    <span className="text-[9px] text-zinc-400">Recompensa diaria por ingresar a la app</span>
+                    <span className="font-bold text-white text-xs block">Bono Diario de Ingreso</span>
+                    <span className="text-[10px] text-zinc-400">Recompensa diaria por ingresar a la app</span>
                   </div>
                 </div>
-                <span className="text-xs font-black text-amber-400">+1 🪙</span>
+                <span className="text-xs font-black text-amber-400 px-2 py-1 rounded-lg bg-amber-400/10 border border-amber-400/20">
+                  +1 🪙
+                </span>
               </button>
 
-              {onWatchAdForCoins && (
-                <button
-                  type="button"
-                  onClick={onWatchAdForCoins}
-                  className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border border-amber-400/40 hover:border-amber-400 flex items-center justify-between text-left transition-all active:scale-98 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <Tv size={16} className="text-amber-400" />
-                    <div>
-                      <span className="font-bold text-white text-xs block">Ver Video Google AdMob</span>
-                      <span className="text-[9px] text-zinc-400">Anuncio bonificado oficial (Sin límite)</span>
-                    </div>
+              {/* Compartir App */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: 'SpotPlay - Videos y LIVEs',
+                      text: '¡Mira videos y apoya a creadores en SpotPlay!',
+                      url: window.location.href,
+                    }).catch(() => {});
+                  }
+                  if (onRechargeCoins) {
+                    onRechargeCoins(3, 'Compartir SpotPlay con Amigos (+3 SpotCoins)');
+                    setRechargeSuccessMsg('¡Ganaste +3 SpotCoins por compartir SpotPlay!');
+                    setTimeout(() => setRechargeSuccessMsg(null), 3000);
+                  }
+                }}
+                className="w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/40 flex items-center justify-between text-left transition-all active:scale-98 cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🚀</span>
+                  <div>
+                    <span className="font-bold text-white text-xs block">Compartir con Amigos</span>
+                    <span className="text-[10px] text-zinc-400">Invita a tus amigos a ver tus videos</span>
                   </div>
-                  <span className="text-xs font-black text-amber-400">+5 🪙</span>
-                </button>
-              )}
+                </div>
+                <span className="text-xs font-black text-cyan-400 px-2 py-1 rounded-lg bg-cyan-400/10 border border-cyan-400/20">
+                  +3 🪙
+                </span>
+              </button>
+            </div>
+
+            {/* Aviso de Política Oficial Google Play & AdMob */}
+            <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-[10px] text-zinc-400 leading-snug">
+              <span className="text-emerald-400 font-bold block mb-0.5">🛡️ 100% Gratuito y Play Store Safe:</span>
+              SpotPlay no vende monedas por dinero real ni cobra a los usuarios. Todas las SpotCoins se obtienen exclusivamente viendo anuncios patrocinados de Google AdMob y participando en la comunidad.
             </div>
           </div>
         )}
