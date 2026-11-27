@@ -30,6 +30,51 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { formatNumber } from '../utils/format';
+import { resolveMediaUrl } from '../utils/apiUrl';
+
+function ProfileVideoThumb({ vid }) {
+  const [imgError, setImgError] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  const rawThumb = vid.cover || vid.thumbnail;
+  const thumbUrl = rawThumb ? resolveMediaUrl(rawThumb) : '';
+  const videoUrl = vid.videoUrl ? resolveMediaUrl(vid.videoUrl) : '';
+
+  if (thumbUrl && !imgError) {
+    return (
+      <img
+        src={thumbUrl}
+        alt={vid.description || 'Video'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  if (videoUrl && !videoError) {
+    return (
+      <video
+        src={`${videoUrl}#t=0.001`}
+        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        className="w-full h-full object-cover pointer-events-none"
+        muted
+        playsInline
+        preload="metadata"
+        onError={() => setVideoError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-950 flex flex-col items-center justify-center p-2 text-center select-none">
+      <Play size={18} className="text-amber-400 mb-1 opacity-80" />
+      <span className="text-[9px] text-zinc-300 font-medium line-clamp-2 leading-tight">
+        {vid.description || 'Spot Play'}
+      </span>
+    </div>
+  );
+}
 
 export default function ProfileView({
   currentUser,
@@ -222,7 +267,7 @@ export default function ProfileView({
         title="Foto de perfil"
       >
         <img
-          src={currentUser.avatar}
+          src={resolveMediaUrl(currentUser.avatar)}
           alt={currentUser.name}
           className="w-24 h-24 rounded-full object-cover border-2 border-cyan-400 p-0.5 shadow-xl"
         />
@@ -547,23 +592,7 @@ export default function ProfileView({
                 onClick={() => onSelectVideo(vid.id)}
                 className="relative aspect-3/4 bg-zinc-900 rounded overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform"
               >
-                {vid.cover || vid.thumbnail ? (
-                  <img
-                    src={vid.cover || vid.thumbnail}
-                    alt={vid.description || 'Video'}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <video
-                    src={`${vid.videoUrl}#t=0.001`}
-                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                    className="w-full h-full object-cover pointer-events-none"
-                    muted
-                    playsInline
-                    preload="metadata"
-                  />
-                )}
+                <ProfileVideoThumb vid={vid} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 group-hover:opacity-40 transition-opacity" />
 
                 {/* Botón Editar Video (Solo en tus videos) */}
@@ -669,7 +698,7 @@ export default function ProfileView({
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <img
-                  src={currentUser.avatar}
+                  src={resolveMediaUrl(currentUser.avatar)}
                   alt={currentUser.name}
                   className="w-10 h-10 rounded-full object-cover border border-[#ffb800]/50"
                 />

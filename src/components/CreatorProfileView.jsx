@@ -1,6 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, UserPlus, Check, MessageSquare, Share2, Play, Edit3, Flag } from 'lucide-react';
 import { formatNumber } from '../utils/format';
+import { resolveMediaUrl } from '../utils/apiUrl';
+
+function CreatorVideoThumb({ video }) {
+  const [imgError, setImgError] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  const rawThumb = video.cover || video.thumbnail;
+  const thumbUrl = rawThumb ? resolveMediaUrl(rawThumb) : '';
+  const videoUrl = video.videoUrl ? resolveMediaUrl(video.videoUrl) : '';
+
+  if (thumbUrl && !imgError) {
+    return (
+      <img
+        src={thumbUrl}
+        alt={video.description || 'Video'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        loading="lazy"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  if (videoUrl && !videoError) {
+    return (
+      <video
+        src={`${videoUrl}#t=0.001`}
+        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        className="w-full h-full object-cover"
+        muted
+        preload="metadata"
+        onError={() => setVideoError(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="w-full h-full bg-gradient-to-br from-zinc-800 to-zinc-950 flex flex-col items-center justify-center p-2 text-center select-none">
+      <Play size={18} className="text-amber-400 mb-1 opacity-80" />
+      <span className="text-[9px] text-zinc-300 font-medium line-clamp-2 leading-tight">
+        {video.description || 'Spot Play'}
+      </span>
+    </div>
+  );
+}
 
 export default function CreatorProfileView({
   creator,
@@ -87,7 +131,7 @@ export default function CreatorProfileView({
       <div className="pt-5 px-4 flex flex-col items-center text-center">
         <div className="relative mb-3">
           <img
-            src={creator.avatar}
+            src={resolveMediaUrl(creator.avatar)}
             alt={creator.name}
             className={`w-24 h-24 rounded-full object-cover border-2 shadow-xl ${
               isOwn ? 'border-amber-400' : 'border-white/20'
@@ -190,22 +234,7 @@ export default function CreatorProfileView({
               onClick={() => onSelectVideo(video.id, creator)}
               className="relative aspect-3/4 bg-zinc-900 rounded overflow-hidden cursor-pointer group active:scale-[0.98] transition-transform"
             >
-              {video.cover || video.thumbnail ? (
-                <img
-                  src={video.cover || video.thumbnail}
-                  alt={video.description || 'Video'}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                />
-              ) : (
-                <video
-                  src={video.videoUrl}
-                  poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-                  className="w-full h-full object-cover"
-                  muted
-                  preload="metadata"
-                />
-              )}
+              <CreatorVideoThumb video={video} />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
 
               {/* Botón Editar si es tu propio perfil */}

@@ -401,7 +401,7 @@ export default function App() {
         }
 
         // 2. Sincronizar perfil del creador desde el servidor compartido
-        const userRes = await fetch('/api/users');
+        const userRes = await fetch(getApiUrl('/api/users'));
         if (userRes.ok) {
           const serverUsers = await userRes.json();
           if (Array.isArray(serverUsers) && serverUsers.length > 0) {
