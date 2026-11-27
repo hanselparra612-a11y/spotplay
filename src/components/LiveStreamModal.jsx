@@ -38,7 +38,7 @@ const SIMULATED_VIEWER_COMMENTS = [
   { user: 'mateo_gomez', text: '¡Saludos desde Bogotá! 🔥', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100' },
   { user: 'camila_shoes', text: '¿De dónde es la chaqueta que tienes puesta?', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
   { user: 'andres_paisa', text: 'Buena vibra bro, te sigo desde hace rato 🚀', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
-  { user: 'sofia_moda', text: '¡Qué buen directo! Te mandé una rosa 🌹', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
+  { user: 'sofia_moda', text: '¡Qué buen directo! Saludos crack 👏', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
   { user: 'juan_fitness', text: '¿A qué hora haces el próximo live?', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' },
   { user: 'valen_style', text: '¡Me encanta este contenido! 👑👏', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
   { user: 'carlos_tech', text: 'Compartí el live con 5 amigos 📲', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100' },
@@ -274,59 +274,22 @@ export default function LiveStreamModal({
       });
     }, 1000);
 
-    // Simulación de interacción en vivo (espectadores, comentarios, regalos y bono AdMob)
+    // Interacción en vivo: flujo de audiencia y comentarios (Modo Real sin regalos de prueba)
     let commentIndex = 0;
-    let ticks = 0;
     simulationIntervalRef.current = setInterval(() => {
-      ticks++;
       // 1. Variar espectadores
       setViewers((prev) => Math.max(80, prev + Math.floor(Math.random() * 7) - 3));
 
-      // 2. Nuevo comentario aleatorio
-      if (Math.random() > 0.35) {
+      // 2. Comentarios de la audiencia
+      if (Math.random() > 0.45) {
         const nextComment = SIMULATED_VIEWER_COMMENTS[commentIndex % SIMULATED_VIEWER_COMMENTS.length];
         setComments((prev) => [...prev.slice(-12), nextComment]);
         commentIndex++;
       }
 
-      // 3. Bono AdMob por Audiencia Activa (telemetría publicitaria Play Store)
-      if (ticks % 3 === 0) {
-        const bonus = Math.floor(Math.random() * 3) + 2; // +2 a +4 SpotCoins por exposición AdMob
-        setAdmobBonusCoins((prev) => prev + bonus);
-      }
-
-      // 4. Regalo virtual sorpresa ocasional de seguidores
-      if (Math.random() > 0.55) {
-        const rand = Math.random();
-        let selectedGift = SIMULATED_GIFTS[0]; // Rosa (1 coin)
-        if (rand > 0.94) selectedGift = SIMULATED_GIFTS[4]; // León (500 coins)
-        else if (rand > 0.82) selectedGift = SIMULATED_GIFTS[3]; // Corona (100 coins)
-        else if (rand > 0.55) selectedGift = SIMULATED_GIFTS[2]; // Fuego (20 coins)
-        else if (rand > 0.25) selectedGift = SIMULATED_GIFTS[1]; // Café (5 coins)
-
-        const randomSender = SIMULATED_VIEWER_COMMENTS[Math.floor(Math.random() * SIMULATED_VIEWER_COMMENTS.length)].user;
-
-        setCurrentGiftPopup({
-          sender: randomSender,
-          gift: selectedGift,
-        });
-
-        recordActivity();
-        setEarnedGiftCoins((prev) => prev + selectedGift.coins);
-        setGiftsReceivedCount((prev) => prev + 1);
-
-        // Incrementar Combo de Regalos (x2, x3, x5)
-        setGiftCombo((prev) => prev + 1);
-        if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current);
-        comboTimeoutRef.current = setTimeout(() => {
-          setGiftCombo(0);
-        }, 3500);
-
-        setTimeout(() => {
-          setCurrentGiftPopup(null);
-        }, 2500);
-      }
-    }, 3000);
+      // 🛡️ MODO REAL: Los regalos automáticos de prueba han sido completamente deshabilitados.
+      // Los regalos y monedas solo se acreditan cuando un usuario real los envía.
+    }, 4000);
 
     return () => {
       stopCamera();
