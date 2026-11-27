@@ -1303,14 +1303,18 @@ export default function App() {
       currentUser.username === 'nuevo_creador' ||
       creator.username === 'sofia_creative';
 
-    // 1. Deducir monedas gastadas del usuario y si es para mi video, acreditar SpotCoins recibidas
+    // 1. Deducir monedas si envía o acreditar SpotCoins si recibe regalos en su video
     setCurrentUser((prev) => {
-      const remainingCoins = Math.max(0, (prev.wallet?.coins || 0) - gift.coins);
+      const currentCoins = typeof prev.wallet?.coins === 'number'
+        ? prev.wallet.coins
+        : (typeof prev.coins === 'number' ? prev.coins : 0);
       const currentTransactions = prev.wallet?.transactions || [];
       const currentReceivedGifts = prev.receivedGifts || [];
 
       let updatedUser;
       if (isMyVideo) {
+        // 🎉 Si es mi propio video, ¡sumar las SpotCoins del regalo recibido a mi billetera!
+        const creditedCoins = currentCoins + gift.coins;
         const newGiftRecord = {
           id: `rg-${Date.now()}`,
           giftId: gift.id,
@@ -1338,15 +1342,18 @@ export default function App() {
 
         updatedUser = {
           ...prev,
+          coins: creditedCoins,
           wallet: {
             ...prev.wallet,
-            coins: remainingCoins,
+            coins: creditedCoins,
             totalGiftsReceivedCoins: (prev.wallet?.totalGiftsReceivedCoins || 0) + gift.coins,
             transactions: [newTx, ...currentTransactions],
           },
           receivedGifts: [newGiftRecord, ...currentReceivedGifts],
         };
       } else {
+        // 📤 Si envía regalo a otro creador, descontar monedas
+        const remainingCoins = Math.max(0, currentCoins - gift.coins);
         const sendTx = {
           id: `tx-gift-sent-${Date.now()}`,
           type: 'GIFT_SENT',
@@ -1360,6 +1367,7 @@ export default function App() {
 
         updatedUser = {
           ...prev,
+          coins: remainingCoins,
           wallet: {
             ...prev.wallet,
             coins: remainingCoins,
