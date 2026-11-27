@@ -60,6 +60,11 @@ export default function LiveStreamModal({
   const [showSummary, setShowSummary] = useState(false);
   const [cameraError, setCameraError] = useState(null);
 
+  // 🔴 Modo Preparación (Pre-Live / Vista Previa) y Conteo Regresivo
+  const [isLiveActive, setIsLiveActive] = useState(false);
+  const [countdown, setCountdown] = useState(null);
+  const [liveTitle, setLiveTitle] = useState('');
+
   const totalLiveCoins = earnedGiftCoins + admobBonusCoins;
 
   // ⏱️ Reglas de Tiempo, Límite por Sesión y Sensor Anti-Fantasmas
@@ -191,12 +196,16 @@ export default function LiveStreamModal({
   useEffect(() => {
     if (!isOpen) {
       stopCamera();
+      setIsLiveActive(false);
+      setCountdown(null);
       return;
     }
 
     const settings = loadPlatformSettings();
     setPlatformSettings(settings);
     setShowSummary(false);
+    setIsLiveActive(false);
+    setCountdown(null);
     setLiveSeconds(0);
     setEarnedGiftCoins(0);
     setAdmobBonusCoins(0);
@@ -213,6 +222,19 @@ export default function LiveStreamModal({
 
     startCamera();
 
+    return () => {
+      stopCamera();
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+      if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current);
+      if (inactivityCountdownIntervalRef.current) clearInterval(inactivityCountdownIntervalRef.current);
+    };
+  }, [isOpen, facingMode]);
+
+  // ⏱️ El cronómetro y temporizadores corren ÚNICAMENTE cuando se pulsa "EMPEZAR LIVE"
+  useEffect(() => {
+    if (!isLiveActive) return;
+
+    const settings = loadPlatformSettings();
     const isExempt = currentUser?.isVerified && (settings.exemptVerifiedCreators ?? true);
     const maxDurationSec = (!isExempt && (settings.maxLiveDurationMinutes || 45) > 0)
       ? (settings.maxLiveDurationMinutes || 45) * 60
@@ -220,7 +242,8 @@ export default function LiveStreamModal({
     const warnSec = (settings.warnBeforeEndMinutes || 5) * 60;
     const inactivityTimeoutSec = (settings.inactivityTimeoutMinutes ?? 10) * 60;
 
-    // Contador de tiempo en vivo con control de sesión e inactividad
+    lastActivityRef.current = Date.now();
+
     timerIntervalRef.current = setInterval(() => {
       setLiveSeconds((prev) => {
         const next = prev + 1;
@@ -263,15 +286,10 @@ export default function LiveStreamModal({
       });
     }, 1000);
 
-
     return () => {
-      stopCamera();
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
-      if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current);
-      if (inactivityCountdownIntervalRef.current) clearInterval(inactivityCountdownIntervalRef.current);
     };
-  }, [isOpen, facingMode]);
+  }, [isLiveActive]);
 
   // Asegurar que el stream se monte en el elemento <video>
   useEffect(() => {
@@ -297,10 +315,32 @@ export default function LiveStreamModal({
     recordActivity();
     setFacingMode((prev) => {
       const nextMode = prev === 'user' ? 'environment' : 'user';
-      // Cámara frontal activa espejo; cámara trasera no lleva espejo
       setIsMirrored(nextMode === 'user');
+      setShowZoomToast(nextMode === 'user' ? '📷 Cámara Frontal (Selfie)' : '📷 Cámara Principal (Trasera)');
+      setTimeout(() => setShowZoomToast(null), 2200);
       return nextMode;
     });
+  };
+
+  const handleCancelPreview = () => {
+    stopCamera();
+    onClose();
+  };
+
+  const handleStartLiveCountdown = () => {
+    recordActivity();
+    setCountdown(3);
+    let count = 3;
+    const timer = setInterval(() => {
+      count -= 1;
+      if (count > 0) {
+        setCountdown(count);
+      } else {
+        clearInterval(timer);
+        setCountdown(null);
+        setIsLiveActive(true);
+      }
+    }, 1000);
   };
 
   const toggleMirror = () => {
@@ -418,9 +458,19 @@ export default function LiveStreamModal({
           }`}
         />
 
-        {/* 🔭 Selector de Lente & Encuadre Gran Angular (0.5x / 1x / Ajustar / Espejo) */}
+        {/* 🔭 Selector de Lente & Encuadre Gran Angular (0.5x / 1x / Ajustar / Espejo / Voltear) */}
         {stream && (
-          <div className="absolute right-3.5 top-[max(126px,calc(env(safe-area-inset-top,0px)+98px))] z-30 flex flex-col items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-2xl border border-white/15 shadow-xl">
+          <div className="absolute right-3.5 top-[max(126px,calc(env(safe-area-inset-top,0px)+98px))] z-30 flex flex-col items-center gap-1.5 bg-black/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/15 shadow-xl">
+            {/* Voltear Cámara Frontal / Trasera (Principal) */}
+            <button
+              type="button"
+              onClick={toggleCameraFacing}
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-white hover:bg-white/20 active:scale-90 transition-all border border-white/10"
+              title={facingMode === 'user' ? 'Cambiar a Cámara Principal (Trasera)' : 'Cambiar a Cámara Frontal (Selfie)'}
+            >
+              <Camera size={14} className={facingMode === 'environment' ? 'text-amber-400' : 'text-cyan-400'} />
+            </button>
+
             <button
               onClick={() => handleSetZoom('0.5x')}
               className={`w-8 h-7 rounded-xl text-[10px] font-black tracking-wider flex items-center justify-center transition-all ${
@@ -497,84 +547,135 @@ export default function LiveStreamModal({
       <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none z-10" />
       <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10" />
 
-      {/* 🌟 HEADER DEL LIVE (Z-20) */}
-      <header className="relative z-20 flex flex-col gap-2 px-3.5 pt-[max(44px,calc(env(safe-area-inset-top,0px)+16px))] pb-2 pointer-events-auto">
-        {/* Fila Principal: Creador a la izquierda + Espectadores y Botón Finalizar Rojo a la derecha */}
-        <div className="flex items-center justify-between gap-2 w-full">
-          {/* Creator Info + Live Badge */}
-          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/15 rounded-full pl-1.5 pr-3 py-1 shrink min-w-0">
+      {/* ⏱️ OVERLAY DE CONTEO REGRESIVO (3, 2, 1) */}
+      {countdown !== null && (
+        <div className="absolute inset-0 z-50 bg-black/75 backdrop-blur-md flex flex-col items-center justify-center pointer-events-none animate-in fade-in duration-150">
+          <div className="w-32 h-32 rounded-full border-4 border-[#FE2C55]/60 flex items-center justify-center bg-black/40 shadow-[0_0_50px_rgba(254,44,85,0.8)]">
+            <span className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-amber-400 via-rose-500 to-[#FE2C55] animate-ping">
+              {countdown}
+            </span>
+          </div>
+          <span className="text-sm font-black uppercase tracking-widest text-white mt-8 drop-shadow-lg">
+            ¡Preparando tu transmisión!
+          </span>
+        </div>
+      )}
+
+      {/* 🌟 HEADER PRE-LIVE (MODO VISTA PREVIA) */}
+      {!isLiveActive && (
+        <header className="relative z-20 flex items-center justify-between px-3.5 pt-[max(44px,calc(env(safe-area-inset-top,0px)+16px))] pb-2 pointer-events-auto">
+          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/15 rounded-full pl-1.5 pr-3 py-1">
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
-              className="w-8 h-8 rounded-full object-cover border border-white/20 shrink-0"
+              className="w-8 h-8 rounded-full object-cover border border-white/20"
             />
-            <div className="flex flex-col text-left min-w-0">
-              <span className="text-xs font-bold text-white truncate max-w-[90px] sm:max-w-[120px]">
+            <div className="flex flex-col text-left">
+              <span className="text-xs font-bold text-white truncate max-w-[120px]">
                 @{currentUser.username}
               </span>
               <div className="flex items-center gap-1.5 text-[10px]">
-                <span className="flex items-center gap-1 text-red-500 font-black shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
-                  LIVE
+                <span className="flex items-center gap-1 text-amber-400 font-extrabold">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  VISTA PREVIA
                 </span>
-                <span className="text-zinc-500">|</span>
-                {remainingSec !== null ? (
-                  <span
-                    className={`font-mono flex items-center gap-1 font-bold ${
-                      remainingSec <= 300
-                        ? remainingSec <= 60
-                          ? 'text-red-400 font-black animate-pulse'
-                          : 'text-amber-300 font-black animate-pulse'
-                        : 'text-cyan-300'
-                    }`}
-                    title="Tiempo restante de esta sesión de Live"
-                  >
-                    <Timer size={10} className={remainingSec <= 300 ? 'text-amber-400' : 'text-cyan-400'} />
-                    {formatTimer(remainingSec)}
-                  </span>
-                ) : (
-                  <span className="text-zinc-300 font-mono flex items-center gap-1">
-                    <Clock size={10} className="text-zinc-400" />
-                    {formatTimer(liveSeconds)}
-                  </span>
-                )}
+                <span className="text-zinc-500">•</span>
+                <span className="text-zinc-400 text-[10px]">Nadie te ve aún</span>
               </div>
             </div>
           </div>
 
-          {/* Acciones Derecha: Espectadores + Botón Finalizar Destacado */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Espectadores */}
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-bold shadow-sm">
-              <Eye size={13} className="text-cyan-400" />
-              <span>{formatNumber(viewers)}</span>
+          <button
+            type="button"
+            onClick={handleCancelPreview}
+            className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-white/20 active:scale-90 transition-all cursor-pointer"
+            title="Salir sin transmitir"
+          >
+            <X size={18} />
+          </button>
+        </header>
+      )}
+
+      {/* 🌟 HEADER DEL LIVE (EN TRANSMISIÓN EN VIVO ACTIVA) */}
+      {isLiveActive && (
+        <header className="relative z-20 flex flex-col gap-2 px-3.5 pt-[max(44px,calc(env(safe-area-inset-top,0px)+16px))] pb-2 pointer-events-auto">
+          {/* Fila Principal: Creador a la izquierda + Espectadores y Botón Finalizar Rojo a la derecha */}
+          <div className="flex items-center justify-between gap-2 w-full">
+            {/* Creator Info + Live Badge */}
+            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/15 rounded-full pl-1.5 pr-3 py-1 shrink min-w-0">
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-8 h-8 rounded-full object-cover border border-white/20 shrink-0"
+              />
+              <div className="flex flex-col text-left min-w-0">
+                <span className="text-xs font-bold text-white truncate max-w-[90px] sm:max-w-[120px]">
+                  @{currentUser.username}
+                </span>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <span className="flex items-center gap-1 text-red-500 font-black shrink-0">
+                    <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                    LIVE
+                  </span>
+                  <span className="text-zinc-500">|</span>
+                  {remainingSec !== null ? (
+                    <span
+                      className={`font-mono flex items-center gap-1 font-bold ${
+                        remainingSec <= 300
+                          ? remainingSec <= 60
+                            ? 'text-red-400 font-black animate-pulse'
+                            : 'text-amber-300 font-black animate-pulse'
+                          : 'text-cyan-300'
+                      }`}
+                      title="Tiempo restante de esta sesión de Live"
+                    >
+                      <Timer size={10} className={remainingSec <= 300 ? 'text-amber-400' : 'text-cyan-400'} />
+                      {formatTimer(remainingSec)}
+                    </span>
+                  ) : (
+                    <span className="text-zinc-300 font-mono flex items-center gap-1">
+                      <Clock size={10} className="text-zinc-400" />
+                      {formatTimer(liveSeconds)}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Botón Finalizar Rojo (100% visible, amplio, seguro y sin recortes) */}
-            <button
-              type="button"
-              onClick={() => handleEndLiveRequest('user')}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full text-xs font-black tracking-wider uppercase shadow-[0_2px_12px_rgba(220,38,38,0.7)] border border-red-300/40 active:scale-95 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
-              title="Finalizar transmisión en vivo"
-            >
-              <X size={13} strokeWidth={3} className="text-white" />
-              <span>Finalizar</span>
-            </button>
-          </div>
-        </div>
+            {/* Acciones Derecha: Espectadores + Botón Finalizar Destacado */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Espectadores */}
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-white text-xs font-bold shadow-sm">
+                <Eye size={13} className="text-cyan-400" />
+                <span>{formatNumber(viewers)}</span>
+              </div>
 
-        {/* Fila Secundaria: SpotCoins / Regalos Acumulados (Estilo TikTok LIVE, debajo del creador) */}
-        <div className="flex items-center justify-start pl-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/50 text-amber-300 text-[11px] font-black shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-            <Coins size={13} className="text-amber-400 fill-amber-400" />
-            <span className="font-mono text-xs">+{totalLiveCoins}</span>
-            <span className="text-[10px] text-amber-400/80 uppercase font-bold tracking-tight">SpotCoins</span>
+              {/* Botón Finalizar Rojo (100% visible, amplio, seguro y sin recortes) */}
+              <button
+                type="button"
+                onClick={() => handleEndLiveRequest('user')}
+                className="px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-full text-xs font-black tracking-wider uppercase shadow-[0_2px_12px_rgba(220,38,38,0.7)] border border-red-300/40 active:scale-95 transition-all shrink-0 flex items-center gap-1 cursor-pointer"
+                title="Finalizar transmisión en vivo"
+              >
+                <X size={13} strokeWidth={3} className="text-white" />
+                <span>Finalizar</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+
+          {/* Fila Secundaria: SpotCoins / Regalos Acumulados (Estilo TikTok LIVE, debajo del creador) */}
+          <div className="flex items-center justify-start pl-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-black/65 backdrop-blur-md border border-amber-400/50 text-amber-300 text-[11px] font-black shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+              <Coins size={13} className="text-amber-400 fill-amber-400" />
+              <span className="font-mono text-xs">+{totalLiveCoins}</span>
+              <span className="text-[10px] text-amber-400/80 uppercase font-bold tracking-tight">SpotCoins</span>
+            </div>
+          </div>
+        </header>
+      )}
 
       {/* ⚠️ BANNER DE AVISO: QUEDAN MENOS DE 5 MINUTOS DE SESIÓN */}
-      {showTimeWarning && (
+      {showTimeWarning && isLiveActive && (
         <div className="absolute top-[max(116px,calc(env(safe-area-inset-top,0px)+90px))] inset-x-3.5 z-30 flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/90 via-red-500/90 to-amber-600/90 backdrop-blur-md text-white shadow-2xl animate-in slide-in-from-top duration-300 border border-white/25">
           <div className="flex items-center gap-2 text-left">
             <Timer size={18} className="text-amber-200 animate-pulse shrink-0" />
@@ -595,7 +696,7 @@ export default function LiveStreamModal({
       )}
 
       {/* 🛡️ MODAL SENSOR ANTI-FANTASMA (INACTIVIDAD PROLONGADA) */}
-      {showInactivityModal && (
+      {showInactivityModal && isLiveActive && (
         <div className="absolute inset-0 z-40 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-200">
           <div className="w-full max-w-xs rounded-3xl bg-zinc-900 border border-amber-500/50 p-5 text-center text-white shadow-[0_0_40px_rgba(245,158,11,0.3)]">
             <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center mb-3">
@@ -619,7 +720,7 @@ export default function LiveStreamModal({
       )}
 
       {/* 🎁 POPUP DE REGALO RECIBIDO EN TIEMPO REAL */}
-      {currentGiftPopup && (
+      {currentGiftPopup && isLiveActive && (
         <div className="absolute top-[max(140px,calc(env(safe-area-inset-top,0px)+112px))] left-4 z-30 flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-black/85 backdrop-blur-xl border border-amber-400/60 shadow-[0_0_30px_rgba(245,158,11,0.5)] animate-in slide-in-from-left duration-300 pointer-events-none">
           <span className="text-3xl animate-bounce">{currentGiftPopup.gift.emoji}</span>
           <div>
@@ -635,105 +736,160 @@ export default function LiveStreamModal({
       )}
 
       {/* 🔥 RACHA DE REGALOS COMBO */}
-      {giftCombo > 1 && (
+      {giftCombo > 1 && isLiveActive && (
         <div className="absolute top-[max(200px,calc(env(safe-area-inset-top,0px)+172px))] left-4 z-30 flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-[#FE2C55] text-black font-black text-xs shadow-[0_0_25px_rgba(254,44,85,0.9)] animate-bounce pointer-events-none border border-white/40">
           <Flame size={16} className="fill-black" />
           <span>¡COMBO x{giftCombo}! 🔥</span>
         </div>
       )}
 
-      {/* 💬 CHAT DE ESPECTADORES EN VIVO (Z-20) */}
-      <div className="relative z-20 flex-1 flex flex-col justify-end px-3.5 pb-14 pointer-events-none max-h-[30vh]">
-        <div className="overflow-y-auto no-scrollbar space-y-1.5 pointer-events-auto pr-8">
-          {comments.map((c, i) => (
-            <div
-              key={i}
-              className={`flex items-start gap-1.5 text-xs text-left animate-in fade-in slide-in-from-bottom-2 duration-200 ${
-                c.isHost
-                  ? 'bg-amber-500/20 border border-amber-400/40 text-amber-200'
-                  : c.isSystem
-                  ? 'bg-red-950/60 border border-red-500/30'
-                  : 'bg-black/40 backdrop-blur-sm'
-              } px-3 py-1.5 rounded-2xl max-w-[85%]`}
-            >
-              {c.avatar && (
-                <img
-                  src={c.avatar}
-                  alt={c.user}
-                  className="w-4 h-4 rounded-full object-cover shrink-0 mt-0.5"
-                />
-              )}
-              <div className="leading-snug">
-                <span className={`font-bold text-[11px] mr-1.5 ${c.isHost ? 'text-amber-400' : 'text-cyan-300'}`}>
-                  @{c.user}{c.isHost ? ' (Tú):' : ':'}
-                </span>
-                <span className="text-white text-[11px] break-words">{c.text}</span>
-              </div>
+      {/* 🔴 CONTROLES PRE-LIVE: TÍTULO Y BOTÓN EMPEZAR LIVE */}
+      {!isLiveActive && (
+        <div className="relative z-20 flex-1 flex flex-col justify-end px-4 pb-[max(24px,calc(env(safe-area-inset-bottom,0px)+16px))] pointer-events-auto max-w-sm mx-auto w-full">
+          {/* Card de Preparación */}
+          <div className="bg-black/80 backdrop-blur-xl border border-white/15 rounded-3xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-3 flex flex-col gap-3">
+            {/* Título opcional del LIVE */}
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-black uppercase tracking-wider text-zinc-400 flex items-center justify-between">
+                <span>✍️ Título de tu LIVE</span>
+                <span className="text-[9px] text-zinc-500 font-normal">Opcional</span>
+              </label>
+              <input
+                type="text"
+                value={liveTitle}
+                onChange={(e) => setLiveTitle(e.target.value)}
+                placeholder="¿De qué hablarás hoy? (Ej: Charlando, Tienda en vivo...)"
+                className="w-full bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 focus:bg-white/15 transition-all"
+                maxLength={60}
+              />
             </div>
-          ))}
-          <div ref={commentsEndRef} />
+
+            {/* Selector de cámara Frontal / Trasera */}
+            <div className="flex items-center justify-between text-[11px] text-zinc-300 border-t border-white/10 pt-2.5">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Camera size={13} className={facingMode === 'environment' ? 'text-amber-400' : 'text-cyan-400'} />
+                <span>{facingMode === 'user' ? 'Cámara Frontal (Selfie)' : 'Cámara Principal (Trasera)'}</span>
+              </span>
+              <button
+                type="button"
+                onClick={toggleCameraFacing}
+                className="text-[11px] font-bold text-amber-300 hover:text-amber-200 underline active:opacity-75 cursor-pointer"
+              >
+                Cambiar a {facingMode === 'user' ? 'Trasera' : 'Frontal'}
+              </button>
+            </div>
+          </div>
+
+          {/* 🔴 Botón Grande EMPEZAR LIVE */}
+          <button
+            type="button"
+            onClick={handleStartLiveCountdown}
+            className="w-full py-4 rounded-full bg-gradient-to-r from-red-600 via-[#FE2C55] to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-black text-sm uppercase tracking-wider shadow-[0_4px_30px_rgba(254,44,85,0.7)] border border-white/30 active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+          >
+            <span className="w-3 h-3 rounded-full bg-white animate-ping" />
+            <span>EMPEZAR LIVE</span>
+          </button>
+          <p className="text-[10px] text-zinc-400 text-center mt-2.5">
+            Verifica tu iluminación y ángulo con calma. Nadie puede verte hasta que pulses empezar.
+          </p>
         </div>
-      </div>
+      )}
+
+      {/* 💬 CHAT DE ESPECTADORES EN VIVO (Z-20) */}
+      {isLiveActive && (
+        <div className="relative z-20 flex-1 flex flex-col justify-end px-3.5 pb-14 pointer-events-none max-h-[30vh]">
+          <div className="overflow-y-auto no-scrollbar space-y-1.5 pointer-events-auto pr-8">
+            {comments.map((c, i) => (
+              <div
+                key={i}
+                className={`flex items-start gap-1.5 text-xs text-left animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                  c.isHost
+                    ? 'bg-amber-500/20 border border-amber-400/40 text-amber-200'
+                    : c.isSystem
+                    ? 'bg-red-950/60 border border-red-500/30'
+                    : 'bg-black/40 backdrop-blur-sm'
+                } px-3 py-1.5 rounded-2xl max-w-[85%]`}
+              >
+                {c.avatar && (
+                  <img
+                    src={c.avatar}
+                    alt={c.user}
+                    className="w-4 h-4 rounded-full object-cover shrink-0 mt-0.5"
+                  />
+                )}
+                <div className="leading-snug">
+                  <span className={`font-bold text-[11px] mr-1.5 ${c.isHost ? 'text-amber-400' : 'text-cyan-300'}`}>
+                    @{c.user}{c.isHost ? ' (Tú):' : ':'}
+                  </span>
+                  <span className="text-white text-[11px] break-words">{c.text}</span>
+                </div>
+              </div>
+            ))}
+            <div ref={commentsEndRef} />
+          </div>
+        </div>
+      )}
 
       {/* 🎛️ CONTROLES INFERIORES DEL TRANSMISOR (Elevado dinámicamente sobre el Teclado) */}
-      <footer
-        style={{
-          paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 'max(12px, env(safe-area-inset-bottom, 12px))',
-          transition: 'padding-bottom 0.12s cubic-bezier(0, 0, 0.2, 1)',
-        }}
-        className="relative z-20 flex items-center gap-1.5 px-3 pt-1 pointer-events-auto"
-      >
+      {isLiveActive && (
+        <footer
+          style={{
+            paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : 'max(12px, env(safe-area-inset-bottom, 12px))',
+            transition: 'padding-bottom 0.12s cubic-bezier(0, 0, 0.2, 1)',
+          }}
+          className="relative z-20 flex items-center gap-1.5 px-3 pt-1 pointer-events-auto"
+        >
+          {/* Input de Chat del Creador */}
+          <form onSubmit={handleSendHostComment} className="flex items-center gap-1 flex-1 min-w-0">
+            <input
+              type="text"
+              placeholder="Escribe en tu directo..."
+              value={hostChatText}
+              onChange={(e) => setHostChatText(e.target.value)}
+              className="w-full bg-black/60 border border-white/15 rounded-full px-3 py-1.5 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
+            />
+            <button
+              type="submit"
+              className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center hover:bg-cyan-500/30 active:scale-90 shrink-0"
+            >
+              <Send size={12} />
+            </button>
+          </form>
 
-        {/* Input de Chat del Creador */}
-        <form onSubmit={handleSendHostComment} className="flex items-center gap-1 flex-1 min-w-0">
-          <input
-            type="text"
-            placeholder="Escribe en tu directo..."
-            value={hostChatText}
-            onChange={(e) => setHostChatText(e.target.value)}
-            className="w-full bg-black/60 border border-white/15 rounded-full px-3 py-1.5 text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-cyan-400"
-          />
+          {/* Voltear cámara */}
           <button
-            type="submit"
-            className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center hover:bg-cyan-500/30 active:scale-90 shrink-0"
+            onClick={toggleCameraFacing}
+            className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/25 active:scale-90 transition-all border border-white/10 shrink-0"
+            title="Cambiar cámara frontal / trasera"
           >
-            <Send size={12} />
+            <Camera size={14} />
           </button>
-        </form>
 
-        {/* Voltear cámara */}
-        <button
-          onClick={toggleCameraFacing}
-          className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/25 active:scale-90 transition-all border border-white/10 shrink-0"
-          title="Cambiar cámara frontal / trasera"
-        >
-          <Camera size={14} />
-        </button>
+          {/* 🪞 Invertir Espejo (Sincronizar derecha e izquierda) */}
+          <button
+            onClick={toggleMirror}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border shrink-0 active:scale-90 ${
+              isMirrored
+                ? 'bg-purple-600/30 border-purple-400 text-purple-300'
+                : 'bg-white/15 border-white/10 text-white hover:bg-white/25'
+            }`}
+            title={isMirrored ? 'Modo Espejo ON (Tu mano derecha se mueve a la derecha)' : 'Modo Espejo OFF'}
+          >
+            <FlipHorizontal size={14} />
+          </button>
 
-        {/* 🪞 Invertir Espejo (Sincronizar derecha e izquierda) */}
-        <button
-          onClick={toggleMirror}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all border shrink-0 active:scale-90 ${
-            isMirrored
-              ? 'bg-purple-600/30 border-purple-400 text-purple-300'
-              : 'bg-white/15 border-white/10 text-white hover:bg-white/25'
-          }`}
-          title={isMirrored ? 'Modo Espejo ON (Tu mano derecha se mueve a la derecha)' : 'Modo Espejo OFF'}
-        >
-          <FlipHorizontal size={14} />
-        </button>
-
-        {/* Silenciar micrófono */}
-        <button
-          onClick={toggleMic}
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-white active:scale-90 transition-all border border-white/10 shrink-0 ${
-            isMuted ? 'bg-red-600/80' : 'bg-white/15 backdrop-blur-md hover:bg-white/25'
-          }`}
-          title={isMuted ? 'Activar micrófono' : 'Silenciar micrófono'}
-        >
-          {isMuted ? <MicOff size={14} /> : <Mic size={14} />}
-        </button>
-      </footer>
+          {/* Silenciar micrófono */}
+          <button
+            onClick={toggleMic}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-white active:scale-90 transition-all border border-white/10 shrink-0 ${
+              isMuted ? 'bg-red-600/80' : 'bg-white/15 backdrop-blur-md hover:bg-white/25'
+            }`}
+            title={isMuted ? 'Activar micrófono' : 'Silenciar micrófono'}
+          >
+            {isMuted ? <MicOff size={14} /> : <Mic size={14} />}
+          </button>
+        </footer>
+      )}
 
 
       {/* 📊 RESUMEN POST-TRANSMISIÓN MODAL (CALIBRADO GOOGLE ADMOB & PLAY STORE) */}
