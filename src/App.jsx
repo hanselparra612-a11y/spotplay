@@ -1442,6 +1442,7 @@ export default function App() {
   const handlePromoteSuccess = ({
     videoId,
     budget,
+    coins,
     goal,
     city,
     paymentMethod,
@@ -1477,17 +1478,20 @@ export default function App() {
         savePersistedUser(updated);
         return updated;
       });
-    } else if (paymentMethod === 'coins') {
-      const coinsCost = Number(budget) <= 500 ? Math.max(1, Number(budget)) : Math.max(1, Math.round(Number(budget) / 1000));
+    } else if (paymentMethod === 'coins' || !paymentMethod) {
+      const rawCost = Number(coins !== undefined ? coins : budget);
+      const coinsCost = (!isNaN(rawCost) && rawCost > 0) ? rawCost : 100;
       setCurrentUser((prev) => {
         const currentTransactions = prev.wallet?.transactions || [];
-        const currentCoins = typeof prev.wallet?.coins === 'number' ? prev.wallet.coins : (typeof prev.coins === 'number' ? prev.coins : 0);
+        const currentCoins = typeof prev.wallet?.coins === 'number' && !isNaN(prev.wallet.coins)
+          ? prev.wallet.coins
+          : (typeof prev.coins === 'number' && !isNaN(prev.coins) ? prev.coins : 0);
         const remainingCoins = Math.max(0, currentCoins - coinsCost);
         const newTx = {
           id: `tx-promo-coins-${Date.now()}`,
           type: 'AD_CAMPAIGN',
           title: `Pauta SpotCoins: ${packTitle || 'Impulso de Video'}`,
-          subtitle: `In-Feed Ad · ${goal}`,
+          subtitle: `In-Feed Ad · ${goal || 'Vistas'}`,
           coins: -coinsCost,
           status: 'COMPLETED',
           date: 'Hoy',

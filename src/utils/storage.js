@@ -259,8 +259,12 @@ export function loadPersistedUser() {
         : CURRENT_USER.wallet.transactions;
 
     // Limpieza estricta de campos COP obsoletos y unificación 100% en SpotCoins
+    const cleanCoins = (typeof parsed.wallet?.coins === 'number' && !isNaN(parsed.wallet.coins))
+      ? parsed.wallet.coins
+      : ((typeof parsed.coins === 'number' && !isNaN(parsed.coins)) ? parsed.coins : CURRENT_USER.wallet.coins);
+
     const cleanWallet = {
-      coins: typeof parsed.wallet?.coins === 'number' ? parsed.wallet.coins : CURRENT_USER.wallet.coins,
+      coins: cleanCoins,
       totalGiftsReceivedCoins:
         typeof parsed.wallet?.totalGiftsReceivedCoins === 'number'
           ? parsed.wallet.totalGiftsReceivedCoins
@@ -297,6 +301,7 @@ export function loadPersistedUser() {
       likesCount: cleanLikes,
       avatar: isRealAvatar ? parsed.avatar : CURRENT_USER.avatar,
       bio: typeof parsed.bio === 'string' ? parsed.bio.replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play') : CURRENT_USER.bio,
+      coins: cleanCoins,
       wallet: cleanWallet,
       receivedGifts:
         parsed.receivedGifts && parsed.receivedGifts.length > 0

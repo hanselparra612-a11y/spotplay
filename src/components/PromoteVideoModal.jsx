@@ -273,11 +273,12 @@ export default function PromoteVideoModal({
 
       onPromoteSuccess({
         videoId: video.id,
-        budget: effectiveBudget,
+        budget: coinsNeeded,
+        coins: coinsNeeded,
         goal: selectedGoal,
         city,
         paymentMethod,
-        duration: selectedPack ? selectedPack.duration : 3,
+        duration: selectedPack ? selectedPack.duration : 4,
         promotedCta: chosenCta,
         campaignType: selectedGoal,
         couponCode,
