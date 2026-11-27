@@ -90,7 +90,7 @@ export default function PromoteVideoModal({
   const [activeTab, setActiveTab] = useState('campaigns'); // 'campaigns' | 'packs' | 'manager'
   const [selectedGoal, setSelectedGoal] = useState('chat');
   const [selectedPack, setSelectedPack] = useState(null);
-  const [budget, setBudget] = useState(25);
+  const [budget, setBudget] = useState(50);
   const [city, setCity] = useState('Toda Colombia');
   const [paymentMethod, setPaymentMethod] = useState('coins'); // 100% Google Play Compliant (SpotCoins)
   const [couponCode, setCouponCode] = useState('SPOT15');
@@ -133,13 +133,13 @@ export default function PromoteVideoModal({
     ? currentUser.wallet.coins
     : (typeof currentUser?.coins === 'number' ? currentUser.coins : 0);
   const userCoins = currentAvailableCoins + extraCoinsBonus;
-  const coinsNeeded = selectedPack ? (selectedPack.coins || 25) : (budget || 25);
+  const coinsNeeded = selectedPack ? (selectedPack.coins || 50) : (budget || 50);
 
   const budgetOptions = [
-    { value: 25, coins: 25, reach: '500 - 1.200 reproducciones prioritarias', label: '25 SpotCoins 🪙 (Despegue)' },
-    { value: 50, coins: 50, reach: '1.800 - 3.500 reproducciones en Para Ti', label: '50 SpotCoins 🪙 (Popular)', popular: true },
-    { value: 100, coins: 100, reach: '5.000 - 10.000 reproducciones garantizadas', label: '100 SpotCoins 🪙 (Viral)' },
-    { value: 250, coins: 250, reach: '15.000+ reproducciones y difusión masiva', label: '250 SpotCoins 🪙 (Élite VIP)' },
+    { value: 50, coins: 50, reach: '1.000 - 2.500 reproducciones prioritarias', label: '50 SpotCoins 🪙 (Inicial)' },
+    { value: 100, coins: 100, reach: '3.500 - 7.000 reproducciones en Para Ti', label: '100 SpotCoins 🪙 (Popular)', popular: true },
+    { value: 250, coins: 250, reach: '10.000 - 20.000 reproducciones garantizadas', label: '250 SpotCoins 🪙 (Viral)' },
+    { value: 500, coins: 500, reach: '35.000+ reproducciones y máxima difusión', label: '500 SpotCoins 🪙 (Élite VIP)' },
   ];
 
   const handleSelectPack = (pack) => {
@@ -360,7 +360,7 @@ export default function PromoteVideoModal({
               const bCoins = Number(video.promotedBudget) <= 500
                 ? Number(video.promotedBudget || 5)
                 : Math.round(Number(video.promotedBudget || 50000) / 1000);
-              const reachText = bCoins >= 100 ? '5.000 - 10.000 vistas' : bCoins >= 50 ? '1.800 - 3.500 vistas' : bCoins >= 20 ? '500 - 1.200 vistas' : '100 - 250 vistas';
+              const reachText = bCoins >= 500 ? '35.000+ vistas' : bCoins >= 250 ? '10.000 - 20.000 vistas' : bCoins >= 100 ? '3.500 - 7.000 vistas' : '1.000 - 2.500 vistas';
               return (
                 <div className="grid grid-cols-2 gap-2 text-center">
                   <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
