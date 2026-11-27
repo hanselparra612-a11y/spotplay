@@ -1,4 +1,6 @@
 // Capa de persistencia permanente en IndexedDB para videos grabados y subidos
+import { extractVideoThumbnail } from './thumbnailUtils.js';
+
 const DB_NAME = 'VideoSpotMediaDB';
 const LEGACY_DB_NAME = 'TokTikMediaDB';
 const DB_VERSION = 1;
@@ -98,19 +100,38 @@ export async function loadVideosFromIndexedDB() {
       }
     }
 
-    const activeVideos = records
-      .map((rec) => {
+    const activeVideos = await Promise.all(
+      records.map(async (rec) => {
         if (!rec.videoBlob) return null;
         try {
           const freshUrl = URL.createObjectURL(rec.videoBlob);
+          let thumb = rec.thumbnail || rec.cover;
+          // Si la miniatura no es base64 ni URL absoluta, regenerarla desde el blob directamente
+          if (!thumb || (!thumb.startsWith('data:image') && !thumb.startsWith('http'))) {
+            try {
+              const generatedThumb = await extractVideoThumbnail(rec.videoBlob, 0.3);
+              if (generatedThumb) {
+                thumb = generatedThumb;
+                rec.thumbnail = generatedThumb;
+                rec.cover = generatedThumb;
+                saveVideoToIndexedDB(rec, rec.videoBlob).catch(() => {});
+              }
+            } catch (tErr) {}
+          }
           return {
             ...rec,
             videoUrl: freshUrl,
+            videoBlob: rec.videoBlob,
+            thumbnail: thumb || rec.thumbnail,
+            cover: thumb || rec.cover,
           };
         } catch (e) {
           return null;
         }
       })
+    );
+
+    return activeVideos
       .filter(Boolean)
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 

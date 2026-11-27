@@ -5,49 +5,19 @@ import { uploadVideoToFirebase } from '../firebase/videoService';
 import { isFirebaseConfigured } from '../firebase/config';
 import { formatCOP } from '../utils/format';
 import { getApiUrl } from '../utils/apiUrl';
+import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
 function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
+    reader.onerror = () => resolve('');
     reader.readAsDataURL(blob);
   });
 }
 
 function extractClientThumbnail(blob) {
-  return new Promise((resolve) => {
-    try {
-      const vid = document.createElement('video');
-      vid.crossOrigin = 'anonymous';
-      vid.muted = true;
-      vid.playsInline = true;
-      const url = URL.createObjectURL(blob);
-      vid.src = url;
-      vid.currentTime = 0.5;
-      vid.onloadeddata = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = vid.videoWidth || 720;
-          canvas.height = vid.videoHeight || 1280;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          URL.revokeObjectURL(url);
-          resolve(dataUrl);
-        } catch (e) {
-          URL.revokeObjectURL(url);
-          resolve(null);
-        }
-      };
-      vid.onerror = () => {
-        URL.revokeObjectURL(url);
-        resolve(null);
-      };
-    } catch (err) {
-      resolve(null);
-    }
-  });
+  return extractVideoThumbnail(blob, 0.3);
 }
 
 export default function UploadModal({

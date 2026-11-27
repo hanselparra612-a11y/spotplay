@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, UserPlus, Check, MessageSquare, Share2, Play, Edit3, Flag } from 'lucide-react';
 import { formatNumber } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
+import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
 function CreatorVideoThumb({ video }) {
   const [imgError, setImgError] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [extractedThumb, setExtractedThumb] = useState(null);
 
   const rawThumb = video.cover || video.thumbnail;
   const thumbUrl = rawThumb ? resolveMediaUrl(rawThumb) : '';
   const videoUrl = video.videoUrl ? resolveMediaUrl(video.videoUrl) : '';
+
+  useEffect(() => {
+    let isMounted = true;
+    if ((imgError || !thumbUrl) && !extractedThumb && (video.videoBlob || videoUrl)) {
+      extractVideoThumbnail(video.videoBlob || videoUrl, 0.3)
+        .then((dataUrl) => {
+          if (isMounted && dataUrl) {
+            setExtractedThumb(dataUrl);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => { isMounted = false; };
+  }, [imgError, thumbUrl, extractedThumb, video.videoBlob, videoUrl]);
+
+  if (extractedThumb) {
+    return (
+      <img
+        src={extractedThumb}
+        alt={video.description || 'Video'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+    );
+  }
 
   if (thumbUrl && !imgError) {
     return (
@@ -24,13 +50,17 @@ function CreatorVideoThumb({ video }) {
   }
 
   if (videoUrl && !videoError) {
+    const cleanSrc = videoUrl.startsWith('blob:') || videoUrl.startsWith('data:')
+      ? videoUrl
+      : `${videoUrl}#t=0.001`;
+
     return (
       <video
-        src={`${videoUrl}#t=0.001`}
-        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-        className="w-full h-full object-cover"
+        src={cleanSrc}
+        className="w-full h-full object-cover pointer-events-none"
         muted
-        preload="metadata"
+        playsInline
+        preload="auto"
         onError={() => setVideoError(true)}
       />
     );

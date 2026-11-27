@@ -4,6 +4,40 @@ import {
   Sparkles, CheckCircle2, ChevronRight, Tag, ArrowLeft, Heart, ShoppingBag
 } from 'lucide-react';
 import { formatNumber, formatCOP } from '../utils/format';
+import { resolveMediaUrl } from '../utils/apiUrl';
+
+function ExploreVideoThumb({ video, className = "w-full h-full object-cover" }) {
+  const [imgError, setImgError] = useState(false);
+  const thumbUrl = video?.cover || video?.thumbnail;
+  const resolvedThumb = thumbUrl ? resolveMediaUrl(thumbUrl) : '';
+  const resolvedVideo = video?.videoUrl ? resolveMediaUrl(video.videoUrl) : '';
+
+  if (resolvedThumb && !imgError) {
+    return (
+      <img
+        src={resolvedThumb}
+        alt={video.description || 'Video'}
+        className={className}
+        loading="lazy"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+
+  const cleanSrc = resolvedVideo.startsWith('blob:') || resolvedVideo.startsWith('data:')
+    ? resolvedVideo
+    : `${resolvedVideo}#t=0.001`;
+
+  return (
+    <video
+      src={cleanSrc}
+      className={className}
+      muted
+      playsInline
+      preload="metadata"
+    />
+  );
+}
 
 // Tendencias destacadas del momento en Colombia
 const TRENDING_TOPICS = [
@@ -226,11 +260,9 @@ export default function ExploreView({
                     className="w-36 p-2 bg-gradient-to-b from-[#181a24] to-[#12141c] rounded-2xl shrink-0 border border-amber-500/30 hover:border-amber-400 transition-all cursor-pointer shadow-md group flex flex-col"
                   >
                     <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black mb-1.5">
-                      <video
-                        src={video.videoUrl}
-                        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                      <ExploreVideoThumb
+                        video={video}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        muted
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                       {Boolean(video.product.price) && (
@@ -318,11 +350,9 @@ export default function ExploreView({
                   onClick={() => onSelectVideo && onSelectVideo(video.id)}
                   className="group relative aspect-9/14 bg-[#14161f] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/5 hover:border-[#ffb800]/40 transition-all"
                 >
-                  <video
-                    src={video.videoUrl}
-                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                  <ExploreVideoThumb
+                    video={video}
                     className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-300"
-                    muted
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                   
@@ -413,11 +443,9 @@ export default function ExploreView({
                       onClick={() => onSelectVideo && onSelectVideo(video.id)}
                       className="group relative aspect-9/14 bg-[#14161f] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/5 hover:border-[#ffb800]/40 transition-all"
                     >
-                      <video
-                        src={video.videoUrl}
-                        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                      <ExploreVideoThumb
+                        video={video}
                         className="w-full h-full object-cover"
-                        muted
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                       <div className="absolute bottom-2 left-2 right-2 text-white">
@@ -448,11 +476,9 @@ export default function ExploreView({
                   onClick={() => onSelectVideo && onSelectVideo(video.id)}
                   className="group relative aspect-9/14 bg-[#14161f] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
                 >
-                  <video
-                    src={video.videoUrl}
-                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                  <ExploreVideoThumb
+                    video={video}
                     className="w-full h-full object-cover"
-                    muted
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   <div className="absolute bottom-2 left-2 right-2 text-white">
@@ -476,11 +502,9 @@ export default function ExploreView({
                   className="group relative bg-[#141822] rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-amber-500/20 hover:border-amber-400 transition-all flex flex-col"
                 >
                   <div className="relative aspect-9/12 bg-black">
-                    <video
-                    src={video.videoUrl}
-                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    <ExploreVideoThumb
+                    video={video}
                     className="w-full h-full object-cover"
-                    muted
                   />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent" />
                     <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[#ffb800] text-[9px] font-bold border border-amber-400/40 flex items-center gap-1">

@@ -31,14 +31,41 @@ import {
 } from 'lucide-react';
 import { formatNumber } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
+import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
 function ProfileVideoThumb({ vid }) {
   const [imgError, setImgError] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [extractedThumb, setExtractedThumb] = useState(null);
 
   const rawThumb = vid.cover || vid.thumbnail;
   const thumbUrl = rawThumb ? resolveMediaUrl(rawThumb) : '';
   const videoUrl = vid.videoUrl ? resolveMediaUrl(vid.videoUrl) : '';
+
+  // Auto-recuperación de miniatura con Canvas si la imagen falla o no existe
+  useEffect(() => {
+    let isMounted = true;
+    if ((imgError || !thumbUrl) && !extractedThumb && (vid.videoBlob || videoUrl)) {
+      extractVideoThumbnail(vid.videoBlob || videoUrl, 0.3)
+        .then((dataUrl) => {
+          if (isMounted && dataUrl) {
+            setExtractedThumb(dataUrl);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => { isMounted = false; };
+  }, [imgError, thumbUrl, extractedThumb, vid.videoBlob, videoUrl]);
+
+  if (extractedThumb) {
+    return (
+      <img
+        src={extractedThumb}
+        alt={vid.description || 'Video'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+    );
+  }
 
   if (thumbUrl && !imgError) {
     return (
@@ -53,14 +80,17 @@ function ProfileVideoThumb({ vid }) {
   }
 
   if (videoUrl && !videoError) {
+    const cleanSrc = videoUrl.startsWith('blob:') || videoUrl.startsWith('data:')
+      ? videoUrl
+      : `${videoUrl}#t=0.001`;
+
     return (
       <video
-        src={`${videoUrl}#t=0.001`}
-        poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        src={cleanSrc}
         className="w-full h-full object-cover pointer-events-none"
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         onError={() => setVideoError(true)}
       />
     );
