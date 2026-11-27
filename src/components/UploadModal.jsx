@@ -283,8 +283,8 @@ export default function UploadModal({
           cover: clientThumbnail || thumbPath,
           ...videoMeta,
           isUserUploaded: true,
-          stats: { likes: 1, comments: 0, bookmarks: 0, shares: 0, giftsCount: 0 },
-          isLiked: true,
+          stats: { likes: 0, comments: 0, bookmarks: 0, shares: 0, giftsCount: 0 },
+          isLiked: false,
           isBookmarked: false,
           comments: [],
         };

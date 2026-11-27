@@ -1,8 +1,8 @@
 // Capa de persistencia en LocalStorage para guardar cambios offline y mantener datos
 import { INITIAL_VIDEOS, CURRENT_USER, SEED_CREATORS_MAP } from '../data/mockVideos.js';
 
-// Purga forzada de caché para eliminar perfiles y videos de prueba antiguos en el navegador del usuario
-const PURGE_KEY = 'spotplay_purge_v7_clean_real_only';
+// Purga forzada de caché para eliminar perfiles/videos de prueba antiguos y limpiar likes automáticos residuales
+const PURGE_KEY = 'spotplay_purge_v8_clean_likes_white';
 if (typeof window !== 'undefined' && localStorage.getItem(PURGE_KEY) !== 'done') {
   try {
     localStorage.removeItem('spotplay_videos_v1');
@@ -11,15 +11,30 @@ if (typeof window !== 'undefined' && localStorage.getItem(PURGE_KEY) !== 'done')
     localStorage.removeItem('spotplay_videos_offline_v2');
     localStorage.removeItem('spotplay_followed_creator_ids_v1');
     localStorage.removeItem('toktik_videos_1986_v2');
+    localStorage.removeItem('spotplay_likes_v1');
+    localStorage.removeItem('spotplay_likes_v2');
+    // Sanitizar metadatos de videos subidos en localStorage para que los corazones inicien blancos (isLiked: false, likes: 0)
+    const metaRaw = localStorage.getItem('spotplay_user_uploaded_meta_v2');
+    if (metaRaw) {
+      const metaList = JSON.parse(metaRaw);
+      if (Array.isArray(metaList)) {
+        const cleanedMeta = metaList.map((v) => ({
+          ...v,
+          isLiked: false,
+          stats: { ...(v.stats || {}), likes: 0 },
+        }));
+        localStorage.setItem('spotplay_user_uploaded_meta_v2', JSON.stringify(cleanedMeta));
+      }
+    }
     localStorage.setItem(PURGE_KEY, 'done');
   } catch (e) {}
 }
 
-const VIDEOS_STORAGE_KEY = 'spotplay_videos_v3';
+const VIDEOS_STORAGE_KEY = 'spotplay_videos_v4';
 const USER_STORAGE_KEY = 'spotplay_user_v2';
 const ORDERS_STORAGE_KEY = 'spotplay_orders_v2';
 const BOOKMARKS_STORAGE_KEY = 'spotplay_bookmarks_v2';
-const LIKES_STORAGE_KEY = 'spotplay_likes_v2';
+const LIKES_STORAGE_KEY = 'spotplay_likes_v3';
 const REPORTS_STORAGE_KEY = 'spotplay_reports_v1';
 const BLOCKED_USERS_STORAGE_KEY = 'spotplay_blocked_users_v1';
 const DELETED_VIDEOS_KEY = 'spotplay_deleted_video_ids_v2';
@@ -223,9 +238,9 @@ export function loadPersistedVideos() {
       const isLiked = likedIds.has(v.id);
       const hasUserGifted = Boolean(v.hasUserGifted);
 
-      // 🎯 MODO REAL ESTRICTO: Eliminar números simulados inflados (> 99) para todos los botones del riel
+      // 🎯 MODO REAL ESTRICTO: Los likes dependen exclusivamente de las acciones reales del usuario
       const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
-      const cleanLikes = rawLikes > 99 ? (isLiked ? 1 : 0) : rawLikes;
+      const cleanLikes = isLiked ? (rawLikes > 0 ? rawLikes : 1) : 0;
 
       const rawBookmarks = typeof v.stats?.bookmarks === 'number' ? v.stats.bookmarks : 0;
       const cleanBookmarks = rawBookmarks > 99 ? (isBookmarked ? 1 : 0) : rawBookmarks;

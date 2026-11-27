@@ -403,12 +403,18 @@ export default function App() {
               const userBookmarks = new Set(loadPersistedBookmarks());
               const sanitized = merged.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => {
                 const thumb = v.thumbnail || v.cover || `/uploads/thumbnails/${v.id}.jpg`;
+                const isLiked = userLikes.has(v.id);
+                const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
                 return {
                   ...v,
                   thumbnail: thumb,
                   cover: thumb,
-                  isLiked: userLikes.has(v.id),
+                  isLiked,
                   isBookmarked: userBookmarks.has(v.id),
+                  stats: {
+                    ...v.stats,
+                    likes: isLiked ? Math.max(1, rawLikes) : 0,
+                  },
                 };
               });
               // Guardar lista oficial autoritativa en localStorage
@@ -484,7 +490,23 @@ export default function App() {
         const storedVideos = await loadVideosFromIndexedDB();
         if (storedVideos && storedVideos.length > 0) {
           const deletedIds = getDeletedVideoIds();
-          const validStored = storedVideos.filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
+          const userLikes = new Set(loadPersistedLikes());
+          const userBookmarks = new Set(loadPersistedBookmarks());
+          const validStored = storedVideos
+            .filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'))
+            .map((v) => {
+              const isLiked = userLikes.has(v.id);
+              const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
+              return {
+                ...v,
+                isLiked,
+                isBookmarked: userBookmarks.has(v.id),
+                stats: {
+                  ...v.stats,
+                  likes: isLiked ? Math.max(1, rawLikes) : 0,
+                },
+              };
+            });
           setVideos((prev) => {
             const storedIds = new Set(validStored.map((v) => v.id));
             const existingWithoutDupes = prev.filter((v) => !storedIds.has(v.id) && !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
@@ -514,7 +536,23 @@ export default function App() {
     const unsubscribe = subscribeVideos((latestVideos) => {
       if (latestVideos && latestVideos.length > 0) {
         const deletedIds = getDeletedVideoIds();
-        const filtered = latestVideos.filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'));
+        const userLikes = new Set(loadPersistedLikes());
+        const userBookmarks = new Set(loadPersistedBookmarks());
+        const filtered = latestVideos
+          .filter((v) => !deletedIds.has(v.id) && !v.description?.toLowerCase().includes('piloto'))
+          .map((v) => {
+            const isLiked = userLikes.has(v.id);
+            const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
+            return {
+              ...v,
+              isLiked,
+              isBookmarked: userBookmarks.has(v.id),
+              stats: {
+                ...v.stats,
+                likes: isLiked ? Math.max(1, rawLikes) : 0,
+              },
+            };
+          });
         setVideos(filtered);
       }
     });
@@ -1192,6 +1230,11 @@ export default function App() {
   const handleUploadSuccess = async (newVideo, targetBlob) => {
     const fullVideo = {
       ...newVideo,
+      isLiked: false,
+      stats: {
+        ...(newVideo.stats || {}),
+        likes: 0,
+      },
       author: {
         id: currentUser.id,
         name: currentUser.name,
