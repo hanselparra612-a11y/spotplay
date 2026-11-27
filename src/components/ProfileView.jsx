@@ -151,6 +151,7 @@ export default function ProfileView({
   onToggleFollow,
   onOpenCreatorProfile,
   onEditVideo,
+  onOpenPromote,
   onOpenInbox,
   onOpenVitrina,
 }) {
@@ -662,6 +663,22 @@ export default function ProfileView({
                   >
                     <Edit3 size={10} />
                     <span>Editar</span>
+                  </button>
+                )}
+
+                {/* Botón Promocionar / Impulsar con SpotCoins (Solo en tus videos) */}
+                {activeTab === 'videos' && onOpenPromote && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenPromote(vid);
+                    }}
+                    className="absolute top-1.5 right-1.5 px-2 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-[9px] flex items-center gap-1 shadow-lg active:scale-90 transition-all z-20 hover:brightness-110 cursor-pointer border border-amber-300/40"
+                    title="Impulsar visibilidad de este video con SpotCoins"
+                  >
+                    <Flame size={10} className="fill-black stroke-black" />
+                    <span>{vid.isPromoted ? 'En Pauta' : 'Impulsar'}</span>
                   </button>
                 )}
 

@@ -90,7 +90,7 @@ export default function PromoteVideoModal({
   const [activeTab, setActiveTab] = useState('campaigns'); // 'campaigns' | 'packs' | 'manager'
   const [selectedGoal, setSelectedGoal] = useState('chat');
   const [selectedPack, setSelectedPack] = useState(null);
-  const [budget, setBudget] = useState(50000);
+  const [budget, setBudget] = useState(5);
   const [city, setCity] = useState('Toda Colombia');
   const [paymentMethod, setPaymentMethod] = useState('coins'); // 100% Google Play Compliant (SpotCoins)
   const [couponCode, setCouponCode] = useState('SPOT15');
@@ -129,13 +129,17 @@ export default function PromoteVideoModal({
     setTimeout(() => setNotificationMsg(null), 3000);
   };
 
-  const userCoins = (currentUser?.wallet?.coins || 0) + extraCoinsBonus;
-  const coinsNeeded = selectedPack ? (selectedPack.coins || 20) : (budget || 20);
+  const currentAvailableCoins = typeof currentUser?.wallet?.coins === 'number'
+    ? currentUser.wallet.coins
+    : (typeof currentUser?.coins === 'number' ? currentUser.coins : 0);
+  const userCoins = currentAvailableCoins + extraCoinsBonus;
+  const coinsNeeded = selectedPack ? (selectedPack.coins || 5) : (budget || 5);
 
   const budgetOptions = [
-    { value: 20, coins: 20, reach: '250 - 600 reproducciones prioritarias', label: '20 SpotCoins 🪙' },
-    { value: 50, coins: 50, reach: '800 - 1.800 reproducciones en Para Ti', label: '50 SpotCoins 🪙', popular: true },
-    { value: 100, coins: 100, reach: '2.500 - 5.000 reproducciones garantizadas', label: '100 SpotCoins 🪙' },
+    { value: 5, coins: 5, reach: '100 - 250 reproducciones prioritarias', label: '5 SpotCoins 🪙 (Prueba Inicial)' },
+    { value: 20, coins: 20, reach: '500 - 1.200 reproducciones prioritarias', label: '20 SpotCoins 🪙', popular: true },
+    { value: 50, coins: 50, reach: '1.800 - 3.500 reproducciones en Para Ti', label: '50 SpotCoins 🪙' },
+    { value: 100, coins: 100, reach: '5.000 - 10.000 reproducciones garantizadas', label: '100 SpotCoins 🪙' },
   ];
 
   const handleSelectPack = (pack) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, UserPlus, Check, MessageSquare, Share2, Play, Edit3, Flag } from 'lucide-react';
+import { ArrowLeft, UserPlus, Check, MessageSquare, Share2, Play, Edit3, Flag, Flame } from 'lucide-react';
 import { formatNumber } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { extractVideoThumbnail } from '../utils/thumbnailUtils';
@@ -108,6 +108,7 @@ export default function CreatorProfileView({
   currentUser,
   onOpenMyProfile,
   onEditVideo,
+  onOpenPromote,
   onOpenReport,
 }) {
   if (!creator) return null;
@@ -302,6 +303,22 @@ export default function CreatorProfileView({
                 >
                   <Edit3 size={10} />
                   <span>Editar</span>
+                </button>
+              )}
+
+              {/* Botón Promocionar / Impulsar con SpotCoins */}
+              {isOwn && onOpenPromote && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenPromote(video);
+                  }}
+                  className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-400 to-[#ffb800] text-black text-[9px] font-black border border-amber-300/40 z-10 flex items-center gap-1 shadow-md active:scale-90 hover:brightness-110"
+                  title="Impulsar visibilidad de este video con SpotCoins"
+                >
+                  <Flame size={10} className="fill-black stroke-black" />
+                  <span>{video.isPromoted ? 'En Pauta' : 'Impulsar'}</span>
                 </button>
               )}
 

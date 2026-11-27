@@ -473,6 +473,14 @@ function VideoCard({
           )}
         </div>
 
+        {/* 🔥 BADGE DE VIDEO PROMOCIONADO / ANUNCIO IN-FEED */}
+        {video.isPromoted && (
+          <div className="mb-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/60 text-amber-300 text-[10px] font-black backdrop-blur-sm shadow-md pointer-events-auto">
+            <Flame size={11} className="fill-amber-400 text-amber-400 animate-pulse" />
+            <span>Patrocinado · {video.promotedCta || 'Destacado 🚀'}</span>
+          </div>
+        )}
+
         {/* 🛍️ CÁPSULA COMERCIAL DE PRODUCTO (VIDEO COMMERCE ESTILO TIKTOK SHOP) */}
         {video.product && (
           <div className="mb-2 pointer-events-auto">
@@ -730,6 +738,25 @@ function VideoCard({
             {formatNumber(video.stats?.shares || 0)}
           </span>
         </div>
+
+        {/* 🔥 Botón Promocionar / Impulsar Video con SpotCoins (Visible en videos propios) */}
+        {isOwnVideo && onOpenPromote && (
+          <div className="flex flex-col items-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenPromote(video);
+              }}
+              className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 via-amber-500 to-[#ffb800] flex items-center justify-center transition-transform active:scale-75 shadow-[0_0_12px_rgba(255,184,0,0.8)] border border-white/30 text-black hover:brightness-110"
+              title="Impulsar visibilidad de este video con SpotCoins"
+            >
+              <Flame size={18} className="fill-black stroke-black" />
+            </button>
+            <span className="text-[9px] font-black text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+              {video.isPromoted ? 'Pautado' : 'Impulsar'}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 🚀 BARRA DE PROGRESO HORIZONTAL INTERACTIVA (ADELANTAR / RETROCEDER / SCRUBBING CON GESTO Y TOQUE) */}

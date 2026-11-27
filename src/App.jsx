@@ -1461,13 +1461,15 @@ export default function App() {
         return updated;
       });
     } else if (paymentMethod === 'coins') {
-      const coinsCost = Math.round(budget / 1000);
+      const coinsCost = Number(budget) <= 500 ? Math.max(1, Number(budget)) : Math.max(1, Math.round(Number(budget) / 1000));
       setCurrentUser((prev) => {
         const currentTransactions = prev.wallet?.transactions || [];
+        const currentCoins = typeof prev.wallet?.coins === 'number' ? prev.wallet.coins : (typeof prev.coins === 'number' ? prev.coins : 0);
+        const remainingCoins = Math.max(0, currentCoins - coinsCost);
         const newTx = {
           id: `tx-promo-coins-${Date.now()}`,
           type: 'AD_CAMPAIGN',
-          title: `Pauta SpotCoins: ${packTitle || 'Campaña Spot'}`,
+          title: `Pauta SpotCoins: ${packTitle || 'Impulso de Video'}`,
           subtitle: `In-Feed Ad · ${goal}`,
           coins: -coinsCost,
           status: 'COMPLETED',
@@ -1477,9 +1479,10 @@ export default function App() {
 
         const updated = {
           ...prev,
+          coins: remainingCoins,
           wallet: {
             ...prev.wallet,
-            coins: Math.max(0, (prev.wallet?.coins || 0) - coinsCost),
+            coins: remainingCoins,
             transactions: [newTx, ...currentTransactions],
           },
         };
@@ -1895,6 +1898,7 @@ export default function App() {
             onToggleFollow={handleToggleFollow}
             onOpenCreatorProfile={handleOpenCreatorOrMyProfile}
             onEditVideo={handleOpenEditVideo}
+            onOpenPromote={(vid) => setActivePromoteVideo(vid)}
             onOpenInbox={() => setCurrentTab('inbox')}
             onOpenVitrina={() => {
               setVitrinaOpenStore(true);
@@ -2073,6 +2077,7 @@ export default function App() {
               setCurrentTab('profile');
             }}
             onEditVideo={handleOpenEditVideo}
+            onOpenPromote={(vid) => setActivePromoteVideo(vid)}
             onOpenMessage={(creator) => {
               setActiveCreatorProfile(null);
               setActiveChatPartner(creator);
