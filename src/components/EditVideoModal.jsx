@@ -14,7 +14,9 @@ import {
   Sparkles,
   AlertTriangle,
   Image as ImageIcon,
+  ShoppingBag,
 } from 'lucide-react';
+import { normalizeWhatsAppNumber } from '../utils/format';
 
 const CATEGORIES = [
   'General',
@@ -60,6 +62,10 @@ export default function EditVideoModal({
   const [isPinned, setIsPinned] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [customThumbnail, setCustomThumbnail] = useState('');
+  const [hasProduct, setHasProduct] = useState(false);
+  const [productName, setProductName] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productWhatsApp, setProductWhatsApp] = useState('3128525929');
   const thumbnailInputRef = useRef(null);
 
   useEffect(() => {
@@ -71,6 +77,18 @@ export default function EditVideoModal({
       setIsPinned(Boolean(video.isPinned));
       setIsConfirmingDelete(false);
       setCustomThumbnail(video.thumbnail || video.cover || '');
+
+      if (video.product) {
+        setHasProduct(true);
+        setProductName(video.product.name || '');
+        setProductPrice(video.product.price ? String(video.product.price) : '');
+        setProductWhatsApp((video.product.whatsapp || '3128525929').replace(/^57/, ''));
+      } else {
+        setHasProduct(false);
+        setProductName('');
+        setProductPrice('');
+        setProductWhatsApp('3128525929');
+      }
 
       if (Array.isArray(video.tags) && video.tags.length > 0) {
         setTags(video.tags.map((t) => (t.startsWith('#') ? t : `#${t}`)).join(' '));
@@ -120,6 +138,12 @@ export default function EditVideoModal({
       isPinned,
       thumbnail: customThumbnail || video.thumbnail,
       cover: customThumbnail || video.cover,
+      product: hasProduct && productName.trim() ? {
+        id: video.product?.id || ('prod-' + Date.now()),
+        name: productName.trim(),
+        price: Number(productPrice.toString().replace(/[^0-9]/g, '')) || 0,
+        whatsapp: normalizeWhatsAppNumber(productWhatsApp.trim() || '573128525929'),
+      } : null,
       updatedAt: new Date().toISOString(),
     };
 
@@ -378,6 +402,89 @@ export default function EditVideoModal({
                 <span>{isPinned ? 'Fijado al Inicio' : 'No Fijado'}</span>
               </button>
             </div>
+          </div>
+
+          {/* 5. 🛍️ Producto Vinculado a Vitrina / Pedidos WhatsApp */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-[#181d2a] to-emerald-500/10 border border-amber-400/30 space-y-3">
+            <div className="flex items-center justify-between cursor-pointer" onClick={() => setHasProduct((prev) => !prev)}>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center border border-amber-400/40">
+                  <ShoppingBag size={14} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-white flex items-center gap-1.5">
+                    <span>Etiqueta de Pedidos WhatsApp</span>
+                    <span className="text-[9px] px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-400/30 font-bold">
+                      Tienda Directa
+                    </span>
+                  </h4>
+                  <p className="text-[10px] text-zinc-400">
+                    Muestra un botón dorado en tu video para recibir pedidos al chat
+                  </p>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                id="editHasProduct"
+                checked={hasProduct}
+                onChange={(e) => setHasProduct(e.target.checked)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-4 h-4 accent-amber-400 cursor-pointer"
+              />
+            </div>
+
+            {hasProduct && (
+              <div className="space-y-2.5 pt-2 border-t border-white/10 animate-in fade-in duration-150">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
+                    Nombre del Producto o Promoción *
+                  </label>
+                  <input
+                    type="text"
+                    value={productName}
+                    onChange={(e) => setProductName(e.target.value)}
+                    placeholder="Ej. Tienda de Mamá, Desayuno Sorpresa, Zapatillas..."
+                    className="w-full bg-[#12151e] border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-400 font-medium"
+                    required={hasProduct}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
+                      Precio en COP (Opcional)
+                    </label>
+                    <input
+                      type="number"
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(e.target.value)}
+                      placeholder="Ej. 45000"
+                      className="w-full bg-[#12151e] border border-white/15 rounded-xl px-3 py-2 text-white text-xs focus:outline-none focus:border-amber-400 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                      WhatsApp de Pedidos
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-2.5 text-emerald-400 font-bold text-[11px]">+57</span>
+                      <input
+                        type="tel"
+                        value={productWhatsApp}
+                        onChange={(e) => setProductWhatsApp(e.target.value)}
+                        placeholder="Ej. 3128525929"
+                        className="w-full bg-[#12151e] border border-white/15 rounded-xl pl-9 pr-2.5 py-2 text-white text-xs focus:outline-none focus:border-emerald-400 font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-emerald-400/90 font-medium flex items-center gap-1">
+                  ✓ Al tocar "Pedir 💬" en el video, se abrirá el chat al WhatsApp (+57) {productWhatsApp || '3128525929'}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Botones de Acción */}

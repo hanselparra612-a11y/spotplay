@@ -3,7 +3,7 @@ import { useVirtualKeyboard } from '../hooks/useVirtualKeyboard';
 import { X, UploadCloud, Film, Music, Hash, Check, Camera, ShoppingBag, Gift, Sparkles, Volume2, VolumeX, Store, Search, TrendingUp, DollarSign, CheckCircle2, ArrowLeft, ArrowRight, Play, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { uploadVideoToFirebase } from '../firebase/videoService';
 import { isFirebaseConfigured } from '../firebase/config';
-import { formatCOP } from '../utils/format';
+import { formatCOP, normalizeWhatsAppNumber } from '../utils/format';
 import { getApiUrl } from '../utils/apiUrl';
 import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
@@ -72,7 +72,7 @@ export default function UploadModal({
   const [isCommercialVideo, setIsCommercialVideo] = useState(false);
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
-  const [productWhatsApp, setProductWhatsApp] = useState(currentUser?.whatsapp || '');
+  const [productWhatsApp, setProductWhatsApp] = useState(currentUser?.whatsapp || '3128525929');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -98,7 +98,7 @@ export default function UploadModal({
     setIsCommercialVideo(false);
     setProductName('');
     setProductPrice('');
-    setProductWhatsApp(currentUser?.whatsapp || '');
+    setProductWhatsApp(currentUser?.whatsapp || '3128525929');
     setIsSuccessSubmitted(false);
     setPublishedVideoInfo(null);
     setUploadProgress(0);
@@ -207,7 +207,7 @@ export default function UploadModal({
           avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
           isFollowing: false,
           isVerified: true,
-          whatsapp: productWhatsApp.trim() || currentUser?.whatsapp || '573105558899',
+          whatsapp: normalizeWhatsAppNumber(productWhatsApp.trim() || currentUser?.whatsapp || '573128525929'),
         },
         description: caption || '¡Mi nuevo video en Spot Play! 🚀🎬',
         tags: tags.split(',').map((t) => t.trim().replace(/^#/, '')).filter(Boolean),
@@ -216,7 +216,7 @@ export default function UploadModal({
           id: 'prod-' + Date.now(),
           name: productName.trim(),
           price: Number(productPrice.toString().replace(/[^0-9]/g, '')) || 0,
-          whatsapp: productWhatsApp.trim() || currentUser?.whatsapp || '573105558899',
+          whatsapp: normalizeWhatsAppNumber(productWhatsApp.trim() || currentUser?.whatsapp || '573128525929'),
         } : null,
         music: {
           title: musicTitle || 'Sonido original',

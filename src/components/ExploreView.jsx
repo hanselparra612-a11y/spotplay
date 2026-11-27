@@ -3,7 +3,7 @@ import {
   Search, Flame, TrendingUp, Play, X, UserPlus, UserCheck, 
   Sparkles, CheckCircle2, ChevronRight, Tag, ArrowLeft, Heart, ShoppingBag
 } from 'lucide-react';
-import { formatNumber, formatCOP } from '../utils/format';
+import { formatNumber, formatCOP, normalizeWhatsAppNumber } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
@@ -330,7 +330,7 @@ export default function ExploreView({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const phone = (video.product.whatsapp || video.author?.whatsapp || '573105558899').replace(/[^0-9]/g, '');
+                        const phone = normalizeWhatsAppNumber(video.product.whatsapp || video.author?.whatsapp || '573128525929');
                         const msg = encodeURIComponent(`¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`);
                         window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
                       }}
@@ -577,7 +577,7 @@ export default function ExploreView({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const phone = (video.product.whatsapp || video.author?.whatsapp || '573105558899').replace(/[^0-9]/g, '');
+                        const phone = normalizeWhatsAppNumber(video.product.whatsapp || video.author?.whatsapp || '573128525929');
                         const msg = encodeURIComponent(`¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`);
                         window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
                       }}

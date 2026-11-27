@@ -18,7 +18,7 @@ import {
   Flag,
   ShoppingBag,
 } from 'lucide-react';
-import { formatNumber, formatTime, formatCOP } from '../utils/format';
+import { formatNumber, formatTime, formatCOP, normalizeWhatsAppNumber } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { getVideoBlobFromIndexedDB } from '../utils/videoDB';
 import ReactionsTray from './ReactionsTray';
@@ -537,7 +537,8 @@ function VideoCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                const phone = (video.product.whatsapp || authorObj?.whatsapp || '573105558899').replace(/[^0-9]/g, '');
+                const rawPhone = video.product.whatsapp || authorObj?.whatsapp || (isOwnVideo && currentUser?.whatsapp) || '573128525929';
+                const phone = normalizeWhatsAppNumber(rawPhone);
                 const msg = encodeURIComponent(`¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`);
                 window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
               }}

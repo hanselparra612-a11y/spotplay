@@ -885,7 +885,7 @@ export default function ProfileView({
                   </div>
                   <div className="text-left">
                     <span className="text-xs font-bold text-white block">Editar Perfil</span>
-                    <span className="text-[10px] text-zinc-400">Foto, nombre, biografía y enlaces</span>
+                    <span className="text-[10px] text-zinc-400">Foto, nombre, bio y WhatsApp de tienda</span>
                   </div>
                 </div>
                 <ChevronRight size={16} className="text-zinc-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />

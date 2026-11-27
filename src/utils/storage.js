@@ -34,7 +34,7 @@ export const INITIAL_SAMPLE_ORDERS = [
     productName: 'Chaqueta Streetwear Rompevientos',
     storeName: 'Urban Streetwear SAS',
     storeCity: 'Medellín',
-    storeWhatsapp: '573105558899',
+    storeWhatsapp: '573128525929',
     selectedSize: 'M',
     selectedColor: 'Negro Puro',
     quantity: 1,

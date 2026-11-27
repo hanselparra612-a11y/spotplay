@@ -2,12 +2,14 @@ import React, { useState, useRef } from 'react';
 import { useVirtualKeyboard } from '../hooks/useVirtualKeyboard';
 import { X, Camera, Check, Upload, Link as LinkIcon, Image, Sparkles } from 'lucide-react';
 import { compressImage } from '../utils/imageCompressor';
+import { normalizeWhatsAppNumber } from '../utils/format';
 
 export default function EditProfileModal({ isOpen, onClose, currentUser, onSave }) {
   const [name, setName] = useState(currentUser.name || '');
   const [username, setUsername] = useState(currentUser.username || '');
   const [bio, setBio] = useState(currentUser.bio || '');
   const [avatar, setAvatar] = useState(currentUser.avatar || '');
+  const [whatsapp, setWhatsapp] = useState(currentUser.whatsapp || '3128525929');
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [tempUrl, setTempUrl] = useState('');
   const fileInputRef = useRef(null);
@@ -65,8 +67,9 @@ export default function EditProfileModal({ isOpen, onClose, currentUser, onSave 
       username: username.replace(/^@/, '').trim(),
       bio,
       avatar,
+      whatsapp: normalizeWhatsAppNumber(whatsapp),
     });
-    alert('✅ ¡Perfil y foto actualizados con éxito!');
+    alert('✅ ¡Perfil y WhatsApp actualizados con éxito!');
     onClose();
   };
 
@@ -233,6 +236,29 @@ export default function EditProfileModal({ isOpen, onClose, currentUser, onSave 
               placeholder="Cuéntale a la comunidad sobre ti..."
               className="w-full bg-[#202126] border border-white/10 rounded-xl p-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 resize-none text-xs"
             />
+          </div>
+
+          {/* WhatsApp de Contacto / Tienda */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
+                WhatsApp de Pedidos / Tienda
+              </label>
+              <span className="text-[9px] text-zinc-400 font-normal">Pedidos directos</span>
+            </div>
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-emerald-400 font-bold text-xs">+57</span>
+              <input
+                type="tel"
+                value={whatsapp.replace(/^57/, '')}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                placeholder="Ej. 3128525929"
+                className="w-full bg-[#202126] border border-white/10 rounded-xl pl-11 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 text-xs font-mono font-bold"
+              />
+            </div>
+            <p className="text-[10px] text-zinc-400 mt-1">
+              Tus clientes te escribirán a este número cuando toquen la etiqueta de pedir en tus videos.
+            </p>
           </div>
 
           {/* Guardar cambios */}

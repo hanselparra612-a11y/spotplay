@@ -28,3 +28,17 @@ export function formatTime(seconds) {
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 }
+
+export function normalizeWhatsAppNumber(rawPhone) {
+  if (!rawPhone) return '573128525929';
+  let cleaned = String(rawPhone).replace(/[^0-9]/g, '');
+  if (!cleaned || cleaned === '573105558899' || cleaned === '3105558899') {
+    return '573128525929';
+  }
+  // Si tiene 10 dígitos (ej. 3128525929 de Colombia), anteponer el código de país 57
+  if (cleaned.length === 10 && cleaned.startsWith('3')) {
+    cleaned = '57' + cleaned;
+  }
+  return cleaned;
+}
+
