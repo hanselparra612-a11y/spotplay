@@ -34,24 +34,6 @@ import {
 import { formatNumber, formatCOP } from '../utils/format';
 import { loadPlatformSettings } from '../services/adminSettingsService';
 
-const SIMULATED_VIEWER_COMMENTS = [
-  { user: 'mateo_gomez', text: '¡Saludos desde Bogotá! 🔥', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100' },
-  { user: 'camila_shoes', text: '¿De dónde es la chaqueta que tienes puesta?', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
-  { user: 'andres_paisa', text: 'Buena vibra bro, te sigo desde hace rato 🚀', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100' },
-  { user: 'sofia_moda', text: '¡Qué buen directo! Saludos crack 👏', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
-  { user: 'juan_fitness', text: '¿A qué hora haces el próximo live?', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' },
-  { user: 'valen_style', text: '¡Me encanta este contenido! 👑👏', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100' },
-  { user: 'carlos_tech', text: 'Compartí el live con 5 amigos 📲', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100' },
-];
-
-const SIMULATED_GIFTS = [
-  { id: 'gift-rose', name: 'Rosa Roja', emoji: '🌹', coins: 1, valueCOP: 100 },
-  { id: 'gift-coffee', name: 'Café Energético', emoji: '☕', coins: 5, valueCOP: 500 },
-  { id: 'gift-fire', name: 'Fuego Viral', emoji: '🔥', coins: 20, valueCOP: 2000 },
-  { id: 'gift-crown', name: 'Corona Dorada', emoji: '👑', coins: 100, valueCOP: 10000 },
-  { id: 'gift-lion', name: 'León de Oro', emoji: '🦁', coins: 500, valueCOP: 50000 },
-];
-
 export default function LiveStreamModal({
   isOpen,
   currentUser,
@@ -61,9 +43,16 @@ export default function LiveStreamModal({
   const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
   const [isMuted, setIsMuted] = useState(false);
-  const [viewers, setViewers] = useState(142);
+  const [viewers, setViewers] = useState(0);
   const [liveSeconds, setLiveSeconds] = useState(0);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([
+    {
+      user: 'Spot Play',
+      text: '🔴 ¡Estás en vivo! El chat está listo para tus seguidores.',
+      avatar: null,
+      isSystem: true,
+    },
+  ]);
   const [earnedGiftCoins, setEarnedGiftCoins] = useState(0);
   const [admobBonusCoins, setAdmobBonusCoins] = useState(0);
   const [giftsReceivedCount, setGiftsReceivedCount] = useState(0);
@@ -274,22 +263,6 @@ export default function LiveStreamModal({
       });
     }, 1000);
 
-    // Interacción en vivo: flujo de audiencia y comentarios (Modo Real sin regalos de prueba)
-    let commentIndex = 0;
-    simulationIntervalRef.current = setInterval(() => {
-      // 1. Variar espectadores
-      setViewers((prev) => Math.max(80, prev + Math.floor(Math.random() * 7) - 3));
-
-      // 2. Comentarios de la audiencia
-      if (Math.random() > 0.45) {
-        const nextComment = SIMULATED_VIEWER_COMMENTS[commentIndex % SIMULATED_VIEWER_COMMENTS.length];
-        setComments((prev) => [...prev.slice(-12), nextComment]);
-        commentIndex++;
-      }
-
-      // 🛡️ MODO REAL: Los regalos automáticos de prueba han sido completamente deshabilitados.
-      // Los regalos y monedas solo se acreditan cuando un usuario real los envía.
-    }, 4000);
 
     return () => {
       stopCamera();
