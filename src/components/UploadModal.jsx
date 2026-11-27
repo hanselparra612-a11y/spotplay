@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useVirtualKeyboard } from '../hooks/useVirtualKeyboard';
-import { X, UploadCloud, Film, Music, Hash, Check, Camera, ShoppingBag, Gift, Sparkles, Volume2, VolumeX, Store, Search, TrendingUp, DollarSign, CheckCircle2, ArrowLeft, ArrowRight, Play, RefreshCw } from 'lucide-react';
+import { X, UploadCloud, Film, Music, Hash, Check, Camera, ShoppingBag, Gift, Sparkles, Volume2, VolumeX, Store, Search, TrendingUp, DollarSign, CheckCircle2, ArrowLeft, ArrowRight, Play, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { uploadVideoToFirebase } from '../firebase/videoService';
 import { isFirebaseConfigured } from '../firebase/config';
 import { formatCOP } from '../utils/format';
@@ -52,6 +52,7 @@ export default function UploadModal({
   const [publishedVideoInfo, setPublishedVideoInfo] = useState(null);
   const fileInputRef = useRef(null);
   const uploadVideoRef = useRef(null);
+  const customThumbnailInputRef = useRef(null);
   const [isUploadMuted, setIsUploadMuted] = useState(false);
   const [capturedThumbnail, setCapturedThumbnail] = useState(null);
   const keyboardHeight = useVirtualKeyboard();
@@ -595,6 +596,67 @@ export default function UploadModal({
               className="hidden"
             />
           </div>
+
+          {/* Selector de Carátula / Miniatura */}
+          {videoPreview && (
+            <div className="p-3 rounded-2xl bg-[#161822]/90 border border-white/10 flex items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-10 h-14 rounded-xl bg-black overflow-hidden border border-[#ffb800]/40 shrink-0 shadow-md">
+                  {capturedThumbnail ? (
+                    <img
+                      src={capturedThumbnail}
+                      alt="Portada"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 gap-0.5">
+                      <ImageIcon size={14} />
+                      <span className="text-[7px]">Auto</span>
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white">Carátula del Video</span>
+                    {capturedThumbnail && (
+                      <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 text-[8px] font-bold">
+                        Lista
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-zinc-400 block truncate">
+                    ¿Quieres cambiar la portada por una foto de tu galería?
+                  </span>
+                </div>
+              </div>
+
+              <input
+                type="file"
+                ref={customThumbnailInputRef}
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    if (ev.target?.result) {
+                      setCapturedThumbnail(ev.target.result);
+                    }
+                  };
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => customThumbnailInputRef.current?.click()}
+                className="px-3 py-1.5 rounded-xl bg-[#ffb800]/15 hover:bg-[#ffb800]/25 border border-[#ffb800]/30 text-[#ffb800] text-[10px] font-bold shrink-0 flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+              >
+                <ImageIcon size={12} />
+                <span>Elegir foto</span>
+              </button>
+            </div>
+          )}
 
           {/* Descripción del Video */}
           <div className="space-y-1">

@@ -40,8 +40,28 @@ export async function saveVideoToIndexedDB(videoItem, blob) {
   try {
     const db = await openDB(DB_NAME);
 
+    // Si no se proporcionó un nuevo blob, intentar preservar el binary blob previo
     let binaryData = blob;
-    let mimeType = blob?.type || 'video/mp4';
+    let mimeType = blob?.type;
+
+    if (!blob) {
+      try {
+        const existingRecord = await new Promise((res) => {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(videoItem.id);
+          req.onsuccess = () => res(req.result || null);
+          req.onerror = () => res(null);
+        });
+        if (existingRecord) {
+          binaryData = existingRecord.videoBlob;
+          mimeType = existingRecord.mimeType || mimeType;
+        }
+      } catch (exErr) {}
+    }
+
+    mimeType = mimeType || 'video/mp4';
+
     if (blob instanceof Blob || (typeof File !== 'undefined' && blob instanceof File)) {
       try {
         binaryData = await blob.arrayBuffer();

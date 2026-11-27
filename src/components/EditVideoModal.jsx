@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X,
   Edit3,
@@ -13,6 +13,7 @@ import {
   Pin,
   Sparkles,
   AlertTriangle,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -58,6 +59,8 @@ export default function EditVideoModal({
   const [visibility, setVisibility] = useState('public'); // 'public' | 'unlisted' | 'hidden'
   const [isPinned, setIsPinned] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [customThumbnail, setCustomThumbnail] = useState('');
+  const thumbnailInputRef = useRef(null);
 
   useEffect(() => {
     if (video && isOpen) {
@@ -67,6 +70,7 @@ export default function EditVideoModal({
       setVisibility(video.isHidden ? 'hidden' : video.visibility || 'public');
       setIsPinned(Boolean(video.isPinned));
       setIsConfirmingDelete(false);
+      setCustomThumbnail(video.thumbnail || video.cover || '');
 
       if (Array.isArray(video.tags) && video.tags.length > 0) {
         setTags(video.tags.map((t) => (t.startsWith('#') ? t : `#${t}`)).join(' '));
@@ -77,6 +81,18 @@ export default function EditVideoModal({
       }
     }
   }, [video, isOpen]);
+
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (ev.target?.result) {
+        setCustomThumbnail(ev.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   if (!isOpen || !video) return null;
 
@@ -102,6 +118,8 @@ export default function EditVideoModal({
       visibility,
       isHidden: visibility === 'hidden',
       isPinned,
+      thumbnail: customThumbnail || video.thumbnail,
+      cover: customThumbnail || video.cover,
       updatedAt: new Date().toISOString(),
     };
 
@@ -152,12 +170,26 @@ export default function EditVideoModal({
           {/* Preview Row */}
           <div className="p-3 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-3">
             <div className="w-14 h-20 rounded-xl bg-black overflow-hidden relative shrink-0 border border-white/10">
-              <video
-                src={video.videoUrl}
-                className="w-full h-full object-cover"
-                muted
-                preload="metadata"
-              />
+              {customThumbnail ? (
+                <img
+                  src={customThumbnail}
+                  alt="Miniatura"
+                  className="w-full h-full object-cover"
+                />
+              ) : video.thumbnail || video.cover ? (
+                <img
+                  src={video.thumbnail || video.cover}
+                  alt="Miniatura"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <video
+                  src={video.videoUrl}
+                  className="w-full h-full object-cover"
+                  muted
+                  preload="metadata"
+                />
+              )}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-white truncate">
@@ -170,6 +202,65 @@ export default function EditVideoModal({
                 <span>❤️ {video.stats?.likes || 0}</span>
                 <span>💬 {video.stats?.comments || 0}</span>
                 <span>🔁 {video.stats?.shares || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Miniatura / Carátula Personalizada */}
+          <div className="p-3.5 rounded-2xl bg-[#181d2a] border border-amber-400/20 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-bold text-white flex items-center gap-1.5">
+                <ImageIcon size={14} className="text-amber-400" />
+                <span>Miniatura / Portada del Video</span>
+              </label>
+              {customThumbnail && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[9px] font-extrabold border border-emerald-400/30">
+                  ✓ Portada personalizada lista
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-22 rounded-xl bg-black overflow-hidden border border-white/15 relative shrink-0 shadow-md">
+                {customThumbnail ? (
+                  <img
+                    src={customThumbnail}
+                    alt="Portada seleccionada"
+                    className="w-full h-full object-cover"
+                  />
+                ) : video.thumbnail || video.cover ? (
+                  <img
+                    src={video.thumbnail || video.cover}
+                    alt="Portada actual"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-zinc-500 gap-1">
+                    <ImageIcon size={16} />
+                    <span className="text-[8px]">Sin foto</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-1.5">
+                <p className="text-[10px] text-zinc-400 leading-snug">
+                  ¿La miniatura se ve oscura o quieres una imagen más llamativa? Elige cualquier foto de tu galería como carátula oficial.
+                </p>
+                <input
+                  type="file"
+                  ref={thumbnailInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleThumbnailChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => thumbnailInputRef.current?.click()}
+                  className="px-3 py-2 rounded-xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                >
+                  <ImageIcon size={13} />
+                  <span>{customThumbnail ? 'Cambiar por otra foto' : 'Elegir foto de galería'}</span>
+                </button>
               </div>
             </div>
           </div>
