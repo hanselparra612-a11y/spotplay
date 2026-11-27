@@ -219,8 +219,8 @@ export function loadPersistedVideos() {
         0
       );
 
-      const isBookmarked = bookmarkedIds.has(v.id) || Boolean(v.isBookmarked);
-      const isLiked = likedIds.has(v.id) || Boolean(v.isLiked);
+      const isBookmarked = bookmarkedIds.has(v.id);
+      const isLiked = likedIds.has(v.id);
       const hasUserGifted = Boolean(v.hasUserGifted);
 
       // 🎯 MODO REAL ESTRICTO: Eliminar números simulados inflados (> 99) para todos los botones del riel

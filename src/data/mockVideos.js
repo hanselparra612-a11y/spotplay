@@ -361,7 +361,7 @@ export const INITIAL_VIDEOS = [
       "shares": 0,
       "giftsCount": 0
     },
-    "isLiked": true,
+    "isLiked": false,
     "isBookmarked": false,
     "comments": [],
     "createdAt": "2026-11-25T05:19:34.393Z",
@@ -403,7 +403,7 @@ export const INITIAL_VIDEOS = [
       "shares": 0,
       "giftsCount": 0
     },
-    "isLiked": true,
+    "isLiked": false,
     "isBookmarked": false,
     "comments": [],
     "createdAt": "2026-11-25T05:19:30.262Z",
@@ -444,7 +444,7 @@ export const INITIAL_VIDEOS = [
       "shares": 0,
       "giftsCount": 0
     },
-    "isLiked": true,
+    "isLiked": false,
     "isBookmarked": false,
     "comments": [],
     "createdAt": "2026-11-25T05:19:32.393Z",

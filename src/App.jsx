@@ -38,7 +38,9 @@ import {
   savePersistedVideos,
   loadPersistedUser,
   savePersistedUser,
+  loadPersistedBookmarks,
   savePersistedBookmarks,
+  loadPersistedLikes,
   savePersistedLikes,
   loadPersistedReports,
   savePersistedReports,
@@ -397,9 +399,17 @@ export default function App() {
               const merged = [...userUploaded, ...nonDupeServer];
 
               // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales y asegurar miniaturas
+              const userLikes = new Set(loadPersistedLikes());
+              const userBookmarks = new Set(loadPersistedBookmarks());
               const sanitized = merged.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => {
                 const thumb = v.thumbnail || v.cover || `/uploads/thumbnails/${v.id}.jpg`;
-                return { ...v, thumbnail: thumb, cover: thumb };
+                return {
+                  ...v,
+                  thumbnail: thumb,
+                  cover: thumb,
+                  isLiked: userLikes.has(v.id),
+                  isBookmarked: userBookmarks.has(v.id),
+                };
               });
               // Guardar lista oficial autoritativa en localStorage
               savePersistedVideos(sanitized);
