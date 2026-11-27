@@ -9,7 +9,6 @@ import {
   Check,
   Volume2,
   VolumeX,
-    Zap,
   Gift,
   ArrowRight,
   Sparkles,
@@ -63,7 +62,6 @@ function VideoCard({
   const [isBuffering, setIsBuffering] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState([]);
   const [progress, setProgress] = useState(0);
-  const [isSpeeding2X, setIsSpeeding2X] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [activeReactionEmoji, setActiveReactionEmoji] = useState(null);
   const [isCinemaMode, setIsCinemaMode] = useState(false);
@@ -87,7 +85,6 @@ function VideoCard({
   const isPlayPendingRef = useRef(false);
   const lastTapRef = useRef(0);
   const singleTapTimerRef = useRef(null);
-  const holdTimerRef = useRef(null);
   const likeHoldTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
 
@@ -129,6 +126,8 @@ function VideoCard({
       }
       vid.muted = !isActive || isMuted;
       vid.volume = 1.0;
+      vid.playbackRate = 1.0;
+      vid.defaultPlaybackRate = 1.0;
       isPlayPendingRef.current = true;
       const playPromise = vid.play();
       if (playPromise !== undefined) {
@@ -225,7 +224,6 @@ function VideoCard({
 
   const handleScrubPointerDown = (e) => {
     e.stopPropagation();
-    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -256,34 +254,13 @@ function VideoCard({
 
     // Reanudar reproducción fluida tras soltar si estaba reproduciéndose
     if (videoRef.current && (wasPlayingBeforeScrubRef.current || isActive)) {
+      videoRef.current.playbackRate = 1.0;
       videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
     }
   };
 
-  // Pointer Down for 2X Hold Gesture
-  const handlePointerDown = () => {
-    holdTimerRef.current = setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.playbackRate = 2.0;
-        setIsSpeeding2X(true);
-      }
-    }, 350);
-  };
-
-  // Pointer Up / Cancel
-  const handlePointerUp = () => {
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current);
-    }
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 1.0;
-    }
-    setIsSpeeding2X(false);
-  };
-
   // Handle tap / double tap refinado profesional (estilo TikTok nativo)
   const handleVideoClick = (e) => {
-    if (isSpeeding2X) return;
     resetIdleTimer();
 
     const now = Date.now();
@@ -334,10 +311,6 @@ function VideoCard({
   return (
     <div
       className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden select-none"
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerUp}
-      onPointerCancel={handlePointerUp}
       onPointerMove={resetIdleTimer}
       onTouchStart={resetIdleTimer}
     >
@@ -359,6 +332,7 @@ function VideoCard({
         src={shouldMountMedia ? videoSrc : undefined}
         poster={posterUrl || undefined}
         className="w-full h-full object-cover cursor-pointer z-[1]"
+        style={{ transform: 'translateZ(0)', willChange: 'transform' }}
         autoPlay={isActive}
         playsInline
         webkit-playsinline="true"
@@ -373,11 +347,22 @@ function VideoCard({
         onPlaying={() => {
           setIsBuffering(false);
           setIsFrameReady(true);
+          if (videoRef.current) {
+            videoRef.current.playbackRate = 1.0;
+          }
         }}
-        onCanPlay={() => setIsBuffering(false)}
+        onCanPlay={() => {
+          setIsBuffering(false);
+          if (videoRef.current) {
+            videoRef.current.playbackRate = 1.0;
+          }
+        }}
         onLoadedData={() => {
           setIsBuffering(false);
           if (isActive) setIsFrameReady(true);
+          if (videoRef.current) {
+            videoRef.current.playbackRate = 1.0;
+          }
         }}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={(e) => {
@@ -404,14 +389,6 @@ function VideoCard({
       {isBuffering && isActive && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20 transition-opacity">
           <div className="w-12 h-12 rounded-full border-3 border-amber-400/30 border-t-amber-400 animate-spin" />
-        </div>
-      )}
-
-      {/* 2X Speed Indicator Overlay */}
-      {isSpeeding2X && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-amber-400 text-xs font-black animate-pulse border border-amber-400/30">
-          <Zap size={14} className="fill-amber-400" />
-          <span>VELOCIDAD 2X</span>
         </div>
       )}
 
