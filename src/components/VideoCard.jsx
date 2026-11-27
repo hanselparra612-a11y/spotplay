@@ -17,8 +17,10 @@ import {
   MoreVertical,
   Flag,
   ShoppingBag,
+  Send,
+  X,
 } from 'lucide-react';
-import { formatNumber, formatTime, formatCOP, normalizeWhatsAppNumber } from '../utils/format';
+import { formatNumber, formatTime, formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser, getTelegramLink } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { getVideoBlobFromIndexedDB } from '../utils/videoDB';
 import ReactionsTray from './ReactionsTray';
@@ -73,6 +75,7 @@ function VideoCard({
   // 🚀 Estados para Aceleración y Scrubbing de Video en la Barra Horizontal
   const [videoSrc, setVideoSrc] = useState(() => resolveMediaUrl(video.videoUrl));
   const [hasPlaybackError, setHasPlaybackError] = useState(false);
+  const [showMultiChatModal, setShowMultiChatModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -531,34 +534,62 @@ function VideoCard({
         )}
 
         {/* 🛍️ CÁPSULA COMERCIAL DE PRODUCTO (VIDEO COMMERCE ESTILO TIKTOK SHOP) */}
-        {video.product && (
-          <div className="mb-2 pointer-events-auto">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const rawPhone = video.product.whatsapp || authorObj?.whatsapp || (isOwnVideo && currentUser?.whatsapp) || '573128525929';
-                const phone = normalizeWhatsAppNumber(rawPhone);
-                const msg = encodeURIComponent(`¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`);
-                window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
-              }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#ffb800] via-[#ffa000] to-[#ff8800] text-black font-extrabold text-xs shadow-[0_4px_16px_rgba(255,184,0,0.55)] border border-amber-200 backdrop-blur-md active:scale-95 hover:brightness-110 transition-all cursor-pointer group"
-            >
-              <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center shrink-0">
-                <ShoppingBag size={12} className="stroke-[2.6] text-black" />
-              </div>
-              <span className="truncate max-w-[130px] font-black">{video.product.name}</span>
-              {Boolean(video.product.price) && (
-                <span className="bg-black/85 text-[#ffb800] px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold">
-                  {formatCOP(video.product.price)}
-                </span>
-              )}
-              <span className="text-[10px] bg-emerald-900/90 text-emerald-300 px-1.5 py-0.5 rounded-full font-bold border border-emerald-400/40 flex items-center gap-0.5 shadow-sm">
-                Pedir 💬
-              </span>
-            </button>
-          </div>
-        )}
+        {video.product && (() => {
+          const rawWa = video.product.whatsapp || authorObj?.whatsapp || (isOwnVideo && currentUser?.whatsapp) || '573128525929';
+          const cleanWa = normalizeWhatsAppNumber(rawWa);
+          const rawTg = video.product.telegram || authorObj?.telegram || (isOwnVideo && currentUser?.telegram) || '';
+          const cleanTg = normalizeTelegramUser(rawTg);
+          const primaryChat = video.product.primaryChat || authorObj?.primaryChat || (isOwnVideo && currentUser?.primaryChat) || (cleanTg && !video.product.whatsapp ? 'telegram' : 'whatsapp');
+
+          const orderMsg = `¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`;
+          const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
+          const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
+
+          const handleProductClick = (e) => {
+            e.stopPropagation();
+            if (primaryChat === 'both' && tgUrl && waUrl) {
+              setShowMultiChatModal(true);
+            } else if (primaryChat === 'telegram' && tgUrl) {
+              window.open(tgUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              window.open(waUrl, '_blank', 'noopener,noreferrer');
+            }
+          };
+
+          return (
+            <div className="mb-2 pointer-events-auto">
+              <button
+                type="button"
+                onClick={handleProductClick}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#ffb800] via-[#ffa000] to-[#ff8800] text-black font-extrabold text-xs shadow-[0_4px_16px_rgba(255,184,0,0.55)] border border-amber-200 backdrop-blur-md active:scale-95 hover:brightness-110 transition-all cursor-pointer group"
+              >
+                <div className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center shrink-0">
+                  <ShoppingBag size={12} className="stroke-[2.6] text-black" />
+                </div>
+                <span className="truncate max-w-[130px] font-black">{video.product.name}</span>
+                {Boolean(video.product.price) && (
+                  <span className="bg-black/85 text-[#ffb800] px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold">
+                    {formatCOP(video.product.price)}
+                  </span>
+                )}
+                {primaryChat === 'telegram' && cleanTg ? (
+                  <span className="text-[10px] bg-sky-900/90 text-sky-200 px-1.5 py-0.5 rounded-full font-bold border border-sky-400/40 flex items-center gap-0.5 shadow-sm">
+                    <Send size={10} className="stroke-[2.5]" />
+                    <span>Pedir ✈️</span>
+                  </span>
+                ) : primaryChat === 'both' && cleanTg ? (
+                  <span className="text-[10px] bg-purple-900/90 text-purple-200 px-1.5 py-0.5 rounded-full font-bold border border-purple-400/40 flex items-center gap-0.5 shadow-sm">
+                    Pedir ✨
+                  </span>
+                ) : (
+                  <span className="text-[10px] bg-emerald-900/90 text-emerald-300 px-1.5 py-0.5 rounded-full font-bold border border-emerald-400/40 flex items-center gap-0.5 shadow-sm">
+                    Pedir 💬
+                  </span>
+                )}
+              </button>
+            </div>
+          );
+        })()}
 
         {/* Caption */}
         <p className="text-xs text-white/95 line-clamp-2 leading-relaxed drop-shadow mb-1.5 select-text pointer-events-auto">
@@ -857,6 +888,83 @@ function VideoCard({
           </div>
         </div>
       </div>
+
+      {/* 🛍️ Modal Selección de Chat de Pedido (WhatsApp / Telegram) */}
+      {showMultiChatModal && video.product && (() => {
+        const rawWa = video.product.whatsapp || authorObj?.whatsapp || (isOwnVideo && currentUser?.whatsapp) || '573128525929';
+        const cleanWa = normalizeWhatsAppNumber(rawWa);
+        const rawTg = video.product.telegram || authorObj?.telegram || (isOwnVideo && currentUser?.telegram) || '';
+        const cleanTg = normalizeTelegramUser(rawTg);
+        const orderMsg = `¡Hola! Vi tu video en Spot Play y me interesa pedir *${video.product.name}* (${video.product.price ? formatCOP(video.product.price) : 'Información'}). ¿Me das más detalles?`;
+        const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
+        const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
+
+        return (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 animate-in fade-in duration-150 pointer-events-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMultiChatModal(false);
+            }}
+          >
+            <div
+              className="w-full max-w-xs bg-[#16171d] border border-white/10 rounded-3xl p-4 shadow-2xl space-y-3.5 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center">
+                    <ShoppingBag size={15} />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="text-xs font-black text-white truncate max-w-[160px]">{video.product.name}</h4>
+                    <p className="text-[10px] text-amber-300 font-mono font-bold">
+                      {video.product.price ? formatCOP(video.product.price) : 'Hacer pedido'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMultiChatModal(false)}
+                  className="p-1 rounded-full bg-white/10 text-zinc-400 hover:text-white"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <p className="text-[11px] text-zinc-300 font-medium">
+                ¿Por cuál app prefieres enviar tu pedido al vendedor?
+              </p>
+
+              <div className="space-y-2 pt-1">
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setShowMultiChatModal(false)}
+                  className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all text-decoration-none"
+                >
+                  <MessageCircle size={16} />
+                  <span>Pedir por WhatsApp</span>
+                </a>
+
+                {tgUrl && (
+                  <a
+                    href={tgUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setShowMultiChatModal(false)}
+                    className="w-full py-2.5 px-3 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition-all text-decoration-none"
+                  >
+                    <Send size={15} />
+                    <span>Pedir por Telegram</span>
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
@@ -877,6 +985,8 @@ export default React.memo(VideoCard, (prevProps, nextProps) => {
     prevProps.video.author?.isFollowing === nextProps.video.author?.isFollowing &&
     prevProps.video.product?.name === nextProps.video.product?.name &&
     prevProps.video.product?.price === nextProps.video.product?.price &&
+    prevProps.video.product?.telegram === nextProps.video.product?.telegram &&
+    prevProps.video.product?.primaryChat === nextProps.video.product?.primaryChat &&
     prevProps.currentUserId === nextProps.currentUserId
   );
 });

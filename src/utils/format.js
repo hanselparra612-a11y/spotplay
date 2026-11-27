@@ -42,3 +42,19 @@ export function normalizeWhatsAppNumber(rawPhone) {
   return cleaned;
 }
 
+export function normalizeTelegramUser(rawTelegram) {
+  if (!rawTelegram) return '';
+  return String(rawTelegram)
+    .trim()
+    .replace(/^@/, '')
+    .replace(/^https?:\/\/t\.me\//i, '')
+    .replace(/\/$/, '');
+}
+
+export function getTelegramLink(rawTelegram, message) {
+  const user = normalizeTelegramUser(rawTelegram);
+  if (!user) return null;
+  const msgParam = message ? `?text=${encodeURIComponent(message)}` : '';
+  return `https://t.me/${user}${msgParam}`;
+}
+

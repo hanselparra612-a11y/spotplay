@@ -3,7 +3,7 @@ import { useVirtualKeyboard } from '../hooks/useVirtualKeyboard';
 import { X, UploadCloud, Film, Music, Hash, Check, Camera, ShoppingBag, Gift, Sparkles, Volume2, VolumeX, Store, Search, TrendingUp, DollarSign, CheckCircle2, ArrowLeft, ArrowRight, Play, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { uploadVideoToFirebase } from '../firebase/videoService';
 import { isFirebaseConfigured } from '../firebase/config';
-import { formatCOP, normalizeWhatsAppNumber } from '../utils/format';
+import { formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser } from '../utils/format';
 import { getApiUrl } from '../utils/apiUrl';
 import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
@@ -73,6 +73,8 @@ export default function UploadModal({
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [productWhatsApp, setProductWhatsApp] = useState(currentUser?.whatsapp || '3128525929');
+  const [productTelegram, setProductTelegram] = useState(currentUser?.telegram || '');
+  const [productPrimaryChat, setProductPrimaryChat] = useState(currentUser?.primaryChat || 'whatsapp');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -99,6 +101,8 @@ export default function UploadModal({
     setProductName('');
     setProductPrice('');
     setProductWhatsApp(currentUser?.whatsapp || '3128525929');
+    setProductTelegram(currentUser?.telegram || '');
+    setProductPrimaryChat(currentUser?.primaryChat || 'whatsapp');
     setIsSuccessSubmitted(false);
     setPublishedVideoInfo(null);
     setUploadProgress(0);
@@ -208,6 +212,8 @@ export default function UploadModal({
           isFollowing: false,
           isVerified: true,
           whatsapp: normalizeWhatsAppNumber(productWhatsApp.trim() || currentUser?.whatsapp || '573128525929'),
+          telegram: normalizeTelegramUser(productTelegram.trim() || currentUser?.telegram || ''),
+          primaryChat: productPrimaryChat || currentUser?.primaryChat || 'whatsapp',
         },
         description: caption || '¡Mi nuevo video en Spot Play! 🚀🎬',
         tags: tags.split(',').map((t) => t.trim().replace(/^#/, '')).filter(Boolean),
@@ -217,6 +223,8 @@ export default function UploadModal({
           name: productName.trim(),
           price: Number(productPrice.toString().replace(/[^0-9]/g, '')) || 0,
           whatsapp: normalizeWhatsAppNumber(productWhatsApp.trim() || currentUser?.whatsapp || '573128525929'),
+          telegram: normalizeTelegramUser(productTelegram.trim() || currentUser?.telegram || ''),
+          primaryChat: productPrimaryChat || currentUser?.primaryChat || 'whatsapp',
         } : null,
         music: {
           title: musicTitle || 'Sonido original',
@@ -805,15 +813,44 @@ export default function UploadModal({
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-zinc-300 uppercase tracking-wider mb-1">
-                      WhatsApp de Pedidos
+                    <label className="block text-[10px] font-bold text-amber-300 uppercase tracking-wider mb-1">
+                      Canal de Pedidos
+                    </label>
+                    <select
+                      value={productPrimaryChat}
+                      onChange={(e) => setProductPrimaryChat(e.target.value)}
+                      className="w-full bg-[#161822] border border-white/10 rounded-xl px-2 py-2 text-white text-xs font-bold focus:outline-none focus:border-amber-400"
+                    >
+                      <option value="whatsapp">💬 WhatsApp</option>
+                      <option value="telegram">✈️ Telegram</option>
+                      <option value="both">✨ Ambos</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                      WhatsApp (+57)
                     </label>
                     <input
                       type="tel"
                       value={productWhatsApp}
                       onChange={(e) => setProductWhatsApp(e.target.value)}
-                      placeholder="Ej. 3101234567"
-                      className="w-full bg-[#161822] border border-white/10 rounded-xl px-3 py-2 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-amber-400"
+                      placeholder="Ej. 3128525929"
+                      className="w-full bg-[#161822] border border-white/10 rounded-xl px-3 py-2 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-emerald-400 font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-1">
+                      Telegram (@)
+                    </label>
+                    <input
+                      type="text"
+                      value={productTelegram}
+                      onChange={(e) => setProductTelegram(e.target.value)}
+                      placeholder="Ej. MiTienda"
+                      className="w-full bg-[#161822] border border-white/10 rounded-xl px-3 py-2 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-sky-400 font-mono font-bold"
                     />
                   </div>
                 </div>

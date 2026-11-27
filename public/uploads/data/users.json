@@ -157,6 +157,8 @@
     "email": "leonardoescarlata6@gmail.com",
     "isVerified": true,
     "role": "admin",
-    "whatsapp": "573128525929"
+    "whatsapp": "573128525929",
+    "telegram": "",
+    "primaryChat": "whatsapp"
   }
 ]

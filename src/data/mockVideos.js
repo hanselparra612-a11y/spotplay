@@ -146,7 +146,9 @@ export const CURRENT_USER = {
   "email": "leonardoescarlata6@gmail.com",
   "isVerified": true,
   "role": "admin",
-  "whatsapp": "573128525929"
+  "whatsapp": "573128525929",
+  "telegram": "",
+  "primaryChat": "whatsapp"
 };
 
 export const CURRENT_AUTHOR = {
@@ -156,6 +158,8 @@ export const CURRENT_AUTHOR = {
   avatar: CURRENT_USER.avatar,
   bio: CURRENT_USER.bio,
   whatsapp: "573128525929",
+  telegram: "",
+  primaryChat: "whatsapp",
   isFollowing: false,
   isVerified: true,
   followersCount: 0,

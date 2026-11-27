@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useVirtualKeyboard } from '../hooks/useVirtualKeyboard';
 import { X, Camera, Check, Upload, Link as LinkIcon, Image, Sparkles } from 'lucide-react';
 import { compressImage } from '../utils/imageCompressor';
-import { normalizeWhatsAppNumber } from '../utils/format';
+import { normalizeWhatsAppNumber, normalizeTelegramUser } from '../utils/format';
 
 export default function EditProfileModal({ isOpen, onClose, currentUser, onSave }) {
   const [name, setName] = useState(currentUser.name || '');
@@ -10,6 +10,8 @@ export default function EditProfileModal({ isOpen, onClose, currentUser, onSave 
   const [bio, setBio] = useState(currentUser.bio || '');
   const [avatar, setAvatar] = useState(currentUser.avatar || '');
   const [whatsapp, setWhatsapp] = useState(currentUser.whatsapp || '3128525929');
+  const [telegram, setTelegram] = useState(currentUser.telegram || '');
+  const [primaryChat, setPrimaryChat] = useState(currentUser.primaryChat || 'whatsapp');
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [tempUrl, setTempUrl] = useState('');
   const fileInputRef = useRef(null);
@@ -68,8 +70,10 @@ export default function EditProfileModal({ isOpen, onClose, currentUser, onSave 
       bio,
       avatar,
       whatsapp: normalizeWhatsAppNumber(whatsapp),
+      telegram: normalizeTelegramUser(telegram),
+      primaryChat: primaryChat || 'whatsapp',
     });
-    alert('✅ ¡Perfil y WhatsApp actualizados con éxito!');
+    alert('✅ ¡Perfil y canales de contacto actualizados con éxito!');
     onClose();
   };
 
@@ -238,26 +242,65 @@ export default function EditProfileModal({ isOpen, onClose, currentUser, onSave 
             />
           </div>
 
-          {/* WhatsApp de Contacto / Tienda */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
-                WhatsApp de Pedidos / Tienda
+          {/* Canal y Canales de Pedidos (WhatsApp / Telegram / Ambos) */}
+          <div className="p-3 bg-white/[0.03] border border-white/10 rounded-2xl space-y-3">
+            <div>
+              <label className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider block mb-1">
+                Canal de Chat para Pedidos
               </label>
-              <span className="text-[9px] text-zinc-400 font-normal">Pedidos directos</span>
+              <select
+                value={primaryChat}
+                onChange={(e) => setPrimaryChat(e.target.value)}
+                className="w-full bg-[#202126] border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-bold focus:outline-none focus:border-amber-400"
+              >
+                <option value="whatsapp">💬 WhatsApp Principal</option>
+                <option value="telegram">✈️ Telegram Principal</option>
+                <option value="both">✨ Ambos (WhatsApp y Telegram)</option>
+              </select>
             </div>
-            <div className="relative flex items-center">
-              <span className="absolute left-3 text-emerald-400 font-bold text-xs">+57</span>
-              <input
-                type="tel"
-                value={whatsapp.replace(/^57/, '')}
-                onChange={(e) => setWhatsapp(e.target.value)}
-                placeholder="Ej. 3128525929"
-                className="w-full bg-[#202126] border border-white/10 rounded-xl pl-11 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 text-xs font-mono font-bold"
-              />
+
+            {/* WhatsApp de Contacto / Tienda */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">
+                  WhatsApp de Pedidos
+                </label>
+                <span className="text-[9px] text-zinc-400 font-normal">Directo a chat</span>
+              </div>
+              <div className="relative flex items-center">
+                <span className="absolute left-3 text-emerald-400 font-bold text-xs">+57</span>
+                <input
+                  type="tel"
+                  value={whatsapp.replace(/^57/, '')}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="Ej. 3128525929"
+                  className="w-full bg-[#202126] border border-white/10 rounded-xl pl-11 pr-3 py-2 text-white focus:outline-none focus:border-emerald-400 text-xs font-mono font-bold"
+                />
+              </div>
             </div>
-            <p className="text-[10px] text-zinc-400 mt-1">
-              Tus clientes te escribirán a este número cuando toquen la etiqueta de pedir en tus videos.
+
+            {/* Telegram de Contacto / Tienda */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider">
+                  Usuario o Enlace de Telegram
+                </label>
+                <span className="text-[9px] text-zinc-400 font-normal">Opcional</span>
+              </div>
+              <div className="relative flex items-center">
+                <span className="absolute left-3 text-sky-400 font-bold text-xs">@</span>
+                <input
+                  type="text"
+                  value={telegram.replace(/^@/, '').replace(/^https?:\/\/t\.me\//i, '')}
+                  onChange={(e) => setTelegram(e.target.value)}
+                  placeholder="MiTienda o tu_usuario"
+                  className="w-full bg-[#202126] border border-white/10 rounded-xl pl-8 pr-3 py-2 text-white focus:outline-none focus:border-sky-400 text-xs font-mono font-bold"
+                />
+              </div>
+            </div>
+
+            <p className="text-[10px] text-zinc-400 leading-tight">
+              Tus clientes te escribirán a estos canales al pulsar la etiqueta de comprar o pedir en tus videos.
             </p>
           </div>
 

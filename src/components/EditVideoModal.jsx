@@ -16,7 +16,7 @@ import {
   Image as ImageIcon,
   ShoppingBag,
 } from 'lucide-react';
-import { normalizeWhatsAppNumber } from '../utils/format';
+import { normalizeWhatsAppNumber, normalizeTelegramUser } from '../utils/format';
 
 const CATEGORIES = [
   'General',
@@ -66,6 +66,8 @@ export default function EditVideoModal({
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [productWhatsApp, setProductWhatsApp] = useState('3128525929');
+  const [productTelegram, setProductTelegram] = useState('');
+  const [productPrimaryChat, setProductPrimaryChat] = useState('whatsapp');
   const thumbnailInputRef = useRef(null);
 
   useEffect(() => {
@@ -83,11 +85,15 @@ export default function EditVideoModal({
         setProductName(video.product.name || '');
         setProductPrice(video.product.price ? String(video.product.price) : '');
         setProductWhatsApp((video.product.whatsapp || '3128525929').replace(/^57/, ''));
+        setProductTelegram(video.product.telegram || video.author?.telegram || '');
+        setProductPrimaryChat(video.product.primaryChat || video.author?.primaryChat || 'whatsapp');
       } else {
         setHasProduct(false);
         setProductName('');
         setProductPrice('');
         setProductWhatsApp('3128525929');
+        setProductTelegram(video.author?.telegram || '');
+        setProductPrimaryChat(video.author?.primaryChat || 'whatsapp');
       }
 
       if (Array.isArray(video.tags) && video.tags.length > 0) {
@@ -143,6 +149,8 @@ export default function EditVideoModal({
         name: productName.trim(),
         price: Number(productPrice.toString().replace(/[^0-9]/g, '')) || 0,
         whatsapp: normalizeWhatsAppNumber(productWhatsApp.trim() || '573128525929'),
+        telegram: normalizeTelegramUser(productTelegram.trim() || ''),
+        primaryChat: productPrimaryChat || 'whatsapp',
       } : null,
       updatedAt: new Date().toISOString(),
     };
@@ -464,8 +472,25 @@ export default function EditVideoModal({
                   </div>
 
                   <div>
+                    <label className="block text-[10px] font-bold text-amber-300 uppercase tracking-wider mb-1">
+                      Canal de Pedidos
+                    </label>
+                    <select
+                      value={productPrimaryChat}
+                      onChange={(e) => setProductPrimaryChat(e.target.value)}
+                      className="w-full bg-[#12151e] border border-white/15 rounded-xl px-2 py-2 text-white text-xs focus:outline-none focus:border-amber-400 font-bold"
+                    >
+                      <option value="whatsapp">💬 WhatsApp</option>
+                      <option value="telegram">✈️ Telegram</option>
+                      <option value="both">✨ Ambos</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
                     <label className="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
-                      WhatsApp de Pedidos
+                      WhatsApp (+57)
                     </label>
                     <div className="relative flex items-center">
                       <span className="absolute left-2.5 text-emerald-400 font-bold text-[11px]">+57</span>
@@ -478,10 +503,26 @@ export default function EditVideoModal({
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-sky-400 uppercase tracking-wider mb-1">
+                      Telegram (@)
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-2.5 text-sky-400 font-bold text-[11px]">@</span>
+                      <input
+                        type="text"
+                        value={productTelegram.replace(/^@/, '').replace(/^https?:\/\/t\.me\//i, '')}
+                        onChange={(e) => setProductTelegram(e.target.value)}
+                        placeholder="Ej. MiTienda"
+                        className="w-full bg-[#12151e] border border-white/15 rounded-xl pl-6 pr-2.5 py-2 text-white text-xs focus:outline-none focus:border-sky-400 font-mono font-bold"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <p className="text-[10px] text-emerald-400/90 font-medium flex items-center gap-1">
-                  ✓ Al tocar "Pedir 💬" en el video, se abrirá el chat al WhatsApp (+57) {productWhatsApp || '3128525929'}
+                <p className="text-[10px] text-amber-300/90 font-medium flex items-center gap-1">
+                  ✓ Configurado para recibir pedidos vía {productPrimaryChat === 'both' ? 'WhatsApp y Telegram' : productPrimaryChat === 'telegram' ? 'Telegram (@' + (productTelegram || 'usuario') + ')' : 'WhatsApp (+57 ' + (productWhatsApp || '3128525929') + ')'}
                 </p>
               </div>
             )}

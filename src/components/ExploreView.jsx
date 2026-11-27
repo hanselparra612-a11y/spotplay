@@ -3,7 +3,7 @@ import {
   Search, Flame, TrendingUp, Play, X, UserPlus, UserCheck, 
   Sparkles, CheckCircle2, ChevronRight, Tag, ArrowLeft, Heart, ShoppingBag
 } from 'lucide-react';
-import { formatNumber, formatCOP, normalizeWhatsAppNumber } from '../utils/format';
+import { formatNumber, formatCOP, normalizeWhatsAppNumber, normalizeTelegramUser, getTelegramLink } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
 import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
@@ -330,13 +330,23 @@ export default function ExploreView({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const phone = normalizeWhatsAppNumber(video.product.whatsapp || video.author?.whatsapp || '573128525929');
-                        const msg = encodeURIComponent(`¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`);
-                        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+                        const rawWa = video.product?.whatsapp || video.author?.whatsapp || '573128525929';
+                        const cleanWa = normalizeWhatsAppNumber(rawWa);
+                        const rawTg = video.product?.telegram || video.author?.telegram || '';
+                        const cleanTg = normalizeTelegramUser(rawTg);
+                        const primaryChat = video.product?.primaryChat || video.author?.primaryChat || (cleanTg && !video.product?.whatsapp ? 'telegram' : 'whatsapp');
+                        const orderMsg = `¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`;
+                        const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
+                        const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
+                        if (primaryChat === 'telegram' && tgUrl) {
+                          window.open(tgUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          window.open(waUrl, '_blank', 'noopener,noreferrer');
+                        }
                       }}
                       className="w-full py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 text-[9px] font-bold flex items-center justify-center gap-1 active:scale-95 transition-all mt-auto"
                     >
-                      <span>Pedir 💬</span>
+                      <span>Pedir al Chat 💬</span>
                     </button>
                   </div>
                 ))}
@@ -577,13 +587,23 @@ export default function ExploreView({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        const phone = normalizeWhatsAppNumber(video.product.whatsapp || video.author?.whatsapp || '573128525929');
-                        const msg = encodeURIComponent(`¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`);
-                        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+                        const rawWa = video.product?.whatsapp || video.author?.whatsapp || '573128525929';
+                        const cleanWa = normalizeWhatsAppNumber(rawWa);
+                        const rawTg = video.product?.telegram || video.author?.telegram || '';
+                        const cleanTg = normalizeTelegramUser(rawTg);
+                        const primaryChat = video.product?.primaryChat || video.author?.primaryChat || (cleanTg && !video.product?.whatsapp ? 'telegram' : 'whatsapp');
+                        const orderMsg = `¡Hola! Vi *${video.product.name}* en Explorar Spot Play y quiero pedirlo. ¿Está disponible?`;
+                        const waUrl = `https://wa.me/${cleanWa}?text=${encodeURIComponent(orderMsg)}`;
+                        const tgUrl = cleanTg ? getTelegramLink(cleanTg, orderMsg) : null;
+                        if (primaryChat === 'telegram' && tgUrl) {
+                          window.open(tgUrl, '_blank', 'noopener,noreferrer');
+                        } else {
+                          window.open(waUrl, '_blank', 'noopener,noreferrer');
+                        }
                       }}
                       className="w-full mt-1 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 text-[10px] font-extrabold flex items-center justify-center gap-1 active:scale-95 transition-all"
                     >
-                      <span>Pedir WhatsApp 💬</span>
+                      <span>Pedir al Chat 💬</span>
                     </button>
                   </div>
                 </div>
