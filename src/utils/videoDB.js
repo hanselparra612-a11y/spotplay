@@ -106,10 +106,12 @@ export async function loadVideosFromIndexedDB() {
         try {
           const freshUrl = URL.createObjectURL(rec.videoBlob);
           let thumb = rec.thumbnail || rec.cover;
-          // Si la miniatura no es base64 ni URL absoluta, regenerarla desde el blob directamente
-          if (!thumb || (!thumb.startsWith('data:image') && !thumb.startsWith('http'))) {
+          const isRealDataThumb = thumb && typeof thumb === 'string' && thumb.startsWith('data:image');
+          // Si la miniatura no es base64 embebido (p. ej. rutas rotas /uploads/thumbnails/... o nulas),
+          // extraerla de inmediato desde el Blob y persistirla en IndexedDB para que cargue en 0ms
+          if (!isRealDataThumb && rec.videoBlob) {
             try {
-              const generatedThumb = await extractVideoThumbnail(rec.videoBlob, 0.3);
+              const generatedThumb = await extractVideoThumbnail(rec.videoBlob, 0.2);
               if (generatedThumb) {
                 thumb = generatedThumb;
                 rec.thumbnail = generatedThumb;

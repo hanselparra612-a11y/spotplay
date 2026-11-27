@@ -10,13 +10,18 @@ function CreatorVideoThumb({ video }) {
   const [extractedThumb, setExtractedThumb] = useState(null);
 
   const rawThumb = video.cover || video.thumbnail;
-  const thumbUrl = rawThumb ? resolveMediaUrl(rawThumb) : '';
+  const isDataThumb = rawThumb && typeof rawThumb === 'string' && rawThumb.startsWith('data:image');
+  const isUserUpload = Boolean(video.isUserUploaded || (video.id && video.id.startsWith('uploaded-')));
+
+  const thumbUrl = (isUserUpload && !isDataThumb)
+    ? ''
+    : (rawThumb ? resolveMediaUrl(rawThumb) : '');
   const videoUrl = video.videoUrl ? resolveMediaUrl(video.videoUrl) : '';
 
   useEffect(() => {
     let isMounted = true;
     if ((imgError || !thumbUrl) && !extractedThumb && (video.videoBlob || videoUrl)) {
-      extractVideoThumbnail(video.videoBlob || videoUrl, 0.3)
+      extractVideoThumbnail(video.videoBlob || videoUrl, 0.2)
         .then((dataUrl) => {
           if (isMounted && dataUrl) {
             setExtractedThumb(dataUrl);
@@ -26,6 +31,16 @@ function CreatorVideoThumb({ video }) {
     }
     return () => { isMounted = false; };
   }, [imgError, thumbUrl, extractedThumb, video.videoBlob, videoUrl]);
+
+  if (isDataThumb) {
+    return (
+      <img
+        src={rawThumb}
+        alt={video.description || 'Video'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+    );
+  }
 
   if (extractedThumb) {
     return (
@@ -61,6 +76,13 @@ function CreatorVideoThumb({ video }) {
         muted
         playsInline
         preload="auto"
+        onLoadedData={(e) => {
+          try {
+            if (e.currentTarget.currentTime === 0) {
+              e.currentTarget.currentTime = 0.1;
+            }
+          } catch (err) {}
+        }}
         onError={() => setVideoError(true)}
       />
     );

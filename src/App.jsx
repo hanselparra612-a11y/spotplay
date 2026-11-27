@@ -676,82 +676,19 @@ export default function App() {
     };
   }, [displayedVideos, currentTab]);
 
-  // 🌟 Motor de Desvanecimiento Dinámico en Scroll estilo VitrinaSpot (60/120 FPS sin re-render de React)
+  // 🚀 Control de Scroll, Snap Infinito y Extensión de Feed ultra-fluido (120 FPS sin bloqueos)
   useEffect(() => {
     if (currentTab !== 'feed') return;
     const container = containerRef.current;
     if (!container) return;
 
-    let rafId = null;
-    let scrollTimeout = null;
-
-    const updateScrollFade = () => {
-      const containerRect = container.getBoundingClientRect();
-      if (containerRect.height <= 0) return;
-
-      const containerCenter = containerRect.top + containerRect.height / 2;
-      // Umbral: a partir del 35% de desviación del centro, la UI se desvanece por completo
-      const maxDistance = containerRect.height * 0.35;
-
-      // Optimización 120 FPS: Solo calcular fade en tarjetas cercanas a la pantalla activa
-      const startIdx = Math.max(0, activeVideoIndex - 2);
-      const endIdx = Math.min(videoRefs.current.length - 1, activeVideoIndex + 2);
-
-      for (let i = startIdx; i <= endIdx; i++) {
-        const card = videoRefs.current[i];
-        if (!card) continue;
-        const sideActions = card.querySelector('.video-side-actions');
-        const bottomInfo = card.querySelector('.video-bottom-info');
-        if (!sideActions && !bottomInfo) continue;
-
-        const cardRect = card.getBoundingClientRect();
-        const cardCenter = cardRect.top + cardRect.height / 2;
-        const diff = Math.abs(cardCenter - containerCenter);
-
-        // Curva suave cuadrática/orgánica estilo VitrinaSpot
-        const rawProgress = Math.max(0, 1 - (diff / maxDistance));
-        const progress = Math.pow(rawProgress, 1.4);
-
-        const opacityVal = progress.toFixed(3);
-        const scaleVal = (0.94 + 0.06 * progress).toFixed(3);
-        const pointerVal = progress > 0.35 ? 'auto' : 'none';
-
-        if (sideActions) {
-          sideActions.style.opacity = opacityVal;
-          sideActions.style.transform = `scale(${scaleVal})`;
-          sideActions.style.pointerEvents = pointerVal;
-        }
-
-        if (bottomInfo) {
-          bottomInfo.style.opacity = opacityVal;
-          bottomInfo.style.transform = `scale(${scaleVal})`;
-          bottomInfo.style.pointerEvents = pointerVal;
-        }
-      }
-    };
-
     const onScroll = () => {
       if (container.scrollHeight - (container.scrollTop + container.clientHeight) < 1200) {
         handleExtendFeed();
       }
-      if (!rafId) {
-        rafId = requestAnimationFrame(() => {
-          updateScrollFade();
-          rafId = null;
-        });
-      }
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(updateScrollFade, 90);
     };
 
     const onScrollEnd = () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      updateScrollFade();
-
       // Sincronización milimétrica del video activo al terminar de deslizar
       if (container.clientHeight > 0) {
         const snapIndex = Math.round(container.scrollTop / container.clientHeight);
@@ -761,26 +698,12 @@ export default function App() {
       }
     };
 
-    const onResize = () => {
-      updateScrollFade();
-    };
-
     container.addEventListener('scroll', onScroll, { passive: true });
     container.addEventListener('scrollend', onScrollEnd, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
-    window.addEventListener('orientationchange', onResize, { passive: true });
-
-    // Calibración inicial tras montar o cambiar a la pestaña 'feed'
-    const initTimer = setTimeout(updateScrollFade, 60);
 
     return () => {
-      clearTimeout(initTimer);
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-      if (rafId) cancelAnimationFrame(rafId);
       container.removeEventListener('scroll', onScroll);
       container.removeEventListener('scrollend', onScrollEnd);
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('orientationchange', onResize);
     };
   }, [displayedVideos, currentTab, handleExtendFeed]);
 

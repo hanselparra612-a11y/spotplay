@@ -39,14 +39,21 @@ function ProfileVideoThumb({ vid }) {
   const [extractedThumb, setExtractedThumb] = useState(null);
 
   const rawThumb = vid.cover || vid.thumbnail;
-  const thumbUrl = rawThumb ? resolveMediaUrl(rawThumb) : '';
+  const isDataThumb = rawThumb && typeof rawThumb === 'string' && rawThumb.startsWith('data:image');
+  const isUserUpload = Boolean(vid.isUserUploaded || (vid.id && vid.id.startsWith('uploaded-')));
+
+  // Si es video subido por el usuario y no tiene miniatura data:image embebida,
+  // omitir peticiones 404 a Render y activar extracción local inmediata
+  const thumbUrl = (isUserUpload && !isDataThumb)
+    ? ''
+    : (rawThumb ? resolveMediaUrl(rawThumb) : '');
   const videoUrl = vid.videoUrl ? resolveMediaUrl(vid.videoUrl) : '';
 
   // Auto-recuperación de miniatura con Canvas si la imagen falla o no existe
   useEffect(() => {
     let isMounted = true;
     if ((imgError || !thumbUrl) && !extractedThumb && (vid.videoBlob || videoUrl)) {
-      extractVideoThumbnail(vid.videoBlob || videoUrl, 0.3)
+      extractVideoThumbnail(vid.videoBlob || videoUrl, 0.2)
         .then((dataUrl) => {
           if (isMounted && dataUrl) {
             setExtractedThumb(dataUrl);
@@ -56,6 +63,16 @@ function ProfileVideoThumb({ vid }) {
     }
     return () => { isMounted = false; };
   }, [imgError, thumbUrl, extractedThumb, vid.videoBlob, videoUrl]);
+
+  if (isDataThumb) {
+    return (
+      <img
+        src={rawThumb}
+        alt={vid.description || 'Video'}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+    );
+  }
 
   if (extractedThumb) {
     return (
@@ -91,6 +108,13 @@ function ProfileVideoThumb({ vid }) {
         muted
         playsInline
         preload="auto"
+        onLoadedData={(e) => {
+          try {
+            if (e.currentTarget.currentTime === 0) {
+              e.currentTarget.currentTime = 0.1;
+            }
+          } catch (err) {}
+        }}
         onError={() => setVideoError(true)}
       />
     );

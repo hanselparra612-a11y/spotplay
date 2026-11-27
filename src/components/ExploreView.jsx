@@ -1,22 +1,64 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, Flame, TrendingUp, Play, X, UserPlus, UserCheck, 
   Sparkles, CheckCircle2, ChevronRight, Tag, ArrowLeft, Heart, ShoppingBag
 } from 'lucide-react';
 import { formatNumber, formatCOP } from '../utils/format';
 import { resolveMediaUrl } from '../utils/apiUrl';
+import { extractVideoThumbnail } from '../utils/thumbnailUtils';
 
 function ExploreVideoThumb({ video, className = "w-full h-full object-cover" }) {
   const [imgError, setImgError] = useState(false);
-  const thumbUrl = video?.cover || video?.thumbnail;
-  const resolvedThumb = thumbUrl ? resolveMediaUrl(thumbUrl) : '';
+  const [extractedThumb, setExtractedThumb] = useState(null);
+
+  const rawThumb = video?.cover || video?.thumbnail;
+  const isDataThumb = rawThumb && typeof rawThumb === 'string' && rawThumb.startsWith('data:image');
+  const isUserUpload = Boolean(video?.isUserUploaded || (video?.id && video?.id.startsWith('uploaded-')));
+
+  const resolvedThumb = (isUserUpload && !isDataThumb)
+    ? ''
+    : (rawThumb ? resolveMediaUrl(rawThumb) : '');
   const resolvedVideo = video?.videoUrl ? resolveMediaUrl(video.videoUrl) : '';
+
+  useEffect(() => {
+    let isMounted = true;
+    if ((imgError || !resolvedThumb) && !extractedThumb && (video?.videoBlob || resolvedVideo)) {
+      extractVideoThumbnail(video?.videoBlob || resolvedVideo, 0.2)
+        .then((dataUrl) => {
+          if (isMounted && dataUrl) {
+            setExtractedThumb(dataUrl);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => { isMounted = false; };
+  }, [imgError, resolvedThumb, extractedThumb, video?.videoBlob, resolvedVideo]);
+
+  if (isDataThumb) {
+    return (
+      <img
+        src={rawThumb}
+        alt={video?.description || 'Video'}
+        className={className}
+      />
+    );
+  }
+
+  if (extractedThumb) {
+    return (
+      <img
+        src={extractedThumb}
+        alt={video?.description || 'Video'}
+        className={className}
+      />
+    );
+  }
 
   if (resolvedThumb && !imgError) {
     return (
       <img
         src={resolvedThumb}
-        alt={video.description || 'Video'}
+        alt={video?.description || 'Video'}
         className={className}
         loading="lazy"
         onError={() => setImgError(true)}
@@ -34,7 +76,14 @@ function ExploreVideoThumb({ video, className = "w-full h-full object-cover" }) 
       className={className}
       muted
       playsInline
-      preload="metadata"
+      preload="auto"
+      onLoadedData={(e) => {
+        try {
+          if (e.currentTarget.currentTime === 0) {
+            e.currentTarget.currentTime = 0.1;
+          }
+        } catch (err) {}
+      }}
     />
   );
 }
