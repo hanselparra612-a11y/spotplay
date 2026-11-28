@@ -164,11 +164,31 @@ export function savePersistedLikes(likedIds) {
   }
 }
 
+export const VIEWS_STORAGE_KEY = 'spotplay_video_views';
+
+export function loadPersistedViews() {
+  try {
+    const raw = localStorage.getItem(VIEWS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+export function savePersistedViews(viewsMap) {
+  try {
+    localStorage.setItem(VIEWS_STORAGE_KEY, JSON.stringify(viewsMap));
+  } catch (err) {
+    console.warn('Error al guardar vistas en localStorage:', err);
+  }
+}
+
 export function loadPersistedVideos() {
   try {
     const raw = localStorage.getItem(VIDEOS_STORAGE_KEY);
     const bookmarkedIds = new Set(loadPersistedBookmarks());
     const likedIds = new Set(loadPersistedLikes());
+    const viewsMap = loadPersistedViews();
     let list = INITIAL_VIDEOS;
     if (raw) {
       const parsed = JSON.parse(raw);
@@ -238,6 +258,11 @@ export function loadPersistedVideos() {
       const isLiked = likedIds.has(v.id);
       const hasUserGifted = Boolean(v.hasUserGifted);
 
+      // 👁️ Vistas reales persistidas
+      const persistedViews = typeof viewsMap[v.id] === 'number' ? viewsMap[v.id] : 0;
+      const rawViews = typeof v.stats?.views === 'number' ? v.stats.views : (typeof v.views === 'number' ? v.views : 0);
+      const cleanViews = Math.max(rawViews, persistedViews);
+
       // 🎯 MODO REAL ESTRICTO: Los likes dependen exclusivamente de las acciones reales del usuario
       const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
       const cleanLikes = isLiked ? (rawLikes > 0 ? rawLikes : 1) : 0;
@@ -269,6 +294,7 @@ export function loadPersistedVideos() {
         hasUserGifted,
         stats: {
           ...v.stats,
+          views: cleanViews,
           likes: cleanLikes,
           comments: realCommentsCount,
           bookmarks: cleanBookmarks,

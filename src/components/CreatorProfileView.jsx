@@ -324,7 +324,7 @@ export default function CreatorProfileView({
 
               <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 text-[10px] text-white font-medium drop-shadow">
                 <Play size={10} className="fill-white" />
-                <span>{formatNumber(video.stats?.likes || 0)}</span>
+                <span>{formatNumber(typeof video.stats?.views === 'number' ? video.stats.views : (typeof video.views === 'number' ? video.views : 0))}</span>
               </div>
             </div>
           ))}

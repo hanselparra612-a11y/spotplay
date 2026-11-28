@@ -42,6 +42,8 @@ import {
   savePersistedBookmarks,
   loadPersistedLikes,
   savePersistedLikes,
+  loadPersistedViews,
+  savePersistedViews,
   loadPersistedReports,
   savePersistedReports,
   loadPersistedBlockedUsers,
@@ -401,10 +403,13 @@ export default function App() {
               // Sanitizar totalmente cualquier residuo de tiendas, productos o pautas comerciales y asegurar miniaturas
               const userLikes = new Set(loadPersistedLikes());
               const userBookmarks = new Set(loadPersistedBookmarks());
+              const userViews = loadPersistedViews();
               const sanitized = merged.map(({ product, isPromoted, promotedCta, promotedCity, ...v }) => {
                 const thumb = v.thumbnail || v.cover || `/uploads/thumbnails/${v.id}.jpg`;
                 const isLiked = userLikes.has(v.id);
                 const rawLikes = typeof v.stats?.likes === 'number' ? v.stats.likes : 0;
+                const rawViews = typeof v.stats?.views === 'number' ? v.stats.views : 0;
+                const finalViews = Math.max(rawViews, userViews[v.id] || 0);
                 return {
                   ...v,
                   thumbnail: thumb,
@@ -413,6 +418,7 @@ export default function App() {
                   isBookmarked: userBookmarks.has(v.id),
                   stats: {
                     ...v.stats,
+                    views: finalViews,
                     likes: isLiked ? Math.max(1, rawLikes) : 0,
                   },
                 };
@@ -806,6 +812,54 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeVideoIndex, displayedVideos]);
+
+  // 👁️ Registro automático de Vistas / Reproducciones reales (Views)
+  const lastViewedVideoIdRef = useRef(null);
+
+  const handleIncrementVideoView = (videoId) => {
+    if (!videoId) return;
+
+    let nextCount = 1;
+    try {
+      const viewsMap = loadPersistedViews();
+      nextCount = (typeof viewsMap[videoId] === 'number' ? viewsMap[videoId] : 0) + 1;
+      viewsMap[videoId] = nextCount;
+      savePersistedViews(viewsMap);
+    } catch (e) {}
+
+    setVideos((prev) => {
+      const updated = prev.map((v) => {
+        if (v.id === videoId) {
+          const currentViews = typeof v.stats?.views === 'number' ? v.stats.views : 0;
+          return {
+            ...v,
+            stats: {
+              ...v.stats,
+              views: Math.max(currentViews + 1, nextCount),
+            },
+          };
+        }
+        return v;
+      });
+      savePersistedVideos(updated);
+      return updated;
+    });
+  };
+
+  useEffect(() => {
+    if (currentTab !== 'feed' || !isFeedPlaybackActive) return;
+    const currentVideo = displayedVideos[activeVideoIndex];
+    if (!currentVideo || !currentVideo.id) return;
+
+    if (lastViewedVideoIdRef.current === currentVideo.id) return;
+
+    const timer = setTimeout(() => {
+      lastViewedVideoIdRef.current = currentVideo.id;
+      handleIncrementVideoView(currentVideo.id);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [activeVideoIndex, currentTab, isFeedPlaybackActive, displayedVideos]);
 
   // Handle Like Toggle (con persistencia aislada, protección contra NaN y sincronización)
   const handleToggleLike = async (videoId) => {

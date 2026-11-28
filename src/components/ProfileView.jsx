@@ -703,7 +703,7 @@ export default function ProfileView({
                 <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between text-[11px] text-white font-medium drop-shadow z-10">
                   <div className="flex items-center gap-1">
                     <Play size={10} className="fill-white" />
-                    <span>{formatNumber(vid.stats?.likes || 0)}</span>
+                    <span>{formatNumber(typeof vid.stats?.views === 'number' ? vid.stats.views : (typeof vid.views === 'number' ? vid.views : 0))}</span>
                   </div>
                   {activeTab === 'bookmarks' && (
                     <span className="text-[9px] text-amber-300/90 truncate max-w-[55px]">
