@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Shield,
@@ -11,6 +11,7 @@ import {
   Gift,
   Coins,
   Flame,
+  ArrowLeft,
   ArrowRight,
   ExternalLink,
   RefreshCw,
@@ -99,6 +100,17 @@ export default function AdminMasterDashboard({
 }) {
   const [activeTab, setActiveTab] = useState(initialTab); 
   // 'overview' | 'admob' | 'coins_gifts' | 'campaigns' | 'creators' | 'moderation' | 'broadcast' | 'settings' | 'accounting'
+
+  // Salir con tecla Escape al presionar en teclado
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   // 1. Configuraciones de la Plataforma
   const [platformSettings, setPlatformSettings] = useState(loadPlatformSettings);
@@ -349,68 +361,66 @@ export default function AdminMasterDashboard({
   return (
     <div className="absolute inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between overflow-hidden animate-in fade-in duration-200 select-none">
       <div className="relative w-full h-full bg-[#111216] flex flex-col overflow-hidden text-white">
-        {/* Top Header Bar - 🏛️ Bóveda Ejecutiva & Control Maestro (Estilo VitrinaSpot) */}
-        <header className="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#101524] via-[#141821] to-[#0c0f14]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-[#ffb800]/20 to-cyan-500/20 text-[#ffb800] flex items-center justify-center border border-[#ffb800]/40 shadow-[0_0_15px_rgba(255,184,0,0.2)] shrink-0">
-              <Crown size={22} />
+        {/* Top Header Bar - 🏛️ Bóveda Ejecutiva & Control Maestro */}
+        <header className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-white/10 flex items-center justify-between gap-2 bg-gradient-to-r from-[#101524] via-[#141821] to-[#0c0f14] pt-[max(10px,env(safe-area-inset-top,10px))]">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-[#ffb800]/20 to-cyan-500/20 text-[#ffb800] flex items-center justify-center border border-[#ffb800]/40 shadow-[0_0_15px_rgba(255,184,0,0.2)] shrink-0">
+              <Crown size={20} className="sm:w-[22px] sm:h-[22px]" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
-                  <span>🏛️ Bóveda Ejecutiva & Control Maestro</span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h1 className="text-xs sm:text-sm font-black text-white tracking-tight truncate flex items-center gap-1.5">
+                  <span>🏛️ Bóveda Ejecutiva</span>
                 </h1>
-                <span className="px-1.5 py-0.5 bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-[9px] uppercase rounded-md tracking-wider shadow-sm">
+                <span className="px-1.5 py-0.5 bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-[8px] sm:text-[9px] uppercase rounded-md tracking-wider shadow-sm shrink-0">
                   Super-Admin
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-zinc-400 mt-0.5">
-                <span className="flex items-center gap-1 text-cyan-400 font-semibold">
+              <div className="flex items-center gap-2 text-[10px] text-zinc-400 mt-0.5 truncate">
+                <span className="flex items-center gap-1 text-cyan-400 font-semibold shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  Modo Seguro 256-bit
+                  Modo Seguro
                 </span>
-                <span>•</span>
-                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                <span className="hidden sm:inline">•</span>
+                <span className="text-emerald-400 font-bold hidden sm:flex items-center gap-1">
                   <ShieldCheck size={12} /> Google AdMob Oficial
-                </span>
-                <span>•</span>
-                <span className="text-emerald-300 font-bold bg-emerald-500/15 px-1.5 py-0.5 rounded text-[9px] border border-emerald-500/30">
-                  ✓ PLAY STORE COMPLIANT
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* 🛍️ PUENTE RÁPIDO DE ADMINISTRADOR A LA VITRINA */}
             <a
               href="https://vitrinaspot.onrender.com/?v=27.7#admin"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/35 hover:to-yellow-500/35 border border-[#ffb800]/50 text-[#ffb800] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-[0_0_12px_rgba(255,184,0,0.2)]"
+              className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/35 hover:to-yellow-500/35 border border-[#ffb800]/50 text-[#ffb800] text-xs font-bold hidden md:flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-[0_0_12px_rgba(255,184,0,0.2)]"
               title="Abrir Panel Maestro de la Vitrina en nueva pestaña"
             >
               <ShoppingBag size={13} />
-              <span>🛍️ Panel Vitrina</span>
+              <span>🛍️ Vitrina</span>
               <ExternalLink size={11} className="opacity-70" />
             </a>
 
             {onLock && (
               <button
-                onClick={() => {
-                  onLock();
-                }}
+                onClick={onLock}
                 className="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer active:scale-95 shadow-sm"
                 title="Bloquear y ocultar panel maestro"
               >
                 <Lock size={13} />
-                <span>Bloquear</span>
+                <span className="hidden sm:inline">Bloquear</span>
               </button>
             )}
+
+            {/* BOTÓN PROMINENTE SALIR AL FEED */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-300 hover:text-white transition-colors cursor-pointer active:scale-95"
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-white/15 to-white/10 hover:from-white/25 hover:to-white/20 border border-white/25 text-white font-extrabold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-md"
+              title="Cerrar panel y volver como usuario al feed de videos"
             >
-              <X size={18} />
+              <ArrowLeft size={15} className="text-[#ffb800]" />
+              <span>Volver al Feed</span>
             </button>
           </div>
         </header>
@@ -1952,6 +1962,37 @@ export default function AdminMasterDashboard({
             </div>
           )}
         </div>
+
+        {/* Barra Fija Inferior - Siempre visible para Salir al Feed o Bloquear */}
+        <footer className="shrink-0 px-3 sm:px-4 py-2.5 bg-[#0a0d14] border-t border-white/10 flex items-center justify-between gap-3 pb-[max(10px,env(safe-area-inset-bottom,10px))] z-20">
+          <div className="flex items-center gap-2 text-xs text-zinc-400 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="font-semibold text-zinc-300 truncate">Modo Maestro</span>
+            <span className="hidden sm:inline text-zinc-500">• {currentUser?.name || 'Administrador'}</span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {onLock && (
+              <button
+                type="button"
+                onClick={onLock}
+                className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+                title="Bloquear panel maestro"
+              >
+                <Lock size={14} />
+                <span className="hidden sm:inline">Bloquear</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-[#ffb800] to-yellow-500 hover:brightness-110 active:scale-95 text-black font-black text-xs uppercase tracking-wide flex items-center gap-2 shadow-[0_0_15px_rgba(255,184,0,0.35)] transition-all cursor-pointer"
+              title="Cerrar panel y volver como usuario al feed de videos"
+            >
+              <ArrowLeft size={16} />
+              <span>Cerrar y Volver al Feed</span>
+            </button>
+          </div>
+        </footer>
       </div>
     </div>
   );
