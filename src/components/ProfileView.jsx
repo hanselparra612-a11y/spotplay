@@ -261,7 +261,11 @@ export default function ProfileView({
 
   const receivedGifts = currentUser?.receivedGifts || [];
   const totalGiftsCount = receivedGifts.length;
-  const totalReceivedCoins = receivedGifts.reduce((acc, g) => acc + (g.coins || 0), 0) || currentUser?.wallet?.totalGiftsReceivedCoins || 721;
+  const totalReceivedCoins =
+    receivedGifts.reduce((acc, g) => acc + (g.coins || 0), 0) ||
+    (typeof currentUser?.wallet?.totalGiftsReceivedCoins === 'number'
+      ? currentUser.wallet.totalGiftsReceivedCoins
+      : 0);
 
   // 📈 Contador General Dinámico en Modo Real: Suma real de todos los Me gusta recibidos en los videos publicados
   const userPublishedLikes = userVideos.reduce(
@@ -473,6 +477,7 @@ export default function ProfileView({
 
       {/* Tabs con Indicador Deslizante y soporte de Swipe */}
       <div className="w-full flex border-b border-white/10 mb-3 relative shrink-0">
+        {/* Tab 1: Mis Videos (Cuadrícula) */}
         <button
           type="button"
           onClick={() => {
@@ -484,13 +489,21 @@ export default function ProfileView({
           }`}
           title="Mis videos (Desliza hacia los lados para cambiar)"
         >
-          <Grid3X3 size={17} className={activeTab === 'videos' ? 'text-[#ffb800]' : ''} />
+          <Grid3X3 size={16} className={activeTab === 'videos' ? 'text-[#ffb800]' : ''} />
           <span className="hidden sm:inline">Videos</span>
+          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none transition-colors ${
+            activeTab === 'videos'
+              ? 'bg-[#ffb800] text-black shadow-sm'
+              : 'bg-white/10 text-zinc-400'
+          }`}>
+            {userVideos.length}
+          </span>
           {activeTab === 'videos' && (
             <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#ffb800] rounded-full shadow-[0_0_8px_rgba(255,184,0,0.8)]" />
           )}
         </button>
 
+        {/* Tab 2: Favoritos / Guardados (Bandera) */}
         <button
           type="button"
           onClick={() => {
@@ -502,13 +515,21 @@ export default function ProfileView({
           }`}
           title="Favoritos guardados (Desliza para cambiar)"
         >
-          <Bookmark size={17} className={activeTab === 'bookmarks' ? 'text-[#ffb800] fill-[#ffb800]' : ''} />
+          <Bookmark size={16} className={activeTab === 'bookmarks' ? 'text-[#ffb800] fill-[#ffb800]' : ''} />
           <span className="hidden sm:inline">Favoritos</span>
+          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none transition-colors ${
+            activeTab === 'bookmarks'
+              ? 'bg-[#ffb800] text-black shadow-sm'
+              : 'bg-white/10 text-zinc-400'
+          }`}>
+            {bookmarkedVideos.length}
+          </span>
           {activeTab === 'bookmarks' && (
             <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#ffb800] rounded-full shadow-[0_0_8px_rgba(255,184,0,0.8)]" />
           )}
         </button>
 
+        {/* Tab 3: Videos que me gustan (Corazón) */}
         <button
           type="button"
           onClick={() => {
@@ -520,13 +541,21 @@ export default function ProfileView({
           }`}
           title="Videos que me gustan (Desliza para cambiar)"
         >
-          <Heart size={17} className={activeTab === 'likes' ? 'text-[#FE2C55] fill-[#FE2C55]' : ''} />
+          <Heart size={16} className={activeTab === 'likes' ? 'text-[#FE2C55] fill-[#FE2C55]' : ''} />
           <span className="hidden sm:inline">Likes</span>
+          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none transition-colors ${
+            activeTab === 'likes'
+              ? 'bg-[#FE2C55] text-white shadow-sm'
+              : 'bg-white/10 text-zinc-400'
+          }`}>
+            {likedVideos.length}
+          </span>
           {activeTab === 'likes' && (
             <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#FE2C55] rounded-full shadow-[0_0_8px_rgba(254,44,85,0.8)]" />
           )}
         </button>
 
+        {/* Tab 4: Regalos recibidos (Regalo) */}
         <button
           type="button"
           onClick={() => {
@@ -538,13 +567,15 @@ export default function ProfileView({
           }`}
           title="Regalos recibidos (Desliza para cambiar)"
         >
-          <Gift size={17} className={activeTab === 'gifts' ? 'text-[#FE2C55]' : ''} />
+          <Gift size={16} className={activeTab === 'gifts' ? 'text-[#FE2C55]' : ''} />
           <span className="hidden sm:inline">Regalos</span>
-          {totalGiftsCount > 0 && (
-            <span className="text-[9px] font-black bg-[#FE2C55] text-white px-1.5 py-0.2 rounded-full leading-tight shadow">
-              {totalGiftsCount}
-            </span>
-          )}
+          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none transition-colors ${
+            activeTab === 'gifts'
+              ? 'bg-[#FE2C55] text-white shadow-sm'
+              : 'bg-white/10 text-zinc-400'
+          }`}>
+            {totalGiftsCount}
+          </span>
           {activeTab === 'gifts' && (
             <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-[#FE2C55] rounded-full shadow-[0_0_8px_rgba(254,44,85,0.8)]" />
           )}

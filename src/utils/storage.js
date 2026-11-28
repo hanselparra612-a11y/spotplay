@@ -385,9 +385,11 @@ export function loadPersistedUser() {
       coins: cleanCoins,
       wallet: cleanWallet,
       receivedGifts:
-        parsed.receivedGifts && parsed.receivedGifts.length > 0
-          ? parsed.receivedGifts
-          : CURRENT_USER.receivedGifts || [],
+        Array.isArray(parsed.receivedGifts)
+          ? parsed.receivedGifts.filter(
+              (g) => !['rg-lion-1', 'rg-1', 'rg-live-1', 'rg-2', 'rg-3'].includes(g.id)
+            )
+          : (CURRENT_USER.receivedGifts || []),
     };
   } catch (err) {
     return CURRENT_USER;

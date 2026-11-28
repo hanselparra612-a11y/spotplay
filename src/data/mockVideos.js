@@ -11,7 +11,7 @@ export const CURRENT_USER = {
   "likesCount": 0,
   "wallet": {
     "coins": 5,
-    "totalGiftsReceivedCoins": 721,
+    "totalGiftsReceivedCoins": 0,
     "adMobRewardsWatched": 28,
     "transactions": [
       {
@@ -76,73 +76,7 @@ export const CURRENT_USER = {
       }
     ]
   },
-  "receivedGifts": [
-    {
-      "id": "rg-lion-1",
-      "giftId": "gift-lion",
-      "giftName": "León de Oro",
-      "emoji": "🦁",
-      "coins": 500,
-      "senderName": "Carlos Music",
-      "senderUsername": "carlos_music",
-      "senderAvatar": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80",
-      "videoTitle": "Outfit Streetwear Bucaramanga",
-      "videoId": "v-1",
-      "date": "Hace 3 horas"
-    },
-    {
-      "id": "rg-1",
-      "giftId": "gift-crown",
-      "giftName": "Corona Dorada",
-      "emoji": "👑",
-      "coins": 100,
-      "senderName": "Valeria Gómez",
-      "senderUsername": "valeria_fit",
-      "senderAvatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&auto=format&fit=crop&q=80",
-      "videoTitle": "Outfit Streetwear Bucaramanga",
-      "videoId": "v-1",
-      "date": "Ayer"
-    },
-    {
-      "id": "rg-live-1",
-      "giftId": "gift-crown-live",
-      "giftName": "Corona Dorada",
-      "emoji": "👑",
-      "coins": 100,
-      "senderName": "Valeria Tech",
-      "senderUsername": "valeria.tech",
-      "senderAvatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
-      "videoTitle": "Transmisión en Vivo (LIVE)",
-      "videoId": "live-1",
-      "date": "Ayer"
-    },
-    {
-      "id": "rg-2",
-      "giftId": "gift-fire",
-      "giftName": "Fuego Viral",
-      "emoji": "🔥",
-      "coins": 20,
-      "senderName": "Andrés Films",
-      "senderUsername": "andres_films",
-      "senderAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
-      "videoTitle": "Review Burger Master Doble",
-      "videoId": "v-3",
-      "date": "Hace 2 días"
-    },
-    {
-      "id": "rg-3",
-      "giftId": "gift-rose",
-      "giftName": "Rosa Roja",
-      "emoji": "🌹",
-      "coins": 1,
-      "senderName": "Carolina Style",
-      "senderUsername": "carolina_style",
-      "senderAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
-      "videoTitle": "Tech Unboxing Auriculares",
-      "videoId": "v-2",
-      "date": "Hace 3 días"
-    }
-  ],
+  "receivedGifts": [],
   "email": "leonardoescarlata6@gmail.com",
   "isVerified": true,
   "role": "admin",
