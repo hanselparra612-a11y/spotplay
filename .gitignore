@@ -34,3 +34,5 @@ apk_release/
 android/app/build/
 android/.gradle/
 android/build/
+.netlify
+
