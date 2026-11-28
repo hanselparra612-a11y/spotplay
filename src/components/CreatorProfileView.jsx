@@ -298,7 +298,7 @@ export default function CreatorProfileView({
                     e.stopPropagation();
                     onEditVideo(video);
                   }}
-                  className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/75 hover:bg-amber-400 hover:text-black text-white text-[9px] font-extrabold border border-white/20 z-10 flex items-center gap-1 shadow-md"
+                  className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/80 hover:bg-amber-400 hover:text-black text-white text-[9px] font-bold border border-white/20 z-10 flex items-center gap-1 shadow-md active:scale-95 transition-all"
                   title="Editar este video"
                 >
                   <Edit3 size={10} />
@@ -306,25 +306,28 @@ export default function CreatorProfileView({
                 </button>
               )}
 
-              {/* Botón Promocionar / Impulsar con SpotCoins */}
-              {isOwn && onOpenPromote && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenPromote(video);
-                  }}
-                  className="absolute top-1.5 right-1.5 px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-400 to-[#ffb800] text-black text-[9px] font-black border border-amber-300/40 z-10 flex items-center gap-1 shadow-md active:scale-90 hover:brightness-110"
-                  title="Impulsar visibilidad de este video con SpotCoins"
-                >
-                  <Flame size={10} className="fill-black stroke-black" />
-                  <span>{video.isPromoted ? 'En Pauta' : 'Impulsar'}</span>
-                </button>
-              )}
+              {/* Fila Inferior: Contador de Vistas (Izquierda) + Botón Impulsar (Derecha) */}
+              <div className="absolute bottom-1 left-1 right-1 flex items-center justify-between z-10 pointer-events-none gap-0.5">
+                <div className="flex items-center gap-0.5 text-[9.5px] text-white font-medium drop-shadow pointer-events-auto shrink-0">
+                  <Play size={9} className="fill-white" />
+                  <span>{formatNumber(typeof video.stats?.views === 'number' ? video.stats.views : (typeof video.views === 'number' ? video.views : 0))}</span>
+                </div>
 
-              <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 text-[10px] text-white font-medium drop-shadow">
-                <Play size={10} className="fill-white" />
-                <span>{formatNumber(typeof video.stats?.views === 'number' ? video.stats.views : (typeof video.views === 'number' ? video.views : 0))}</span>
+                {/* Botón Promocionar / Impulsar con SpotCoins */}
+                {isOwn && onOpenPromote && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenPromote(video);
+                    }}
+                    className="pointer-events-auto px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-[#ffb800] text-black text-[8.5px] font-black border border-amber-300/40 flex items-center gap-0.5 shadow-md active:scale-90 hover:brightness-110 cursor-pointer shrink-0"
+                    title="Impulsar visibilidad de este video con SpotCoins"
+                  >
+                    <Flame size={9} className="fill-black stroke-black" />
+                    <span>{video.isPromoted ? 'En Pauta' : 'Impulsar'}</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}

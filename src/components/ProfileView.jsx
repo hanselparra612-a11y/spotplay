@@ -658,27 +658,11 @@ export default function ProfileView({
                       e.stopPropagation();
                       onEditVideo(vid);
                     }}
-                    className="absolute top-1.5 left-1.5 px-2 py-1 rounded-lg bg-black/75 hover:bg-amber-400 hover:text-black text-white border border-white/25 transition-all z-20 shadow-md active:scale-90 flex items-center gap-1 font-extrabold text-[9px]"
+                    className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md bg-black/80 hover:bg-amber-400 hover:text-black text-white border border-white/25 transition-all z-20 shadow-md active:scale-90 flex items-center gap-1 font-bold text-[9px] backdrop-blur-xs"
                     title="Editar este video"
                   >
                     <Edit3 size={10} />
                     <span>Editar</span>
-                  </button>
-                )}
-
-                {/* Botón Promocionar / Impulsar con SpotCoins (Solo en tus videos) */}
-                {activeTab === 'videos' && onOpenPromote && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenPromote(vid);
-                    }}
-                    className="absolute top-1.5 right-1.5 px-2 py-1 rounded-lg bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-[9px] flex items-center gap-1 shadow-lg active:scale-90 transition-all z-20 hover:brightness-110 cursor-pointer border border-amber-300/40"
-                    title="Impulsar visibilidad de este video con SpotCoins"
-                  >
-                    <Flame size={10} className="fill-black stroke-black" />
-                    <span>{vid.isPromoted ? 'En Pauta' : 'Impulsar'}</span>
                   </button>
                 )}
 
@@ -692,7 +676,7 @@ export default function ProfileView({
                 {/* Badge de Regalos recibidos en este video (Mis Videos) */}
                 {activeTab === 'videos' && vid.stats?.giftsCount > 0 && (
                   <div
-                    className="absolute top-1.5 right-1.5 bg-black/75 backdrop-blur-xs text-[#FE2C55] px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-[9px] font-black border border-pink-500/30 z-10 shadow"
+                    className="absolute top-1.5 right-1.5 bg-black/75 backdrop-blur-xs text-[#FE2C55] px-1.5 py-0.5 rounded-md flex items-center gap-0.5 text-[9px] font-black border border-pink-500/30 z-20 shadow"
                     title={`${vid.stats.giftsCount} regalos recibidos`}
                   >
                     <Gift size={9} className="fill-[#FE2C55]" />
@@ -700,13 +684,31 @@ export default function ProfileView({
                   </div>
                 )}
 
-                <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between text-[11px] text-white font-medium drop-shadow z-10">
-                  <div className="flex items-center gap-1">
-                    <Play size={10} className="fill-white" />
+                {/* Fila Inferior: Contador de Vistas (Izquierda) + Botón Impulsar (Derecha) */}
+                <div className="absolute bottom-1 left-1 right-1 flex items-center justify-between z-10 pointer-events-none gap-0.5">
+                  <div className="flex items-center gap-0.5 text-[9.5px] text-white font-medium drop-shadow pointer-events-auto shrink-0">
+                    <Play size={9} className="fill-white" />
                     <span>{formatNumber(typeof vid.stats?.views === 'number' ? vid.stats.views : (typeof vid.views === 'number' ? vid.views : 0))}</span>
                   </div>
+
+                  {/* Botón Promocionar / Impulsar con SpotCoins (Solo en tus videos) */}
+                  {activeTab === 'videos' && onOpenPromote && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenPromote(vid);
+                      }}
+                      className="pointer-events-auto px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-[#ffb800] text-black font-black text-[8.5px] flex items-center gap-0.5 shadow-md active:scale-90 transition-all hover:brightness-110 cursor-pointer border border-amber-300/40 shrink-0"
+                      title="Impulsar visibilidad de este video con SpotCoins"
+                    >
+                      <Flame size={9} className="fill-black stroke-black" />
+                      <span>{vid.isPromoted ? 'En Pauta' : 'Impulsar'}</span>
+                    </button>
+                  )}
+
                   {activeTab === 'bookmarks' && (
-                    <span className="text-[9px] text-amber-300/90 truncate max-w-[55px]">
+                    <span className="text-[8.5px] text-amber-300/90 truncate max-w-[50px] drop-shadow pointer-events-auto">
                       @{vid.author?.username}
                     </span>
                   )}
