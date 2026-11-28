@@ -50,6 +50,7 @@ import {
   savePersistedBlockedUsers,
   getDeletedVideoIds,
   markVideoAsDeleted,
+  addOfficialBroadcast,
 } from './utils/storage';
 import {
   saveVideoToIndexedDB,
@@ -1386,7 +1387,8 @@ export default function App() {
     );
   };
 
-  const handleBroadcastNotification = ({ title, message, target }) => {
+  const handleBroadcastNotification = ({ title, message, target = 'all' }) => {
+    addOfficialBroadcast({ title, message, target });
     setActiveBroadcastBanner({
       title,
       message,
@@ -1395,7 +1397,7 @@ export default function App() {
     });
     setTimeout(() => {
       setActiveBroadcastBanner(null);
-    }, 8000);
+    }, 12000);
   };
 
   // 🎁 Handle Send Virtual Gift (Monetización en Video & Acreditación de SpotCoins de Seguidores)
@@ -1806,7 +1808,7 @@ export default function App() {
 
         {/* 📢 Banner Interactivo de Difusión Masiva Push (Enviado desde Admin Master Dashboard) */}
         {activeBroadcastBanner && (
-          <div className="absolute top-3 left-3 right-3 z-50 bg-[#14151a]/95 backdrop-blur-xl border border-amber-400/60 rounded-2xl p-3 shadow-[0_10px_35px_rgba(0,0,0,0.8)] flex items-start gap-2.5 animate-in slide-in-from-top-4 duration-300">
+          <div className="absolute top-14 left-3 right-3 z-[100] bg-[#14151a]/95 backdrop-blur-xl border border-amber-400/60 rounded-2xl p-3 shadow-[0_10px_35px_rgba(0,0,0,0.8)] flex items-start gap-2.5 animate-in slide-in-from-top-4 duration-300">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 to-[#FE2C55] flex items-center justify-center shrink-0 text-black shadow-md">
               <Bell size={16} className="animate-bounce" />
             </div>
@@ -2235,6 +2237,8 @@ export default function App() {
           isOpen={Boolean(activeChatPartner)}
           chatPartner={activeChatPartner}
           onClose={() => setActiveChatPartner(null)}
+          onBroadcastNotification={handleBroadcastNotification}
+          isMasterAdmin={isMasterAdminAuthenticated}
         />
 
         {/* Edit Profile Modal */}

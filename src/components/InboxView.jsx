@@ -1,14 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Heart, UserPlus, MessageCircle, Sparkles, Send, 
-  MessageSquare, ShoppingBag, CheckCheck, ChevronRight, Search, Gift
+  MessageSquare, ShoppingBag, CheckCheck, ChevronRight, Search, Gift, Bell, Radio
 } from 'lucide-react';
+import { loadPersistedBroadcasts } from '../utils/storage';
 
 export default function InboxView({ onOpenChat }) {
   // Pestaña principal: 'messages' (Chats) o 'activity' (Notificaciones)
   const [mainTab, setMainTab] = useState('messages');
   const [activityFilter, setActivityFilter] = useState('all');
   const [searchFilter, setSearchFilter] = useState('');
+  const [broadcasts, setBroadcasts] = useState(loadPersistedBroadcasts);
+
+  useEffect(() => {
+    const handleBroadcastUpdate = () => {
+      setBroadcasts(loadPersistedBroadcasts());
+    };
+    window.addEventListener('spotplay_broadcast', handleBroadcastUpdate);
+    window.addEventListener('storage', handleBroadcastUpdate);
+    return () => {
+      window.removeEventListener('spotplay_broadcast', handleBroadcastUpdate);
+      window.removeEventListener('storage', handleBroadcastUpdate);
+    };
+  }, []);
+
+  // Deduplicar comunicados por mensaje único
+  const seenBcast = new Set();
+  const uniqueBroadcasts = broadcasts.filter((b) => {
+    if (!b || !b.message || seenBcast.has(b.message)) return false;
+    seenBcast.add(b.message);
+    return true;
+  });
+
+  const latestBroadcast = uniqueBroadcasts[0] || null;
 
   // Lista de Chats Activos con la plataforma
   const activeChats = [
@@ -21,15 +45,27 @@ export default function InboxView({ onOpenChat }) {
         avatar: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&auto=format&fit=crop&q=80',
         isVerified: true,
       },
-      lastMessage: '🎉 ¡Bienvenido a Spot Play! Tu perfil de creador oficial está listo para monetizar con regalos virtuales.',
-      time: 'Hoy',
-      unread: 1,
+      lastMessage: latestBroadcast
+        ? `📢 ${latestBroadcast.title}: ${latestBroadcast.message}`
+        : '🎉 ¡Bienvenido a Spot Play! Tu perfil de creador oficial está listo para monetizar con regalos virtuales.',
+      time: latestBroadcast ? latestBroadcast.timestamp : 'Hoy',
+      unread: latestBroadcast ? 1 : 0,
       isOnline: true,
     },
   ];
 
-  // Lista de Notificaciones y Actividad
-  const activities = [
+  // Lista de Notificaciones y Actividad (incluye comunicados masivos emitidos de forma única)
+  const broadcastActivities = uniqueBroadcasts.map((b) => ({
+    id: `bcast-${b.id}`,
+    type: 'system',
+    icon: Radio,
+    iconColor: 'text-amber-400 bg-amber-500/10',
+    title: `📢 ${b.title}: ${b.message}`,
+    time: b.timestamp || 'Reciente',
+    user: activeChats[0].user,
+  }));
+
+  const baseActivities = [
     {
       id: 0,
       type: 'system',
@@ -49,6 +85,8 @@ export default function InboxView({ onOpenChat }) {
       user: activeChats[0].user,
     },
   ];
+
+  const activities = [...broadcastActivities, ...baseActivities];
 
   const filteredChats = activeChats.filter((c) => {
     const q = searchFilter.toLowerCase();

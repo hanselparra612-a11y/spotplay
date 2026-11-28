@@ -1,15 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, Send, Sparkles, CheckCheck, 
-  Smile, Heart, Flame
+  Smile, Heart, Flame, Radio, Bell, Megaphone, ShieldCheck
 } from 'lucide-react';
+import { addOfficialBroadcast, loadPersistedBroadcasts } from '../utils/storage';
 
-export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
+export default function DirectMessagesDrawer({ 
+  isOpen, 
+  onClose, 
+  chatPartner,
+  onBroadcastNotification,
+  isMasterAdmin = false,
+}) {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isBroadcastMode, setIsBroadcastMode] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const isSysChat = Boolean(
+    chatPartner && (chatPartner.id === 'sys' || chatPartner.username === 'spotplay_soporte')
+  );
 
   // Detección de teclado virtual en tiempo real
   useEffect(() => {
@@ -53,41 +65,76 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
   // Clave de almacenamiento persistente para este contacto
   const storageKey = chatPartner ? `spotplay_chat_${chatPartner.id || chatPartner.username}` : null;
 
-  // Mensajes por defecto de interacción social
-  const defaultInitialMessages = [
-    {
-      id: 'm-1',
-      sender: 'partner',
-      text: `¡Hola! Gracias por apoyar mis videos en Spot Play ✨ ¿Qué tipo de contenido te gustaría ver en el próximo video?`,
-      time: '10:40 AM',
-      read: true,
-    },
-    {
-      id: 'm-2',
-      sender: 'me',
-      text: '¡Hola! Me encantó la edición del último reel. ¡Sigue así!',
-      time: '10:42 AM',
-      read: true,
-    },
-    {
-      id: 'm-3',
-      sender: 'partner',
-      text: '¡Muchas gracias por la buena vibra! Viene contenido exclusivo muy pronto 🚀🔥',
-      time: '10:43 AM',
-      read: true,
-    },
-  ];
+  // Mensajes por defecto de bienvenida
+  const getInitialMessages = () => {
+    if (isSysChat) {
+      const persistedBroadcasts = loadPersistedBroadcasts();
+      const seenMessages = new Set();
+      const broadcastMessages = [];
+      
+      for (const b of persistedBroadcasts) {
+        if (b && b.message && !seenMessages.has(b.message)) {
+          seenMessages.add(b.message);
+          broadcastMessages.push({
+            id: `msg-${b.id}`,
+            sender: 'partner',
+            isBroadcast: true,
+            title: b.title,
+            text: `📢 COMUNICADO OFICIAL: ${b.title}\n\n${b.message}`,
+            time: b.timestamp || 'Reciente',
+            read: true,
+          });
+        }
+      }
+
+      const baseSys = [
+        {
+          id: 'sys-welcome',
+          sender: 'partner',
+          text: '🎉 ¡Bienvenido a Spot Play Oficial! Este es el canal institucional de la plataforma. Aquí recibirás novedades, soporte y comunicados directos para toda la comunidad.',
+          time: 'Hoy',
+          read: true,
+        },
+      ];
+
+      return [...baseSys, ...broadcastMessages];
+    }
+
+    return [
+      {
+        id: 'm-1',
+        sender: 'partner',
+        text: `¡Hola! Gracias por apoyar mis videos en Spot Play ✨ ¿Qué tipo de contenido te gustaría ver en el próximo video?`,
+        time: '10:40 AM',
+        read: true,
+      },
+      {
+        id: 'm-2',
+        sender: 'me',
+        text: '¡Hola! Me encantó la edición del último reel. ¡Sigue así!',
+        time: '10:42 AM',
+        read: true,
+      },
+      {
+        id: 'm-3',
+        sender: 'partner',
+        text: '¡Muchas gracias por la buena vibra! Viene contenido exclusivo muy pronto 🚀🔥',
+        time: '10:43 AM',
+        read: true,
+      },
+    ];
+  };
 
   const [messages, setMessages] = useState(() => {
-    if (!storageKey) return defaultInitialMessages;
+    if (!storageKey) return getInitialMessages();
     try {
       const saved = localStorage.getItem(storageKey);
-      if (!saved) return defaultInitialMessages;
+      if (!saved) return getInitialMessages();
       const parsed = JSON.parse(saved);
-      if (!Array.isArray(parsed) || parsed.length === 0) return defaultInitialMessages;
+      if (!Array.isArray(parsed) || parsed.length === 0) return getInitialMessages();
       return parsed;
     } catch {
-      return defaultInitialMessages;
+      return getInitialMessages();
     }
   });
 
@@ -102,6 +149,32 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
     }
   }, [messages, storageKey]);
 
+  // Escuchar comunicados que se emitan desde el Panel Maestro en vivo
+  useEffect(() => {
+    const handleLiveBroadcast = (e) => {
+      if (isSysChat && e.detail) {
+        const b = e.detail;
+        setMessages((prev) => {
+          if (prev.some((m) => m.text && m.text.includes(b.message))) {
+            return prev;
+          }
+          const bcastMsg = {
+            id: `msg-live-${b.id || Date.now()}`,
+            sender: 'partner',
+            isBroadcast: true,
+            title: b.title,
+            text: `📢 COMUNICADO OFICIAL: ${b.title}\n\n${b.message}`,
+            time: b.timestamp || 'Ahora',
+            read: true,
+          };
+          return [...prev, bcastMsg];
+        });
+      }
+    };
+    window.addEventListener('spotplay_broadcast', handleLiveBroadcast);
+    return () => window.removeEventListener('spotplay_broadcast', handleLiveBroadcast);
+  }, [isSysChat]);
+
   // Scroll automático hacia el último mensaje
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -114,6 +187,29 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
     const cleanText = textToSend.trim();
     if (!cleanText) return;
 
+    // 📢 SI ESTÁ EN MODO DIFUSIÓN A TODA LA COMUNIDAD (DUEÑO / ADMIN)
+    if (isSysChat && isBroadcastMode) {
+      // 1. Disparar banner en tiempo real en la app y persistir de forma única
+      if (onBroadcastNotification) {
+        onBroadcastNotification({
+          title: '👑 Comunicado Oficial Spot Play',
+          message: cleanText,
+          target: 'all',
+        });
+      } else {
+        addOfficialBroadcast({
+          title: '👑 Comunicado Oficial Spot Play',
+          message: cleanText,
+          target: 'all',
+        });
+      }
+
+      setInputText('');
+      alert('🚀 ¡Comunicado difundido exitosamente a toda la comunidad de Spot Play!');
+      return;
+    }
+
+    // Mensaje normal enviado por el usuario
     const newMsg = {
       id: `msg-${Date.now()}`,
       sender: 'me',
@@ -125,7 +221,42 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
     setMessages((prev) => [...prev, newMsg]);
     setInputText('');
 
-    // Simulación inteligente de respuesta del Creador
+    // Si es chat con Spot Play Oficial (Soporte Inteligente)
+    if (isSysChat) {
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        const q = cleanText.toLowerCase();
+        let reply = '¡Hola! Gracias por comunicarte con el Soporte Oficial de Spot Play. Nuestro equipo y sistema están activos para asistirte.';
+        
+        if (q.includes('monetiz') || q.includes('ganar') || q.includes('plata') || q.includes('dinero') || q.includes('regalo')) {
+          reply = '💰 En Spot Play puedes monetizar mediante Regalos Virtuales patrocinados por Google AdMob que tus seguidores te envían en tus videos y transmisiones LIVE.';
+        } else if (q.includes('vitrina') || q.includes('producto') || q.includes('tienda') || q.includes('vender') || q.includes('negocio')) {
+          reply = '🛍️ En Vitrina Spot puedes publicar tus productos o servicios gratis. Los clientes se contactan directo a tu WhatsApp o Telegram.';
+        } else if (q.includes('live') || q.includes('en vivo') || q.includes('transmitir') || q.includes('transmisi')) {
+          reply = '🔴 Para emitir en vivo, toca el botón central "+" en el menú inferior y selecciona "Emitir En Vivo". ¡Podrás recibir regalos virtuales en tiempo real!';
+        } else if (q.includes('spotcoins') || q.includes('coins') || q.includes('moneda') || q.includes('billetera')) {
+          reply = '🪙 Tus SpotCoins se gestionan desde tu Perfil > Billetera. Puedes obtener más viendo anuncios de Google AdMob o recargando paquetes.';
+        } else if (q.includes('difusion') || q.includes('comunicado') || q.includes('todos') || q.includes('comunidad')) {
+          reply = '📢 Para emitir un comunicado masivo a toda la comunidad, puedes presionar el botón "Activar Difusión" arriba de este chat o usar la pestaña Difusión en el Panel Maestro.';
+        } else if (q.includes('hola') || q.includes('buenas')) {
+          reply = '¡Hola! Me alegra saludarte. Soy el canal oficial de Spot Play. ¿En qué podemos ayudarte hoy? ✨';
+        }
+
+        const botReply = {
+          id: `msg-${Date.now() + 1}`,
+          sender: 'partner',
+          text: reply,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          read: true,
+        };
+
+        setMessages((prev) => [...prev, botReply]);
+      }, 1200);
+      return;
+    }
+
+    // Simulación de respuesta del Creador (en chats normales)
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
@@ -178,19 +309,72 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
             <div>
               <div className="flex items-center gap-1">
                 <p className="text-xs font-black leading-tight text-white">{chatPartner.name || chatPartner.username}</p>
-                <Sparkles size={11} className="text-[#ffb800]" />
+                {isSysChat ? (
+                  <ShieldCheck size={13} className="text-[#ffb800]" />
+                ) : (
+                  <Sparkles size={11} className="text-[#ffb800]" />
+                )}
               </div>
               <p className="text-[10px] text-zinc-400 leading-tight">
-                @{chatPartner.username} • <span className="text-emerald-400 font-semibold">En línea</span>
+                @{chatPartner.username} • <span className="text-emerald-400 font-semibold">{isSysChat ? 'Canal Verificado' : 'En línea'}</span>
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. ÁREA DE MENSAJES (SCROLLABLE) */}
+      {/* 2. BARRA DE DIFUSIÓN MASIVA (SOLO DISPONIBLE EN CANAL OFICIAL) */}
+      {isSysChat && (
+        <div className="px-3.5 py-2 bg-gradient-to-r from-amber-500/15 via-[#181a24] to-transparent border-b border-amber-500/20 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isBroadcastMode ? 'bg-amber-400 text-black animate-pulse' : 'bg-white/10 text-zinc-300'}`}>
+              <Radio size={13} />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-white leading-tight">
+                {isBroadcastMode ? 'Modo Difusión Masiva Activo' : 'Canal Oficial & Soporte'}
+              </p>
+              <p className="text-[9px] text-zinc-400 leading-tight">
+                {isBroadcastMode ? 'Tu mensaje se enviará a TODA la comunidad en vivo' : 'Chat institucional 1 a 1'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsBroadcastMode(!isBroadcastMode)}
+            className={`px-2.5 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer shadow-sm active:scale-95 ${
+              isBroadcastMode
+                ? 'bg-gradient-to-r from-amber-400 to-[#FE2C55] text-black shadow-[0_0_12px_rgba(255,184,0,0.4)]'
+                : 'bg-white/10 hover:bg-white/20 text-zinc-200'
+            }`}
+          >
+            {isBroadcastMode ? '📢 Transmitiendo a Todos' : 'Activar Difusión'}
+          </button>
+        </div>
+      )}
+
+      {/* 3. ÁREA DE MENSAJES (SCROLLABLE) */}
       <div className="flex-1 overflow-y-auto p-3.5 space-y-3 no-scrollbar">
         {messages.map((m) => {
+          // Si es un comunicado oficial masivo
+          if (m.isBroadcast) {
+            return (
+              <div
+                key={m.id}
+                className="w-full my-2 p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#181a24] to-zinc-900 border border-amber-400/50 shadow-[0_0_20px_rgba(255,184,0,0.15)] animate-in zoom-in-95 duration-200"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="flex items-center gap-1.5 text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                    <Radio size={13} className="animate-pulse" />
+                    <span>Difusión Oficial a la Comunidad</span>
+                  </span>
+                  <span className="text-[9px] text-zinc-400 font-mono">{m.time}</span>
+                </div>
+                <p className="text-xs text-white leading-relaxed whitespace-pre-wrap">{m.text}</p>
+              </div>
+            );
+          }
+
           const isMe = m.sender === 'me';
           return (
             <div
@@ -205,7 +389,7 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
                 }`}
               >
                 {/* Texto del mensaje */}
-                {m.text && <p className="leading-snug">{m.text}</p>}
+                {m.text && <p className="leading-snug whitespace-pre-wrap">{m.text}</p>}
               </div>
 
               {/* Hora y Doble Check de Lectura */}
@@ -242,21 +426,23 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
         }}
         className="bg-[#12141c] border-t border-white/10 shrink-0"
       >
-        {/* 3. REACCIONES RÁPIDAS (EMOJIS) */}
-        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#10121a] border-b border-white/5 overflow-x-auto no-scrollbar">
-          <span className="text-[10px] text-zinc-500 font-semibold shrink-0">Reacción rápida:</span>
-          {quickReactions.map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => handleSendMessage(emoji)}
-              className="px-2 py-0.5 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full text-xs transition-transform cursor-pointer"
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
+        {/* 4. REACCIONES RÁPIDAS (EMOJIS) */}
+        {!isBroadcastMode && (
+          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#10121a] border-b border-white/5 overflow-x-auto no-scrollbar">
+            <span className="text-[10px] text-zinc-500 font-semibold shrink-0">Reacción rápida:</span>
+            {quickReactions.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleSendMessage(emoji)}
+                className="px-2 py-0.5 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full text-xs transition-transform cursor-pointer"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* 4. CAJA DE ENTRADA DE MENSAJES */}
+        {/* 5. CAJA DE ENTRADA DE MENSAJES */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -270,16 +456,31 @@ export default function DirectMessagesDrawer({ isOpen, onClose, chatPartner }) {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onFocus={handleInputFocus}
-            placeholder="Escribe un mensaje al creador..."
-            className="flex-1 bg-[#1a1d28] border border-white/10 text-white placeholder-zinc-500 text-xs rounded-2xl py-2.5 px-3.5 focus:outline-none focus:border-[#ffb800] focus:ring-1 focus:ring-[#ffb800] transition-all"
+            placeholder={
+              isBroadcastMode
+                ? '📢 Escribe el comunicado para toda la comunidad...'
+                : isSysChat
+                ? 'Escribe tu consulta al soporte oficial...'
+                : 'Escribe un mensaje al creador...'
+            }
+            className={`flex-1 bg-[#1a1d28] border text-white placeholder-zinc-500 text-xs rounded-2xl py-2.5 px-3.5 focus:outline-none transition-all ${
+              isBroadcastMode
+                ? 'border-amber-400/80 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 placeholder-amber-400/50'
+                : 'border-white/10 focus:border-[#ffb800] focus:ring-1 focus:ring-[#ffb800]'
+            }`}
           />
 
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="w-9 h-9 rounded-xl bg-gradient-to-r from-[#ffb800] to-[#ffa000] disabled:opacity-30 text-black flex items-center justify-center shrink-0 active:scale-90 transition-transform font-bold cursor-pointer shadow-md"
+            className={`w-9 h-9 rounded-xl disabled:opacity-30 flex items-center justify-center shrink-0 active:scale-90 transition-transform font-bold cursor-pointer shadow-md ${
+              isBroadcastMode
+                ? 'bg-gradient-to-r from-amber-400 to-[#FE2C55] text-black shadow-[0_0_15px_rgba(255,184,0,0.5)]'
+                : 'bg-gradient-to-r from-[#ffb800] to-[#ffa000] text-black'
+            }`}
+            title={isBroadcastMode ? 'Transmitir a toda la comunidad' : 'Enviar mensaje'}
           >
-            <Send size={15} />
+            {isBroadcastMode ? <Radio size={16} /> : <Send size={15} />}
           </button>
         </form>
       </div>

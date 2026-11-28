@@ -450,3 +450,88 @@ export function savePersistedBlockedUsers(blockedList) {
   }
 }
 
+// 📢 Comunicados Oficiales y Difusión Masiva a la Comunidad
+export const BROADCASTS_STORAGE_KEY = 'spotplay_official_broadcasts';
+
+export function loadPersistedBroadcasts() {
+  try {
+    const raw = localStorage.getItem(BROADCASTS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+export function savePersistedBroadcasts(broadcasts) {
+  try {
+    localStorage.setItem(BROADCASTS_STORAGE_KEY, JSON.stringify(broadcasts));
+  } catch (err) {
+    console.warn('Error al guardar comunicados en localStorage:', err);
+  }
+}
+
+export function addOfficialBroadcast({ title, message, target = 'all' }) {
+  try {
+    const broadcasts = loadPersistedBroadcasts();
+
+    // Evitar duplicados si se llama dos veces con el mismo contenido en menos de 3.5 segundos
+    const recentDuplicate = broadcasts.find(
+      (b) => b.title === title && b.message === message && Math.abs(Date.now() - new Date(b.date).getTime()) < 3500
+    );
+    if (recentDuplicate) {
+      return recentDuplicate;
+    }
+
+    const newBcast = {
+      id: `bcast-${Date.now()}`,
+      title: title || 'Comunicado Oficial',
+      message: message || '',
+      target,
+      timestamp: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+      date: new Date().toISOString(),
+    };
+    const updatedBroadcasts = [newBcast, ...broadcasts];
+    savePersistedBroadcasts(updatedBroadcasts);
+
+    // Inyectar en el chat oficial de Spot Play Oficial en localStorage evitando duplicados
+    const chatKeys = ['spotplay_chat_sys', 'spotplay_chat_spotplay_soporte'];
+    chatKeys.forEach((key) => {
+      try {
+        let existing = [];
+        const raw = localStorage.getItem(key);
+        if (raw) existing = JSON.parse(raw);
+        if (!Array.isArray(existing)) existing = [];
+
+        if (existing.some((m) => m.text && m.text.includes(newBcast.message))) {
+          return;
+        }
+
+        const bcastMsg = {
+          id: `msg-${newBcast.id}`,
+          sender: 'partner',
+          isBroadcast: true,
+          title: newBcast.title,
+          text: `📢 COMUNICADO OFICIAL: ${newBcast.title}\n\n${newBcast.message}`,
+          time: newBcast.timestamp,
+          read: false,
+        };
+
+        const updatedMessages = [...existing, bcastMsg];
+        localStorage.setItem(key, JSON.stringify(updatedMessages));
+      } catch (e) {
+        console.warn('Error inyectando comunicado en chat oficial:', e);
+      }
+    });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('spotplay_broadcast', { detail: newBcast }));
+    }
+
+    return newBcast;
+  } catch (err) {
+    console.warn('Error agregando comunicado oficial:', err);
+    return null;
+  }
+}
+
+

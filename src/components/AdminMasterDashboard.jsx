@@ -55,6 +55,8 @@ import {
 import {
   loadPersistedReports,
   savePersistedReports,
+  addOfficialBroadcast,
+  loadPersistedBroadcasts,
 } from '../utils/storage';
 import {
   loadCoinPacks,
@@ -323,6 +325,15 @@ export default function AdminMasterDashboard({
   const handleSendBroadcast = (e) => {
     e.preventDefault();
     if (!broadcastTitle || !broadcastMessage) return;
+
+    // 1. Guardar e inyectar en el chat oficial de la plataforma
+    addOfficialBroadcast({
+      title: broadcastTitle,
+      message: broadcastMessage,
+      target: broadcastTarget,
+    });
+
+    // 2. Disparar banner en tiempo real en la app
     if (onBroadcastNotification) {
       onBroadcastNotification({
         title: broadcastTitle,
@@ -330,7 +341,7 @@ export default function AdminMasterDashboard({
         target: broadcastTarget,
       });
     }
-    alert(`🚀 Notificación masiva enviada a ${broadcastTarget === 'all' ? 'todos los usuarios y creadores' : broadcastTarget}.`);
+    alert(`🚀 Notificación masiva enviada a ${broadcastTarget === 'all' ? 'todos los usuarios y creadores' : broadcastTarget}. ¡Registrada con éxito en el canal oficial de Spot Play y visible en las bandejas de entrada!`);
   };
 
   // Manejador de Descarga Contable (Software y Economía Digital Spot Play)
@@ -1773,12 +1784,37 @@ export default function AdminMasterDashboard({
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95"
+                  className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:opacity-95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
                 >
                   <Send size={14} />
                   <span>Disparar Notificación Push Masiva</span>
                 </button>
               </form>
+
+              {/* Historial de Comunicados Emitidos */}
+              <div className="space-y-2 mt-4">
+                <h4 className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                  <Radio size={14} className="text-amber-400" />
+                  <span>Historial de Difusiones Recientes</span>
+                </h4>
+                {loadPersistedBroadcasts().length === 0 ? (
+                  <p className="text-[11px] text-zinc-500 italic p-3 bg-white/5 rounded-xl border border-white/5">
+                    No se han emitido comunicados recientemente.
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+                    {loadPersistedBroadcasts().map((b) => (
+                      <div key={b.id} className="p-2.5 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-amber-300 truncate">{b.title}</span>
+                          <span className="text-[9px] text-zinc-500">{b.timestamp}</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-300 leading-snug">{b.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
