@@ -15,9 +15,15 @@ export default function DirectMessagesDrawer({
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isBroadcastMode, setIsBroadcastMode] = useState(false);
+  const [isBroadcastMode, setIsBroadcastMode] = useState(() => Boolean(chatPartner?.startInBroadcastMode));
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (chatPartner?.startInBroadcastMode) {
+      setIsBroadcastMode(true);
+    }
+  }, [chatPartner]);
 
   const isSysChat = Boolean(
     chatPartner && (chatPartner.id === 'sys' || chatPartner.username === 'spotplay_soporte')
@@ -325,30 +331,30 @@ export default function DirectMessagesDrawer({
 
       {/* 2. BARRA DE DIFUSIÓN MASIVA (SOLO DISPONIBLE EN CANAL OFICIAL) */}
       {isSysChat && (
-        <div className="px-3.5 py-2 bg-gradient-to-r from-amber-500/15 via-[#181a24] to-transparent border-b border-amber-500/20 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isBroadcastMode ? 'bg-amber-400 text-black animate-pulse' : 'bg-white/10 text-zinc-300'}`}>
-              <Radio size={13} />
+        <div className="px-3.5 py-2.5 bg-[#161822] border-b-2 border-amber-400/40 flex items-center justify-between shrink-0 shadow-md">
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-sm ${isBroadcastMode ? 'bg-amber-400 text-black animate-pulse' : 'bg-amber-400/20 text-amber-400 border border-amber-400/40'}`}>
+              <Radio size={16} />
             </div>
             <div>
-              <p className="text-[11px] font-bold text-white leading-tight">
-                {isBroadcastMode ? 'Modo Difusión Masiva Activo' : 'Canal Oficial & Soporte'}
+              <p className="text-xs font-black text-white leading-tight">
+                {isBroadcastMode ? '📢 Modo Difusión Masiva Activo' : 'Canal Oficial & Soporte'}
               </p>
-              <p className="text-[9px] text-zinc-400 leading-tight">
-                {isBroadcastMode ? 'Tu mensaje se enviará a TODA la comunidad en vivo' : 'Chat institucional 1 a 1'}
+              <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
+                {isBroadcastMode ? 'Tu mensaje se enviará a TODA la comunidad en vivo' : 'Toca el botón para hablar a todos'}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setIsBroadcastMode(!isBroadcastMode)}
-            className={`px-2.5 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer shadow-sm active:scale-95 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shadow-md active:scale-95 ${
               isBroadcastMode
-                ? 'bg-gradient-to-r from-amber-400 to-[#FE2C55] text-black shadow-[0_0_12px_rgba(255,184,0,0.4)]'
-                : 'bg-white/10 hover:bg-white/20 text-zinc-200'
+                ? 'bg-gradient-to-r from-amber-400 via-amber-300 to-[#FE2C55] text-black shadow-[0_0_15px_rgba(255,184,0,0.5)]'
+                : 'bg-amber-400/20 hover:bg-amber-400 text-amber-300 hover:text-black border border-amber-400/60'
             }`}
           >
-            {isBroadcastMode ? '📢 Transmitiendo a Todos' : 'Activar Difusión'}
+            {isBroadcastMode ? '📢 Transmitiendo a Todos' : '📢 Activar Difusión'}
           </button>
         </div>
       )}

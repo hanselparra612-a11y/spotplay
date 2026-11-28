@@ -145,6 +145,34 @@ export default function InboxView({ onOpenChat }) {
       {/* ------------------------------------------------------------- */}
       {mainTab === 'messages' && (
         <div className="flex flex-col gap-3">
+          {/* 📢 Banner de Acceso Rápido a Difusión a Toda la Comunidad */}
+          <div
+            onClick={() => onOpenChat({ ...activeChats[0].user, startInBroadcastMode: true })}
+            className="flex items-center justify-between gap-2 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-amber-500/25 via-[#1a1d28] to-[#12141c] border-2 border-amber-400/60 hover:border-amber-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(255,184,0,0.18)] active:scale-[0.98] group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 via-amber-300 to-[#FE2C55] text-black flex items-center justify-center font-black shadow-md shrink-0">
+                <Radio size={18} className="animate-pulse" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 truncate">
+                  <h4 className="text-xs font-black text-amber-300 group-hover:text-amber-200 transition-colors uppercase tracking-wide truncate">
+                    Difusión Masiva
+                  </h4>
+                  <span className="px-1.5 py-0.2 bg-amber-400 text-black rounded text-[8px] font-black shrink-0">
+                    ADMIN
+                  </span>
+                </div>
+                <p className="text-[10px] text-zinc-300 leading-tight truncate mt-0.5">
+                  Emitir comunicado a la comunidad
+                </p>
+              </div>
+            </div>
+            <button className="px-2.5 py-1.5 bg-gradient-to-r from-amber-400 to-[#ffa000] text-black text-[10px] font-black rounded-xl shadow-md shrink-0 group-hover:scale-105 active:scale-95 transition-transform cursor-pointer">
+              Transmitir
+            </button>
+          </div>
+
           {/* Barra de Búsqueda rápida de contactos */}
           <div className="relative">
             <input
