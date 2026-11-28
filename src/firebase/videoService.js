@@ -75,7 +75,7 @@ export async function uploadVideoToFirebase(file, videoMeta, onProgress) {
   }
 
   // 1. Subir el archivo binario a Storage
-  const fileExt = file.name.split('.').pop() || 'mp4';
+  const fileExt = (file.name && typeof file.name === 'string') ? (file.name.split('.').pop() || 'mp4') : 'mp4';
   const filePath = `videos/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
   const storageRef = ref(storage, filePath);
   const uploadTask = uploadBytesResumable(storageRef, file);
@@ -103,14 +103,22 @@ export async function uploadVideoToFirebase(file, videoMeta, onProgress) {
     tags: videoMeta.tags || [],
     music: videoMeta.music || {
       title: 'Sonido original',
-      author: videoMeta.author.username,
+      author: videoMeta.author?.username || 'creador',
       cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=80',
     },
+    thumbnail: videoMeta.thumbnail || videoMeta.cover || '',
+    cover: videoMeta.cover || videoMeta.thumbnail || '',
+    product: videoMeta.product || null,
+    whatsapp: videoMeta.whatsapp || '',
+    telegram: videoMeta.telegram || '',
+    primaryChat: videoMeta.primaryChat || 'whatsapp',
+    isUserUploaded: true,
     stats: {
       likes: 0,
       comments: 0,
       bookmarks: 0,
       shares: 0,
+      giftsCount: 0,
     },
     comments: [],
     createdAt: serverTimestamp(),

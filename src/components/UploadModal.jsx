@@ -237,41 +237,46 @@ export default function UploadModal({
 
       let uploadedVideo;
       const targetBlob = videoBlob || videoFile;
+      let clientThumbnail = capturedThumbnail;
 
-      if (videoFile && isFirebaseConfigured) {
-        uploadedVideo = await uploadVideoToFirebase(videoFile, videoMeta, (prog) => {
-          setUploadProgress(prog);
+      // 1. Extraer inmediatamente del video que ya está activo y reproduciéndose en pantalla
+      if (!clientThumbnail && uploadVideoRef.current && uploadVideoRef.current.videoWidth > 0) {
+        try {
+          const vid = uploadVideoRef.current;
+          const c = document.createElement('canvas');
+          c.width = Math.min(vid.videoWidth, 480);
+          c.height = Math.round((c.width / vid.videoWidth) * vid.videoHeight);
+          const ctx = c.getContext('2d');
+          ctx.drawImage(vid, 0, 0, c.width, c.height);
+          const d = c.toDataURL('image/jpeg', 0.82);
+          if (d && d.length > 200) clientThumbnail = d;
+        } catch (err) {}
+      }
+
+      // 2. Fallback de extracción con Canvas asistido
+      if (!clientThumbnail && targetBlob) {
+        try {
+          setUploadProgress(20);
+          clientThumbnail = await extractClientThumbnail(targetBlob);
+        } catch (cErr) {}
+      }
+
+      const fullVideoMeta = {
+        ...videoMeta,
+        thumbnail: clientThumbnail || '',
+        cover: clientThumbnail || '',
+      };
+
+      if (targetBlob && isFirebaseConfigured) {
+        uploadedVideo = await uploadVideoToFirebase(targetBlob, fullVideoMeta, (prog) => {
+          setUploadProgress(Math.min(95, Math.max(25, prog)));
         });
       } else {
         // 💾 Persistencia Real y Permanente en Disco (Accesible en Celular y PC sin perderse)
         let persistentUrl = videoPreview;
         const uploadId = 'uploaded-' + Date.now();
-        let clientThumbnail = capturedThumbnail;
 
         setUploadProgress(35);
-
-        // 1. Extraer inmediatamente del video que ya está activo y reproduciéndose en pantalla
-        if (!clientThumbnail && uploadVideoRef.current && uploadVideoRef.current.videoWidth > 0) {
-          try {
-            const vid = uploadVideoRef.current;
-            const c = document.createElement('canvas');
-            c.width = Math.min(vid.videoWidth, 480);
-            c.height = Math.round((c.width / vid.videoWidth) * vid.videoHeight);
-            const ctx = c.getContext('2d');
-            ctx.drawImage(vid, 0, 0, c.width, c.height);
-            const d = c.toDataURL('image/jpeg', 0.82);
-            if (d && d.length > 200) clientThumbnail = d;
-          } catch (err) {}
-        }
-
-        // 2. Fallback de extracción con Canvas asistido
-        if (!clientThumbnail && targetBlob) {
-          try {
-            setUploadProgress(55);
-            clientThumbnail = await extractClientThumbnail(targetBlob);
-          } catch (cErr) {}
-        }
-
         setUploadProgress(80);
 
         // 3. Objeto de video listo para visualización y almacenamiento inmediato
