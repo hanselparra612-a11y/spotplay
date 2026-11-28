@@ -1622,8 +1622,8 @@ export default function App() {
     }
 
     // 2. Marcar video como promocionado con datos enriquecidos de campaña publicitaria
-    setVideos((prev) =>
-      prev.map((v) =>
+    setVideos((prev) => {
+      const updated = prev.map((v) =>
         v.id === videoId
           ? {
               ...v,
@@ -1639,8 +1639,10 @@ export default function App() {
               promotedAt: Date.now(),
             }
           : v
-      )
-    );
+      );
+      savePersistedVideos(updated);
+      return updated;
+    });
   };
 
   // 🔴 Handle Live Stream Finished (Calibrado Google AdMob & SpotCoins)
