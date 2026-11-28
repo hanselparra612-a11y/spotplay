@@ -1831,7 +1831,7 @@ export default function AdminMasterDashboard({
                     <div>
                       <h4 className="text-xs font-black text-white flex items-center gap-2">
                         <span>Denuncias de la Comunidad</span>
-                        <span className="px-1.5 py-0.2 bg-red-500/30 text-red-300 rounded text-[9px] font-bold border border-red-500/40">
+                        <span className="px-1.5 py-0.2 bg-red-500/30 text-red-300 rounded text-[9px] font-bold border border-red-500/40 whitespace-nowrap shrink-0">
                           {reports.filter((r) => r.status === 'PENDING_REVIEW').length} pendientes
                         </span>
                       </h4>

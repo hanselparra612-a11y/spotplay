@@ -124,16 +124,22 @@ export default function ReportModal({ isOpen, onClose, video, onSubmitReport }) 
 
         {/* Content */}
         {!isSuccess ? (
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pt-3 space-y-4 pr-1">
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pt-3 space-y-4 pr-1 no-scrollbar">
             {/* Tarjeta del video a denunciar */}
             <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
               <div className="w-12 h-14 rounded-xl bg-zinc-800 overflow-hidden shrink-0 border border-white/10">
-                {video.videoUrl ? (
+                {video.thumbnailUrl || video.cover || video.thumbnail ? (
+                  <img
+                    src={video.thumbnailUrl || video.cover || video.thumbnail}
+                    alt={video.title || 'Video'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : video.videoUrl ? (
                   <video
-                    src={video.videoUrl}
-                    poster="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    src={`${video.videoUrl}#t=0.001`}
                     className="w-full h-full object-cover"
                     muted
+                    playsInline
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs">🎬</div>
@@ -146,7 +152,7 @@ export default function ReportModal({ isOpen, onClose, video, onSubmitReport }) 
                 <p className="text-[11px] text-zinc-300 line-clamp-1">
                   {video.description || video.title || 'Video de Spot Play'}
                 </p>
-                <span className="text-[9px] text-zinc-500">ID: {video.id}</span>
+                <span className="text-[9px] text-zinc-500 font-mono">ID: {video.id}</span>
               </div>
             </div>
 
@@ -174,7 +180,7 @@ export default function ReportModal({ isOpen, onClose, video, onSubmitReport }) 
                           <p className={`text-xs font-bold ${isSelected ? 'text-red-300' : 'text-zinc-200'}`}>
                             {reason.title}
                           </p>
-                          <p className="text-[10px] text-zinc-400 line-clamp-1">{reason.description}</p>
+                          <p className="text-[10px] text-zinc-400 line-clamp-2 leading-tight mt-0.5">{reason.description}</p>
                         </div>
                       </div>
                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
