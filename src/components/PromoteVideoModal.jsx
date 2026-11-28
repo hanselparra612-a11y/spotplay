@@ -308,7 +308,7 @@ export default function PromoteVideoModal({
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#121316]">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center shadow">
-              <Flame size={15} className="text-black fill-black" />
+              <Flame size={15} className="text-white fill-white stroke-white" />
             </div>
             <div>
               <h2 className="text-sm font-black text-white leading-tight">
@@ -1101,7 +1101,7 @@ export default function PromoteVideoModal({
                   <span className="text-white animate-pulse">Activando en {city}...</span>
                 ) : userCoins >= coinsNeeded ? (
                   <>
-                    <Flame size={15} className="fill-black" />
+                    <Flame size={15} className="fill-white stroke-white text-white" />
                     <span>Activar Campaña con {coinsNeeded} SpotCoins</span>
                   </>
                 ) : (

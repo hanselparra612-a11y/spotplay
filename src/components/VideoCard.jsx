@@ -831,7 +831,7 @@ function VideoCard({
               className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 via-amber-500 to-[#ffb800] flex items-center justify-center transition-transform active:scale-75 shadow-[0_0_12px_rgba(255,184,0,0.8)] border border-white/30 text-black hover:brightness-110"
               title="Impulsar visibilidad de este video con SpotCoins"
             >
-              <Flame size={18} className="fill-black stroke-black" />
+              <Flame size={18} className="fill-white stroke-white text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
             </button>
             <span className="text-[9px] font-black text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
               {video.isPromoted ? 'Pautado' : 'Impulsar'}
