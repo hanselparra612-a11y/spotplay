@@ -11,7 +11,7 @@
     "likesCount": 0,
     "wallet": {
       "coins": 276,
-      "totalGiftsReceivedCoins": 851,
+      "totalGiftsReceivedCoins": 0,
       "adMobRewardsWatched": 28,
       "transactions": [
         {
@@ -23,56 +23,6 @@
           "amount": 13600,
           "status": "COMPLETED",
           "date": "Justo ahora",
-          "icon": "gift"
-        },
-        {
-          "id": "tx-1",
-          "type": "VIDEO_GIFT",
-          "title": "Regalo León de Oro 🦁",
-          "subtitle": "En tu video • @carlos_music",
-          "coins": 500,
-          "status": "COMPLETED",
-          "date": "Hace 3 horas",
-          "icon": "gift"
-        },
-        {
-          "id": "tx-2",
-          "type": "LIVE_GIFT",
-          "title": "Regalo Corona Dorada 👑",
-          "subtitle": "De @valeria.tech en LIVE",
-          "coins": 100,
-          "status": "COMPLETED",
-          "date": "Ayer",
-          "icon": "gift"
-        },
-        {
-          "id": "tx-3",
-          "type": "VIDEO_GIFT",
-          "title": "Regalo Corona Dorada 👑",
-          "subtitle": "En tu video • @valeria_fit",
-          "coins": 100,
-          "status": "COMPLETED",
-          "date": "Ayer",
-          "icon": "gift"
-        },
-        {
-          "id": "tx-4",
-          "type": "VIDEO_GIFT",
-          "title": "Regalo Fuego Viral 🔥",
-          "subtitle": "En tu video • @andres_films",
-          "coins": 20,
-          "status": "COMPLETED",
-          "date": "Hace 2 días",
-          "icon": "gift"
-        },
-        {
-          "id": "tx-5",
-          "type": "VIDEO_GIFT",
-          "title": "Regalo Rosa Roja 🌹",
-          "subtitle": "En tu video • @carolina_style",
-          "coins": 1,
-          "status": "COMPLETED",
-          "date": "Hace 3 días",
           "icon": "gift"
         },
         {

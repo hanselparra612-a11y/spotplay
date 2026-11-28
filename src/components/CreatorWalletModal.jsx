@@ -37,75 +37,13 @@ export default function CreatorWalletModal({
 
   // Cálculo matemático exacto de SpotCoins recibidas (Videos + Transmisiones LIVE)
   const giftsSum = receivedGifts.reduce((sum, g) => sum + (Number(g.coins) || 0), 0);
-  const walletTotal = Number(wallet.totalGiftsReceivedCoins) || 0;
-  const totalReceivedCoins = walletTotal > 0 ? walletTotal : (giftsSum > 0 ? giftsSum : 0);
+  const totalReceivedCoins = giftsSum;
 
   const currentAvailableCoins = typeof wallet.coins === 'number' ? wallet.coins : 0;
 
-  const transactions = wallet.transactions && wallet.transactions.length > 0
-    ? wallet.transactions
-    : [
-        {
-          id: 'tx-1',
-          type: 'VIDEO_GIFT',
-          title: 'Regalo León de Oro 🦁',
-          subtitle: 'En tu video • @carlos_music',
-          coins: 500,
-          status: 'COMPLETED',
-          date: 'Hace 3 horas',
-          icon: 'gift',
-        },
-        {
-          id: 'tx-2',
-          type: 'LIVE_GIFT',
-          title: 'Regalo Corona Dorada 👑',
-          subtitle: 'De @valeria.tech en LIVE',
-          coins: 100,
-          status: 'COMPLETED',
-          date: 'Ayer',
-          icon: 'gift',
-        },
-        {
-          id: 'tx-3',
-          type: 'VIDEO_GIFT',
-          title: 'Regalo Corona Dorada 👑',
-          subtitle: 'En tu video • @valeria_fit',
-          coins: 100,
-          status: 'COMPLETED',
-          date: 'Ayer',
-          icon: 'gift',
-        },
-        {
-          id: 'tx-4',
-          type: 'VIDEO_GIFT',
-          title: 'Regalo Fuego Viral 🔥',
-          subtitle: 'En tu video • @andres_films',
-          coins: 20,
-          status: 'COMPLETED',
-          date: 'Hace 2 días',
-          icon: 'gift',
-        },
-        {
-          id: 'tx-5',
-          type: 'VIDEO_GIFT',
-          title: 'Regalo Rosa Roja 🌹',
-          subtitle: 'En tu video • @carolina_style',
-          coins: 1,
-          status: 'COMPLETED',
-          date: 'Hace 3 días',
-          icon: 'gift',
-        },
-        {
-          id: 'tx-6',
-          type: 'ADMOB_REWARD',
-          title: 'Recompensa Google AdMob 🎬',
-          subtitle: 'Video bonificado completado',
-          coins: 5,
-          status: 'COMPLETED',
-          date: 'Hoy',
-          icon: 'admob',
-        },
-      ];
+  const transactions = (wallet.transactions || []).filter(
+    (tx) => !['tx-1', 'tx-2', 'tx-3', 'tx-4', 'tx-5'].includes(tx.id)
+  );
 
   return (
     <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 animate-in fade-in duration-200 select-none">

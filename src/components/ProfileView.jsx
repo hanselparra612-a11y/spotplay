@@ -261,11 +261,7 @@ export default function ProfileView({
 
   const receivedGifts = currentUser?.receivedGifts || [];
   const totalGiftsCount = receivedGifts.length;
-  const totalReceivedCoins =
-    receivedGifts.reduce((acc, g) => acc + (g.coins || 0), 0) ||
-    (typeof currentUser?.wallet?.totalGiftsReceivedCoins === 'number'
-      ? currentUser.wallet.totalGiftsReceivedCoins
-      : 0);
+  const totalReceivedCoins = receivedGifts.reduce((acc, g) => acc + (g.coins || 0), 0);
 
   // 📈 Contador General Dinámico en Modo Real: Suma real de todos los Me gusta recibidos en los videos publicados
   const userPublishedLikes = userVideos.reduce(

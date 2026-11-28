@@ -344,17 +344,24 @@ export function loadPersistedUser() {
       ? parsed.wallet.coins
       : ((typeof parsed.coins === 'number' && !isNaN(parsed.coins)) ? parsed.coins : CURRENT_USER.wallet.coins);
 
+    const cleanReceivedGifts = Array.isArray(parsed.receivedGifts)
+      ? parsed.receivedGifts.filter(
+          (g) => !['rg-lion-1', 'rg-1', 'rg-live-1', 'rg-2', 'rg-3'].includes(g.id)
+        )
+      : (CURRENT_USER.receivedGifts || []);
+
+    const giftsSum = cleanReceivedGifts.reduce((sum, g) => sum + (Number(g.coins) || 0), 0);
+
     const cleanWallet = {
       coins: cleanCoins,
-      totalGiftsReceivedCoins:
-        typeof parsed.wallet?.totalGiftsReceivedCoins === 'number'
-          ? parsed.wallet.totalGiftsReceivedCoins
-          : CURRENT_USER.wallet.totalGiftsReceivedCoins,
+      totalGiftsReceivedCoins: giftsSum,
       adMobRewardsWatched:
         typeof parsed.wallet?.adMobRewardsWatched === 'number'
           ? parsed.wallet.adMobRewardsWatched
           : CURRENT_USER.wallet.adMobRewardsWatched,
-      transactions: rawTransactions.map((tx) => ({
+      transactions: (rawTransactions || []).filter(
+        (tx) => !['tx-1', 'tx-2', 'tx-3', 'tx-4', 'tx-5'].includes(tx.id)
+      ).map((tx) => ({
         ...tx,
         coins: tx.coins || (tx.amount ? Math.round(tx.amount / 50) : 5),
         subtitle: typeof tx.subtitle === 'string' ? tx.subtitle.replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play') : tx.subtitle,
@@ -384,12 +391,7 @@ export function loadPersistedUser() {
       bio: typeof parsed.bio === 'string' ? parsed.bio.replace(/VideoSpot/gi, 'Spot Play').replace(/SpotPlay/gi, 'Spot Play') : CURRENT_USER.bio,
       coins: cleanCoins,
       wallet: cleanWallet,
-      receivedGifts:
-        Array.isArray(parsed.receivedGifts)
-          ? parsed.receivedGifts.filter(
-              (g) => !['rg-lion-1', 'rg-1', 'rg-live-1', 'rg-2', 'rg-3'].includes(g.id)
-            )
-          : (CURRENT_USER.receivedGifts || []),
+      receivedGifts: cleanReceivedGifts,
     };
   } catch (err) {
     return CURRENT_USER;
