@@ -846,21 +846,6 @@ export default function App() {
     });
   };
 
-  useEffect(() => {
-    if (currentTab !== 'feed' || !isFeedPlaybackActive) return;
-    const currentVideo = displayedVideos[activeVideoIndex];
-    if (!currentVideo || !currentVideo.id) return;
-
-    if (lastViewedVideoIdRef.current === currentVideo.id) return;
-
-    const timer = setTimeout(() => {
-      lastViewedVideoIdRef.current = currentVideo.id;
-      handleIncrementVideoView(currentVideo.id);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [activeVideoIndex, currentTab, isFeedPlaybackActive, displayedVideos]);
-
   // Handle Like Toggle (con persistencia aislada, protección contra NaN y sincronización)
   const handleToggleLike = async (videoId) => {
     let nextLikedState = false;
@@ -1788,6 +1773,22 @@ export default function App() {
       });
     }
   }, [activeVideoIndex, isFeedPlaybackActive]);
+
+  // 👁️ Conteo de vistas tras 600ms de reproducción activa en el Feed
+  useEffect(() => {
+    if (currentTab !== 'feed' || !isFeedPlaybackActive) return;
+    const currentVideo = displayedVideos[activeVideoIndex];
+    if (!currentVideo || !currentVideo.id) return;
+
+    if (lastViewedVideoIdRef.current === currentVideo.id) return;
+
+    const timer = setTimeout(() => {
+      lastViewedVideoIdRef.current = currentVideo.id;
+      handleIncrementVideoView(currentVideo.id);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [activeVideoIndex, currentTab, isFeedPlaybackActive, displayedVideos]);
 
   return (
     <div className="w-full h-[100dvh] bg-[#07080b] flex items-center justify-center p-0 sm:p-4 overflow-hidden font-sans relative">
